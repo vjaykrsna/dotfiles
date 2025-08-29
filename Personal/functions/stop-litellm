@@ -1,0 +1,16 @@
+#autoload
+
+stop-litellm() {
+    # Source environment variables
+    if [ -f "$HOME/.dotfiles/.env" ]; then
+        source "$HOME/.dotfiles/.env"
+    fi
+
+    (
+        cd "$LITELLM_PROXY_DIR" || {
+            echo "❌ LiteLLM proxy directory not found: $LITELLM_PROXY_DIR"
+            return 1
+        }
+        docker-compose down
+    )
+}

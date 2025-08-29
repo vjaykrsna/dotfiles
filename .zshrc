@@ -167,7 +167,7 @@ fi
 # ==================================================================
 # FUNCTIONS
 # ==================================================================
-fpath=($HOME/.config/zsh/functions $fpath)
+fpath=($HOME/Personal/functions $fpath)
 autoload -U startlb stoplb extract start-litellm stop-litellm nodesymlink termux yadma
 
 # bun completions

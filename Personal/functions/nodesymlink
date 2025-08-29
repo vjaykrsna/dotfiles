@@ -1,0 +1,46 @@
+#autoload
+# Create/update symlinks for Node.js binaries managed by NVM
+# Usage: nodesymlink [bin1 bin2 ...]  # optional, defaults to common list
+
+nodesymlink() {
+  emulate -L zsh
+  setopt err_return no_unset
+
+  local NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  local TARGET_DIR="$HOME/.local/bin"
+
+  # Get current NVM version using nvm command (more reliable)
+  local current_version
+  current_version=$(nvm current 2>/dev/null | sed 's/v//')
+  
+  # Fallback method if nvm command fails
+  if [[ -z "$current_version" ]]; then
+    current_version=$(ls -1d "$NVM_DIR/versions/node/"*/ 2>/dev/null | xargs -n 1 basename | sort -V | tail -1 | sed 's/v//')
+  fi
+
+  [[ -z "$current_version" ]] && {
+    print "❌ No Node.js version found in NVM"
+    return 1
+  }
+
+  local NODE_CURRENT="$NVM_DIR/versions/node/v$current_version/bin"
+
+  # Default list of node-related executables
+  local bins=(node npm npx yarn pnpm corepack bun)
+  [[ $# -gt 0 ]] && bins=("$@")
+
+  mkdir -p "$TARGET_DIR"
+
+  print "🔗 Creating symlinks for Node.js v$current_version"
+
+  for bin in "${bins[@]}"; do
+    if [[ -x "$NODE_CURRENT/$bin" ]]; then
+      ln -sf "$NODE_CURRENT/$bin" "$TARGET_DIR/$bin"
+      print "✅ Linked $bin -> $NODE_CURRENT/$bin"
+    else
+      print "⚠️  $bin not found in $NODE_CURRENT (skipping)"
+    fi
+  done
+  
+  print "✅ Node.js symlinks updated successfully"
+}

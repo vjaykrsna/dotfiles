@@ -1,0 +1,31 @@
+#autoload
+
+termux() {
+    # Check device connection
+    if ! adb get-state 1>/dev/null 2>&1; then
+        echo "❌ No device connected via ADB." >&2
+        return 1
+    fi
+
+    # Verify Termux debug package exists
+    if ! adb shell pm path com.termux 1>/dev/null 2>&1; then
+        echo "❌ com.termux package not found on device." >&2
+        return 1
+    fi
+
+    # Try run-as to ensure it's debuggable
+    if ! adb shell run-as com.termux true 2>/dev/null; then
+        echo "❌ Termux is not debuggable. Install the debug build from GitHub." >&2
+        return 1
+    fi
+
+    # Launch Termux shell (preserve TERM and make it interactive)
+    adb shell -t run-as com.termux env \
+        PATH="/data/data/com.termux/files/usr/bin:\$PATH" \
+        LD_LIBRARY_PATH="/data/data/com.termux/files/usr/lib" \
+        HOME="/data/data/com.termux/files/home" \
+        TMPDIR="/data/data/com.termux/files/usr/tmp" \
+        SHELL="/data/data/com.termux/files/usr/bin/bash" \
+        TERM="$TERM" \
+        /data/data/com.termux/files/usr/bin/bash
+}
