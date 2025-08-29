@@ -1,0 +1,40 @@
+#autoload
+
+stopllm() {
+    # Source environment variables
+    if [ -f "$HOME/.env" ]; then
+        . "$HOME/.env"
+    fi
+
+    # Stop LiteLLM service
+    echo "Stopping LiteLLM service..."
+    (
+        cd "$HOME/Personal/myDocker/litellm" || {
+            echo "❌ LiteLLM directory not found"
+            return 1
+        }
+        docker-compose down
+    )
+
+    # Stop PostgreSQL service
+    echo "Stopping PostgreSQL service..."
+    (
+        cd "$HOME/Personal/myDocker/postgres" || {
+            echo "❌ PostgreSQL directory not found"
+            return 1
+        }
+        docker-compose down
+    )
+
+    # Stop Redis service
+    echo "Stopping Redis service..."
+    (
+        cd "$HOME/Personal/myDocker/redis" || {
+            echo "❌ Redis directory not found"
+            return 1
+        }
+        docker-compose down
+    )
+
+    echo "All services stopped!"
+}

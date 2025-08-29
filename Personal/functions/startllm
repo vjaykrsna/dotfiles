@@ -1,0 +1,44 @@
+#autoload
+
+startllm() {
+    # Source environment variables
+    if [ -f "$HOME/.env" ]; then
+        . "$HOME/.env"
+    fi
+
+    # Start Redis service
+    echo "Starting Redis service..."
+    (
+        cd "$HOME/Personal/myDocker/redis" || {
+            echo "❌ Redis directory not found"
+            return 1
+        }
+        docker-compose up -d
+    )
+
+    # Start PostgreSQL service
+    echo "Starting PostgreSQL service..."
+    (
+        cd "$HOME/Personal/myDocker/postgres" || {
+            echo "❌ PostgreSQL directory not found"
+            return 1
+        }
+        docker-compose up -d
+    )
+
+    # Wait for services to initialize
+    echo "Waiting for services to initialize..."
+    sleep 10
+
+    # Start LiteLLM service
+    echo "Starting LiteLLM service..."
+    (
+        cd "$HOME/Personal/myDocker/litellm" || {
+            echo "❌ LiteLLM directory not found"
+            return 1
+        }
+        docker-compose up -d
+    )
+
+    echo "All services started!"
+}
