@@ -6,8 +6,8 @@
 !.env
 !.plan.md
 
-# Track all files in .scripts directory
-!.scripts/
+# Track all personal files
+!Personal/
 
 # Common files to ignore in dotfiles
 .DS_Store
@@ -21,10 +21,6 @@ Thumbs.db
 *.log
 *.tmp
 *.temp
-
-# Original yadm patterns to keep
-.roo/
-AGENTS.md
 
 # Backup files
 *.bak
