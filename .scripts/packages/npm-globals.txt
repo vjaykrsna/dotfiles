@@ -1,0 +1,4 @@
+bun@latest
+firecrawl-mcp@latest
+npm@latest
+pnpm@latest
