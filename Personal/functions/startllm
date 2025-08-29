@@ -13,7 +13,7 @@ startllm() {
             echo "❌ Redis directory not found"
             return 1
         }
-        docker-compose up -d
+        docker compose up -d
     )
 
     # Start PostgreSQL service
@@ -23,7 +23,7 @@ startllm() {
             echo "❌ PostgreSQL directory not found"
             return 1
         }
-        docker-compose up -d
+        docker compose up -d
     )
 
     # Wait for services to initialize
@@ -37,7 +37,7 @@ startllm() {
             echo "❌ LiteLLM directory not found"
             return 1
         }
-        docker-compose up -d
+        docker compose up -d
     )
 
     echo "All services started!"

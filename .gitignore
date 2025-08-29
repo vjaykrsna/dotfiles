@@ -8,6 +8,7 @@
 
 # Track all personal files
 !Personal/
+!Personal/**
 
 # Common files to ignore in dotfiles
 .DS_Store

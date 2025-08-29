@@ -13,7 +13,7 @@ stopllm() {
             echo "❌ LiteLLM directory not found"
             return 1
         }
-        docker-compose down
+        docker compose down
     )
 
     # Stop PostgreSQL service
@@ -23,7 +23,7 @@ stopllm() {
             echo "❌ PostgreSQL directory not found"
             return 1
         }
-        docker-compose down
+        docker compose down
     )
 
     # Stop Redis service
@@ -33,7 +33,7 @@ stopllm() {
             echo "❌ Redis directory not found"
             return 1
         }
-        docker-compose down
+        docker compose down
     )
 
     echo "All services stopped!"

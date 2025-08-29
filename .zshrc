@@ -168,7 +168,7 @@ fi
 # FUNCTIONS
 # ==================================================================
 fpath=($HOME/Personal/functions $fpath)
-autoload -U startlb stoplb extract start-litellm stop-litellm nodesymlink termux yadma
+autoload -U startlb stoplb extract startllm stopllm nodesymlink termux yadma
 
 # bun completions
 [ -s "/home/vijay/.bun/_bun" ] && source "/home/vijay/.bun/_bun"
