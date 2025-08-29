@@ -67,10 +67,19 @@ if ! dpkg -s onlyoffice-desktopeditors &>/dev/null; then
 fi
 
 # --- auto-cpufreq ---
+    # --- auto-cpufreq ---
+    if ! command -v auto-cpufreq &>/dev/null; then
+
+# --- auto-cpufreq ---
 if ! command -v auto-cpufreq &>/dev/null; then
     echo "  - Installing auto-cpufreq..."
     git clone --depth=1 https://github.com/AdnanHodzic/auto-cpufreq.git /tmp/auto-cpufreq
     (cd /tmp/auto-cpufreq && ./auto-cpufreq-installer --install)
+    
+    # Enable auto-cpufreq as a daemon service
+    echo "  - Enabling auto-cpufreq daemon..."
+    auto-cpufreq --install
+    
     rm -rf /tmp/auto-cpufreq
 fi
 

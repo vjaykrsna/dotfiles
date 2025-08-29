@@ -1,0 +1,40 @@
+# ==================================================================
+# PERSONAL ALIASES
+# ==================================================================
+
+# Basic navigation and utilities
+alias cls='clear'
+alias ls='eza'
+alias ll='eza -alh --icons'
+alias la='eza -a'
+alias cd='z'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias -- -='cd -'
+alias bat='batcat'
+
+# Zsh editing
+alias editzsh="micro $HOME/.zshrc"
+alias reloadzsh="source $HOME/.zshrc"
+alias dotsync="$HOME/.dotfiles/scripts/daily-sync.sh"
+
+# Git aliases
+alias gs='git status'
+commit() { git commit -m "$*"; }
+alias lgit='lazygit'
+gitlog() { git log --oneline --graph --decorate --all -n "${1:-5}"; }
+
+# System & Monitoring
+alias mem='free -h'
+alias cpu='btop'
+alias temp='sensors'
+alias usage='du -sh .[!.]* * 2>/dev/null | awk '\''$1 ~ /K$/ && $1+0 >= 50 || $1 ~ /M|G$/'\'' | sort -hr'
+alias update='sudo apt update && sudo apt upgrade -y'
+alias cleanup='sudo apt autoremove --purge -y && sudo apt clean'
+alias netcheck='ping -c 4 google.com'
+alias ports='sudo lsof -i -P -n | grep LISTEN'
+
+# Custom Apps
+alias myzram='watch -n 1 "free -h && echo && zramctl && zramctl --bytes --output=NAME,DATA,COMPR | awk '\''NR==2 && \$3>0 {printf \"Compression Ratio: %.2f : 1\\n\", \$2/\$3}'\''"'
+alias hackerui="$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox"
+alias dockerui='lazydocker'
