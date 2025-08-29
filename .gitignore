@@ -1,2 +1,31 @@
+# Ignore everything by default
+*
+
+# Track specific files (negative patterns)
+!.gitignore
+!.env
+!.plan.md
+
+# Track all files in .scripts directory
+!.scripts/
+
+# Common files to ignore in dotfiles
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Temporary files
+.cache/
+*.log
+*.tmp
+*.temp
+
+# Original yadm patterns to keep
 .roo/
 AGENTS.md
+
+# Backup files
+*.bak
+*.backup
