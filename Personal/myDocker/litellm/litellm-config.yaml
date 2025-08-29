@@ -1,0 +1,285 @@
+# LiteLLM config — use os.environ/VAR for .env
+
+# ===============================
+# LiteLLM Configuration for Gemini
+# ===============================
+
+common_pro_params: &pro_defaults
+  model: gemini/gemini-2.5-pro
+  rpm: 4
+  tpm: 250000
+  thinking:
+    type: enabled
+    budget_tokens: -1
+
+common_flash_params: &flash_defaults
+  model: gemini/gemini-2.5-flash
+  rpm: 4
+  tpm: 250000
+  thinking:
+    type: enabled
+    budget_tokens: -1
+
+
+common_openrouter_params: &openrouter_defaults
+  api_base: https://openrouter.ai/api/v1
+
+model_list:
+  # -------------------------
+  # Gemini Pro Models (21 keys)
+  # -------------------------
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_1
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_3
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_4
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_5
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_6
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_7
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_8
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_9
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_10
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_11
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_12
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_13
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_14
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_15
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_16
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_17
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_18
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_19
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      <<: *pro_defaults
+      api_key: os.environ/GEMINI_API_KEY_20
+
+  # -------------------------
+  # Gemini Flash Models (21 keys)
+  # -------------------------
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_1
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_2
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_3
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_4
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_5
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_6
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_7
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_8
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_9
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_10
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_11
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_12
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_13
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_14
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_15
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_16
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_17
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_18
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_19
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      <<: *flash_defaults
+      api_key: os.environ/GEMINI_API_KEY_20
+
+  # -------------------------
+  # Openrouter Models (5 keys)
+  # -------------------------
+  # Qwen Coder - 5 keys
+  - model_name: qwen3-coder
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_KEY_1
+      api_base: https://openrouter.ai/api/v1
+  - model_name: qwen3-coder
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_KEY_2
+      api_base: https://openrouter.ai/api/v1
+  - model_name: qwen3-coder
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_KEY_3
+      api_base: https://openrouter.ai/api/v1
+  - model_name: qwen3-coder
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_KEY_4
+      api_base: https://openrouter.ai/api/v1
+  - model_name: qwen3-coder
+    litellm_params:
+      model: openrouter/qwen/qwen3-coder:free
+      api_key: os.environ/OPENROUTER_KEY_5
+      api_base: https://openrouter.ai/api/v1
+
+  # GLM-4.5 AIR - 5 keys
+  - model_name: glm-4.5-air
+    litellm_params:
+      model: openrouter/z-ai/glm-4.5-air:free
+      api_key: os.environ/OPENROUTER_KEY_1
+      api_base: https://openrouter.ai/api/v1
+  - model_name: glm-4.5-air
+    litellm_params:
+      model: openrouter/z-ai/glm-4.5-air:free
+      api_key: os.environ/OPENROUTER_KEY_2
+      api_base: https://openrouter.ai/api/v1
+  - model_name: glm-4.5-air
+    litellm_params:
+      model: openrouter/z-ai/glm-4.5-air:free
+      api_key: os.environ/OPENROUTER_KEY_3
+      api_base: https://openrouter.ai/api/v1
+  - model_name: glm-4.5-air
+    litellm_params:
+      model: openrouter/z-ai/glm-4.5-air:free
+      api_key: os.environ/OPENROUTER_KEY_4
+      api_base: https://openrouter.ai/api/v1
+  - model_name: glm-4.5-air
+    litellm_params:
+      model: openrouter/z-ai/glm-4.5-air:free
+      api_key: os.environ/OPENROUTER_KEY_5
+      api_base: https://openrouter.ai/api/v1
+
+general_settings:
+  pass_raw_headers: true
+
+router_settings:
+  routing_strategy: usage-based-routing-v2
+  redis_host: litellm_redis
+  redis_port: 6379
+  cache: true
+  cache_params:
+    type: redis
+  num_retries: 2                    # Retry up to 2 times per model key
+  retry_after: 3                    # Wait 3 seconds between retries
+  timeout: 60                       # 60 second timeout per request
+  allowed_fails: 2                  # Allow 3 fails per minute before cooling down a key
+  cooldown_time: 90
+
+litellm_settings:
+  drop_params: true
+  turn_off_message_logging: true
+  set_verbose: false
+  # ADD THIS: Additional retry/error handling settings
+  num_retries: 15                    # Global retry setting as backup
+  request_timeout: 60               # Request timeout in seconds
+  # Retry policy for specific error types
+  retry_policy:
+    InternalServerErrorRetries: 10   # Retry 500 errors 10 times
+    TimeoutErrorRetries: 3          # Retry timeouts 3 times
+    RateLimitErrorRetries: 5        # Retry rate limits 5 times
+  # Handle specific error types differently
+  # fallbacks: [
+  #   {"gemini-2.5-pro": ["qwen3-coder"]},
+  #   {"gemini-2.5-flash": ["qwen3-coder"]}
+  # ]
