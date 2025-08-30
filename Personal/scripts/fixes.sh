@@ -4,31 +4,51 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- COLORS ---
-BLUE='\033[0;34m'; YELLOW='\033[0;33m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
-log() { echo -e "$1$2${NC}"; }
-info() { log "$BLUE" "ℹ️  $1"; }
-ok()   { log "$GREEN" "✅ $1"; }
-warn() { log "$YELLOW" "⚠️  $1"; }
-err()  { log "$RED" "❌ $1"; }
-run_privileged() { [ "$EUID" -eq 0 ] && "$@" || sudo "$@"; }
+# --- Sourcing Dependencies ---
+source ./scripts/installer.sh # For logging and utility functions
 
-USERNAME=${2:-$(whoami)}
+# --- USER HANDLING ---
+USERNAME="${2:-${SUDO_USER:-$USER}}"
 
-# --- FIX 1: Input-Remapper groups ---
-fix_input_groups() {
-    info "Fixing input-remapper groups for $USERNAME..."
+# --- FIX: Input-Remapper ---
+fix_input_remapper() {
+    info "Ensuring idempotent configuration for input-remapper for $USERNAME..."
+
+    # 1. Ensure user is in the correct groups
+    local updated=false
     run_privileged groupadd -f input
     for g in input video audio; do
-        if ! groups "$USERNAME" | grep -qw "$g"; then
+        if ! id -nG "$USERNAME" | grep -qw "$g"; then
             run_privileged usermod -a -G "$g" "$USERNAME"
-            ok "Added $USERNAME to $g"
+            ok "Added $USERNAME to group '$g'"
+            updated=true
         fi
     done
-    run_privileged systemctl restart input-remapper 2>/dev/null || true
+    if [ "$updated" = true ]; then
+        warn "User must log out and back in for group changes to take full effect"
+    fi
+
+    # 2. Ensure systemd service override is correct
+    local override_dir="/etc/systemd/system/input-remapper-daemon.service.d"
+    local override_file="$override_dir/override.conf"
+    run_privileged mkdir -p "$override_dir"
+    echo -e "[Service]\nUser=$USERNAME" | run_privileged tee "$override_file" > /dev/null
+    
+    # 3. Ensure udev rule for /dev/uinput permissions is correct
+    local udev_rule_file="/etc/udev/rules.d/70-input-remapper-permissions.rules"
+    info "Ensuring correct udev rule for input device permissions..."
+    echo 'KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"' | run_privileged tee "$udev_rule_file" > /dev/null
+
+    # 4. Reload daemons and restart the service
+    run_privileged systemctl daemon-reload
+    run_privileged udevadm control --reload-rules
+    run_privileged udevadm trigger
+    run_privileged systemctl restart input-remapper-daemon.service 2>/dev/null || true
+    
+    ok "input-remapper configuration is up to date."
 }
 
-# --- FIX 2: Dock extension conflicts ---
+# --- FIX: Dock extension conflicts ---
 fix_extensions() {
     info "Cleaning up dock extensions..."
     local EXTENSIONS=(
@@ -43,19 +63,21 @@ fix_extensions() {
     ok "Dock extensions cleaned"
 }
 
-# --- FIX 3: Cron environment (optional) ---
+# --- FIX: Cron environment (optional) ---
 fix_cron() {
     info "Ensuring cron EXTRA_OPTS is defined..."
     if ! grep -q "EXTRA_OPTS" /etc/environment; then
         echo 'EXTRA_OPTS=""' | run_privileged tee -a /etc/environment > /dev/null
         ok "Added EXTRA_OPTS to /etc/environment"
-        run_privileged systemctl reload cron 2>/dev/null || true
+        # Try both cron and crond reload
+        run_privileged systemctl reload cron 2>/dev/null || \
+        run_privileged systemctl reload crond 2>/dev/null || true
     else
         info "EXTRA_OPTS already present"
     fi
 }
 
-# --- FIX 4: Udev rules ---
+# --- FIX: Udev rules ---
 fix_udev() {
     info "Refreshing udev rules..."
     run_privileged udevadm control --reload-rules
@@ -63,11 +85,18 @@ fix_udev() {
     ok "udev rules refreshed"
 }
 
+# --- FIX: Disable SSSD ---
+disable_sssd() {
+    info "Disabling SSSD services..."
+    run_privileged systemctl disable --now sssd.service sssd-kcm.service 2>/dev/null || true
+    ok "SSSD services disabled"
+}
+
 # --- Verifications ---
 check_groups() {
     info "Checking groups..."
     for g in input video audio; do
-        if groups "$USERNAME" | grep -qw "$g"; then
+        if id -nG "$USERNAME" | grep -qw "$g"; then
             ok "$g group OK"
         else
             warn "$g group missing"
@@ -87,12 +116,13 @@ check_extensions() {
 }
 
 # --- CLI ---
-case "$1" in
-    input) fix_input_groups ;;
+case "${1:-all}" in
+    input) fix_input_remapper ;;
     extensions) fix_extensions ;;
     cron) fix_cron ;;
     udev) fix_udev ;;
+    sssd) disable_sssd ;;
     check) check_groups; check_extensions ;;
-    all|"") fix_input_groups; fix_extensions; fix_cron; fix_udev ;;
-    *) echo "Usage: $0 {all|input|extensions|cron|udev|check}"; exit 1 ;;
+    all|"") fix_input_remapper; fix_extensions; fix_cron; fix_udev; disable_sssd ;;
+    *) echo "Usage: $0 {all|input|extensions|cron|udev|sssd|check} [username]"; exit 1 ;;
 esac

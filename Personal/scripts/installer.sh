@@ -2,21 +2,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# ===============================
-# COLORS
-# ===============================
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
-# ===============================
-# UTILITY FUNCTIONS
-# ===============================
-log() { echo -e "${GREEN}› $*${NC}"; }
-warn() { echo -e "${YELLOW}› $*${NC}"; }
-error() { echo -e "${RED}› $*${NC}"; }
+# --- UTILITY FUNCTIONS ---
+GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
+info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
+ok()   { echo -e "${GREEN}✅ $*${NC}"; }
+warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
+error() { echo -e "${RED}❌ $*${NC}"; exit 1; } # Exit on error
 
 ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
 run_privileged() { [ "$EUID" -eq 0 ] && "$@" || sudo "$@"; }
@@ -44,11 +35,9 @@ install_packages_from_file() {
     fi
 }
 
-# ===============================
-# SYSTEM PACKAGES
-# ===============================
+# --- SYSTEM PACKAGES ---
 install_system_packages() {
-    log "--- System Package Installation ---"
+    info "--- System Package Installation ---"
 
     [[ -f scripts/packages/custom.sh ]] && run_privileged bash scripts/packages/custom.sh
 
@@ -59,9 +48,7 @@ install_system_packages() {
     install_packages_from_file scripts/packages/flatpak.txt "flatpak install -y"
 }
 
-# ===============================
-# LANGUAGE ENVIRONMENT
-# ===============================
+# --- LANGUAGE ENVIRONMENT ---
 setup_nvm() {
     warn "Setting up NVM..."
     if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
@@ -133,80 +120,65 @@ install_language_packages() {
 }
 
 
-# ===============================
-# GNOME SETTINGS
-# ===============================
-# ===============================
-# USER SERVICES
-# ===============================
-# ===============================
-# SYSTEM FIXES
-# ===============================
+# --- SYSTEM FIXES ---
 run_system_fixes() {
-    log "--- Running System Fixes ---"
+    info "--- Running System Fixes ---"
     bash scripts/fixes.sh all
     log "--- System Fixes Complete ---"
 }
 
-# ===============================
-# CLI INSTALLER
-# ===============================
+# --- CLI INSTALLER ---
 run_cli_installer() {
-    log "--- Running CLI Tools Installer ---"
-    bash scripts/cli.sh
-    log "--- CLI Tools Installation Complete ---"
+    info "--- Running CLI Tools Installer ---"
+    source scripts/cli.sh && run_cli_installer_interactive
+    ok "--- CLI Tools Installation Complete ---"
 }
 
-# ===============================
-# PRE-INSTALL
-# ===============================
+# --- PRE-INSTALL ---
 run_preinstall() {
-    log "--- Running Pre-Install Setup ---"
+    info "--- Running Pre-Install Setup ---"
     sudo bash scripts/preinstall.sh
     log "--- Pre-Install Setup Complete ---"
 }
 
-# ===============================
-# SNAP REMOVAL
-# ===============================
+# --- SNAP REMOVAL ---
 run_snap_removal() {
-    log "--- Running Snap Removal ---"
-    sudo bash scripts/unsnap.sh
-    log "--- Snap Removal Complete ---"
+    info "--- Running Snap Removal ---"
+    source scripts/unsnap.sh && run_snap_removal_interactive
+    ok "--- Snap Removal Complete ---"
+}
+
+# --- POST-INSTALL ---
+run_post_install() {
+    info "--- Running Post-Install ---"
+    run_privileged bash scripts/post-install.sh
+    ok "--- Post-Install Complete ---"
 }
 
 
 
-# ===============================
-# SHELL ENVIRONMENT
-# ===============================
+# --- SHELL ENVIRONMENT ---
 setup_shell_environment() {
     setup_zinit_starship
 }
 
-# ===============================
-# NVIDIA GPU SETUP
-# ===============================
+# --- NVIDIA GPU SETUP ---
 run_nvidia_setup() {
-    log "--- Setting Up NVIDIA GPU ---"
+    info "--- Setting Up NVIDIA GPU ---"
     bash scripts/nvidia.sh
     log "--- NVIDIA GPU Setup Complete ---"
 }
 
-# ===============================
-# RAM CONFIGURATION
-# ===============================
+# --- SYSTEM CONFIGURATION ---
 configure_system() {
-    log "--- Configuring System (RAM + Power) ---"
+    info "--- Configuring System (RAM + Power) ---"
     bash scripts/myconfig.sh
     log "--- System Configuration Complete ---"
 }
 
-# ===============================
-# SHELL ENVIRONMENT
-# ===============================
+# --- SHELL ENVIRONMENT (ZINIT/STARSHIP) ---
 setup_zinit_starship() {
-    log "--- Setting Up Shell Environment ---"
+    info "--- Setting Up Shell Environment ---"
     local ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
     if [ ! -d "$ZINIT_HOME" ]; then
         warn "Installing Zinit..."

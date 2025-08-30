@@ -2,23 +2,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# ===============================
-# COLORS & LOGGING
-# ===============================
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m'
-
-log()   { echo -e "${GREEN}› $*${NC}"; }
-warn()  { echo -e "${YELLOW}› $*${NC}"; }
-error() { echo -e "${RED}› $*${NC}"; }
-
-# ===============================
-# UTILITY
-# ===============================
+# --- CONFIG & UTILITY ---
 start_dir=$(pwd)
+GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
+info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
+ok()   { echo -e "${GREEN}✅ $*${NC}"; }
+warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
+error() { echo -e "${RED}❌ $*${NC}"; } # No exit here, setup.sh handles loop
 with_dotfiles_root() { pushd "$(dirname "$0")/.." >/dev/null; "$@"; popd >/dev/null; }
 
 source ./scripts/installer.sh  # installer functions
@@ -44,9 +34,7 @@ validate_environment() {
     check_basic_dependencies
 }
 
-# ===============================
-# MENU DISPLAY
-# ===============================
+# --- MENU DISPLAY ---
 show_menu() {
     echo -e "
 ${BLUE}=====================================${NC}
@@ -54,44 +42,43 @@ ${BLUE}=====================================${NC}
 ${BLUE}=====================================${NC}
  ${GREEN}PRE-INSTALLATION${NC}
    1. Pre-Install System Setup
-   2. Remove Snap Packages
-
- ${GREEN}SYSTEM SETUP${NC}
-   3. Install System Packages
-   4. Setup Language Environment
-   5. Install Language Packages
-   6. Setup Shell Environment (zinit + starship)
-
- ${GREEN}HARDWARE & MAINTENANCE${NC}
-   7. Setup NVIDIA GPU
-   8. Apply System Fixes
-   9. Install CLI Tools
-  10. Configure System (RAM + Power)
+  ${GREEN}SYSTEM SETUP${NC}
+   2. Install System Packages
+   3. Setup Language Environment
+   4. Install Language Packages
+   5. Setup Shell Environment (zinit + starship)
+ 
+  ${GREEN}HARDWARE & MAINTENANCE${NC}
+   6. Setup NVIDIA GPU
+   7. Apply System Fixes
+   8. Install CLI Tools (Interactive)
+   9. Configure System (RAM + Power)
+  10. Run Post-Install Configuration
+ 
+  ${RED}MAINTENANCE${NC}
+  11. Remove Snap Packages (Interactive)
 
   ${GREEN}q. Quit${NC}
 ${BLUE}=====================================${NC}"
     echo -n -e "${YELLOW}Enter your choice: ${NC}"
 }
 
-# ===============================
-# MENU ACTIONS
-# ===============================
+# --- MENU ACTIONS ---
 declare -A actions=(
     [1]=run_preinstall
-    [2]=run_snap_removal
-    [3]=install_system_packages
-    [4]=setup_language_environment
-    [5]=install_language_packages
-    [6]=setup_shell_environment
-    [7]=run_nvidia_setup
-    [8]=run_system_fixes
-    [9]=run_cli_installer
-    [10]=configure_system
+    [2]=install_system_packages
+    [3]=setup_language_environment
+    [4]=install_language_packages
+    [5]=setup_shell_environment
+    [6]=run_nvidia_setup
+    [7]=run_system_fixes
+    [8]=run_cli_installer
+    [9]=configure_system
+   [10]=run_post_install
+   [11]=run_snap_removal
 )
 
-# ===============================
-# MAIN LOOP
-# ===============================
+# --- MAIN LOOP ---
 check_basic_dependencies
 
 while true; do

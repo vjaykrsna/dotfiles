@@ -5,45 +5,45 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- COLORS ---
-GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'
-RED='\033[0;31m'; NC='\033[0m'
+# --- Sourcing Dependencies ---
+# Note: This script is intended to be run standalone with sudo,
+# but we source this to get logging functions.
+source ./scripts/installer.sh
 
-echo -e "${GREEN}🔧 Pre-Install System Preparation${NC}"
-echo -e "${YELLOW}⚠️  This script requires sudo access for system updates${NC}"
+info "🔧 Pre-Install System Preparation"
+warn "This script requires sudo access for system updates"
 
 # Check if running with sudo
 if [[ $EUID -ne 0 ]]; then
-    echo -e "${RED}❌ Please run with sudo: sudo $0${NC}"
-    exit 1
+    error "Please run with sudo: sudo $0"
 fi
 
 # Update package lists
-echo -e "${YELLOW}› Updating package lists...${NC}"
+warn "› Updating package lists..."
 apt update
 
 # Upgrade system packages
-echo -e "${YELLOW}› Upgrading system packages...${NC}"
+warn "› Upgrading system packages..."
 apt upgrade -y
 
 # Install essential tools
-echo -e "${YELLOW}› Installing essential build tools...${NC}"
+warn "› Installing essential build tools..."
 apt install -y build-essential curl wget git software-properties-common
 
 # Install Flatpak if not present
 if ! command -v flatpak &> /dev/null; then
-    echo -e "${YELLOW}› Installing Flatpak...${NC}"
+    warn "› Installing Flatpak..."
     apt install -y flatpak gnome-software-plugin-flatpak
 fi
 
 # Clean up
-echo -e "${YELLOW}› Cleaning up...${NC}"
+warn "› Cleaning up..."
 apt autoremove -y
 apt autoclean
 
 # Enable Flathub (basic setup)
-echo -e "${YELLOW}› Adding Flathub remote...${NC}"
+warn "› Adding Flathub remote..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
-echo -e "${GREEN}✅ Pre-install preparation complete!${NC}"
-echo -e "${YELLOW}💡 You can now run './scripts/setup.sh' for the main installation${NC}"
+ok "Pre-install preparation complete!"
+info "💡 You can now run './scripts/setup.sh' for the main installation"
