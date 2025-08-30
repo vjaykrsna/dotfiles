@@ -1,16 +1,16 @@
 #autoload
 dockerctl() {
     if [[ $# -lt 1 ]]; then
-        echo "Usage: dockerctl {start|stop|restart|status|logs|clean} {service1|all} ..."
+        echo "Usage: dockerctl {start|stop|restart|status|logs|clean|update} {service1|all} ..."
         return 1
     fi
 
     local action="$1"; shift
 
     case "$action" in
-        start|stop|restart|status|logs|clean) ;;
+        start|stop|restart|status|logs|clean|update) ;;
         *)
-            echo "❌ Invalid action '$action'. Use: start, stop, restart, status, logs, clean"
+            echo "❌ Invalid action '$action'. Use: start, stop, restart, status, logs, clean, update"
             return 1
             ;;
     esac
@@ -27,8 +27,7 @@ dockerctl() {
 
     # Add dependencies for litellm if starting
     if [[ " ${services[*]} " == *" litellm "* && "$action" == "start" ]]; then
-        [[ " ${services[*]} " != *" postgres "* ]] && services=("postgres" "${services[@]}")
-        [[ " ${services[*]} " != *" redis "*    ]] && services=("redis" "${services[@]}")
+        [[ " ${services[*]} " != *" redis "* ]] && services=("redis" "${services[@]}")
     fi
 
     for service in "${services[@]}"; do
@@ -50,6 +49,12 @@ dockerctl() {
                 clean)
                     docker compose down
                     docker system prune -a --volumes -f
+                    ;;
+                update)
+                    docker compose pull             # fetch latest images
+                    docker compose down             # stop current container
+                    docker compose up -d            # start with latest
+                    docker image prune -f           # remove old dangling images
                     ;;
             esac
         )
