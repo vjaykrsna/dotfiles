@@ -1,8 +1,8 @@
 services:
   redis:
-    image: redis/redis-stack:latest
+    image: redis:7-alpine
     container_name: litellm_redis
-    restart: always
+    restart: unless-stopped
     pull_policy: if_not_present
     ports:
       - "${REDIS_PORT}:${REDIS_PORT}"

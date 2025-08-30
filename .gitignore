@@ -10,21 +10,6 @@
 !Personal/
 !Personal/**
 
-# Common files to ignore in dotfiles
-.DS_Store
-Thumbs.db
-*.swp
-*.swo
-*~
 
-# Temporary files
-.cache/
-*.log
-*.tmp
-*.temp
-
-# Backup files
-*.bak
-*.backup
 !.bashrc
 !.profile

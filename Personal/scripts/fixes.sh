@@ -1,7 +1,8 @@
 #!/bin/bash
 # fixes.sh - Post-Installation Common Fixes
 
-set -e
+set -euo pipefail
+IFS=$'\n\t'
 
 # --- COLORS ---
 BLUE='\033[0;34m'; YELLOW='\033[0;33m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
@@ -10,20 +11,21 @@ info() { log "$BLUE" "ℹ️  $1"; }
 ok()   { log "$GREEN" "✅ $1"; }
 warn() { log "$YELLOW" "⚠️  $1"; }
 err()  { log "$RED" "❌ $1"; }
+run_privileged() { [ "$EUID" -eq 0 ] && "$@" || sudo "$@"; }
 
 USERNAME=${2:-$(whoami)}
 
 # --- FIX 1: Input-Remapper groups ---
 fix_input_groups() {
     info "Fixing input-remapper groups for $USERNAME..."
-    sudo groupadd -f input
+    run_privileged groupadd -f input
     for g in input video audio; do
         if ! groups "$USERNAME" | grep -qw "$g"; then
-            sudo usermod -a -G "$g" "$USERNAME"
+            run_privileged usermod -a -G "$g" "$USERNAME"
             ok "Added $USERNAME to $g"
         fi
     done
-    sudo systemctl restart input-remapper 2>/dev/null || true
+    run_privileged systemctl restart input-remapper 2>/dev/null || true
 }
 
 # --- FIX 2: Dock extension conflicts ---
@@ -45,9 +47,9 @@ fix_extensions() {
 fix_cron() {
     info "Ensuring cron EXTRA_OPTS is defined..."
     if ! grep -q "EXTRA_OPTS" /etc/environment; then
-        echo 'EXTRA_OPTS=""' | sudo tee -a /etc/environment > /dev/null
+        echo 'EXTRA_OPTS=""' | run_privileged tee -a /etc/environment > /dev/null
         ok "Added EXTRA_OPTS to /etc/environment"
-        sudo systemctl reload cron 2>/dev/null || true
+        run_privileged systemctl reload cron 2>/dev/null || true
     else
         info "EXTRA_OPTS already present"
     fi
@@ -56,8 +58,8 @@ fix_cron() {
 # --- FIX 4: Udev rules ---
 fix_udev() {
     info "Refreshing udev rules..."
-    sudo udevadm control --reload-rules
-    sudo udevadm trigger
+    run_privileged udevadm control --reload-rules
+    run_privileged udevadm trigger
     ok "udev rules refreshed"
 }
 

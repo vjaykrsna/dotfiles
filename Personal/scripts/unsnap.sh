@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+IFS=$'\n\t'
 
 echo "🚨 Make sure you have backups! This will remove snap and its packages."
 

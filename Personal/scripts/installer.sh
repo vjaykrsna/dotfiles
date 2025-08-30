@@ -130,6 +130,95 @@ install_language_packages() {
 }
 
 # ===============================
+# GIT LFS
+# ===============================
+init_git_lfs() {
+    log "--- Initializing Git LFS ---"
+    git lfs install
+    log "--- Git LFS Initialization Complete ---"
+}
+
+# ===============================
+# GNOME SETTINGS
+# ===============================
+# ===============================
+# USER SERVICES
+# ===============================
+# ===============================
+# SYSTEM FIXES
+# ===============================
+run_system_fixes() {
+    log "--- Running System Fixes ---"
+    bash scripts/fixes.sh all
+    log "--- System Fixes Complete ---"
+}
+
+# ===============================
+# CLI INSTALLER
+# ===============================
+run_cli_installer() {
+    log "--- Running CLI Tools Installer ---"
+    bash scripts/cli.sh
+    log "--- CLI Tools Installation Complete ---"
+}
+
+# ===============================
+# PRE-INSTALL
+# ===============================
+run_preinstall() {
+    log "--- Running Pre-Install Setup ---"
+    sudo bash scripts/preinstall.sh
+    log "--- Pre-Install Setup Complete ---"
+}
+
+# ===============================
+# SNAP REMOVAL
+# ===============================
+run_snap_removal() {
+    log "--- Running Snap Removal ---"
+    sudo bash scripts/unsnap.sh
+    log "--- Snap Removal Complete ---"
+}
+
+
+# ===============================
+# COMPLETE SETUP
+# ===============================
+complete_setup() {
+    log "--- Running Complete Setup ---"
+    install_system_packages
+    setup_language_environment
+    install_language_packages
+    setup_zinit_starship
+    log "--- Complete Setup Finished ---"
+}
+
+# ===============================
+# SHELL ENVIRONMENT
+# ===============================
+setup_shell_environment() {
+    setup_zinit_starship
+}
+
+# ===============================
+# NVIDIA GPU SETUP
+# ===============================
+run_nvidia_setup() {
+    log "--- Setting Up NVIDIA GPU ---"
+    bash scripts/nvidia.sh
+    log "--- NVIDIA GPU Setup Complete ---"
+}
+
+# ===============================
+# RAM CONFIGURATION
+# ===============================
+configure_ram() {
+    log "--- Configuring RAM ---"
+    bash scripts/myram.sh
+    log "--- RAM Configuration Complete ---"
+}
+
+# ===============================
 # SHELL ENVIRONMENT
 # ===============================
 setup_zinit_starship() {
@@ -151,15 +240,3 @@ setup_zinit_starship() {
     fc-cache -fv
     log "--- Shell Environment Setup Complete ---"
 }
-
-# ===============================
-# MAIN
-# ===============================
-main() {
-    install_system_packages
-    setup_language_environment
-    install_language_packages
-    setup_zinit_starship
-}
-
-main "$@"

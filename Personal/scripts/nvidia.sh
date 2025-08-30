@@ -1,36 +1,37 @@
 #!/bin/bash
-# NVIDIA GPU On-Demand Setup with envycontrol
 set -euo pipefail
+IFS=$'\n\t'
 
-# Ensure prime-select exists
-command -v prime-select >/dev/null || { echo "Install nvidia-prime first."; exit 1; }
+# ===============================
+# COLORS
+# ===============================
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-log() { echo -e "\033[0;32m› $*\033[0m"; }
-warn() { echo -e "\033[0;33m› $*\033[0m"; }
+# ===============================
+# UTILITY FUNCTIONS
+# ===============================
+log() { echo -e "${GREEN}› $*${NC}"; }
+warn() { echo -e "${YELLOW}› $*${NC}"; }
+error() { echo -e "${RED}› $*${NC}"; }
 
-log "Switching NVIDIA GPU to on-demand mode..."
-sudo prime-select on-demand
+command -v prime-select >/dev/null || { error "Install nvidia-prime first."; exit 1; }
+run_privileged() { [ "$EUID" -eq 0 ] && "$@" || sudo "$@"; }
 
-log "Disabling Ubuntu GPU manager..."
-sudo systemctl mask gpu-manager.service
+log "Switching NVIDIA GPU to on-demand..."
+run_privileged prime-select on-demand
+run_privileged systemctl mask gpu-manager.service
+grep -q "LIBGL_DRI3_DISABLE" /etc/environment || echo "LIBGL_DRI3_DISABLE=true" | run_privileged tee -a /etc/environment >/dev/null
 
-# Disable DRI3 safely
-grep -q "LIBGL_DRI3_DISABLE" /etc/environment || echo "LIBGL_DRI3_DISABLE=true" | sudo tee -a /etc/environment > /dev/null
-
-# Install envycontrol if not present
 if ! command -v envycontrol &>/dev/null; then
-    log "Downloading envycontrol..."
-    ENVYCONTROL_DEB="/tmp/python3-envycontrol_3.5.1-1_all.deb"
-    wget -O "$ENVYCONTROL_DEB" "https://github.com/bayasdev/envycontrol/releases/download/v3.5.1/python3-envycontrol_3.5.1-1_all.deb"
-
     log "Installing envycontrol..."
-    sudo dpkg -i "$ENVYCONTROL_DEB" || sudo apt-get install -f -y
-    rm "$ENVYCONTROL_DEB"
-else
-    log "envycontrol already installed."
+    wget -O /tmp/envycontrol.deb "https://github.com/bayasdev/envycontrol/releases/download/v3.5.1/python3-envycontrol_3.5.1-1_all.deb"
+    run_privileged dpkg -i /tmp/envycontrol.deb || run_privileged apt-get install -f -y
 fi
 
 log "Setting GPU to integrated mode..."
-sudo envycontrol -s integrated
-
-log "✅ GPU setup complete! Integrated graphics active by default."
+run_privileged envycontrol -s integrated
+log "✅ GPU setup complete! Integrated graphics active."

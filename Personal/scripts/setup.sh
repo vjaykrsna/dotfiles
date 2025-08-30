@@ -42,8 +42,6 @@ check_basic_dependencies() {
 
 validate_environment() {
     check_basic_dependencies
-    check_setup_conflicts
-    validate_setup_completion
 }
 
 # ===============================
@@ -52,9 +50,9 @@ validate_environment() {
 show_menu() {
     echo -e "
 ${BLUE}=====================================${NC}
-  ${YELLOW}Dotfiles Management Utility${NC}
+ ${YELLOW}Dotfiles Management Utility${NC}
 ${BLUE}=====================================${NC}
-  ${GREEN}QUICK SETUP${NC}
+ ${GREEN}QUICK SETUP${NC}
     0. Complete Setup (Fresh Install)
 
   ${GREEN}SHELL ENVIRONMENT${NC}
@@ -67,29 +65,16 @@ ${BLUE}=====================================${NC}
 
   ${GREEN}CONFIGURATION${NC}
     5. Initialize Git LFS
-    6. Restore GNOME Settings
-    7. Enable User Systemd Services
 
   ${GREEN}PRE-SETUP${NC}
    -1. Pre-Install System Setup
    -2. Remove Snap Packages
 
-  ${GREEN}TEST${NC}
-   -3. Dry Run
-
   ${GREEN}HARDWARE & MAINTENANCE${NC}
    13. Setup NVIDIA GPU
    14. Apply System Fixes
    15. Install CLI Tools
-
-  ${GREEN}UPDATE${NC}
-    8. Update System Package Lists
-    9. Update Language Tool Lists
-    10. Sync GNOME Settings
-
-  ${GREEN}GIT${NC}
-    11. Sync From GitHub
-    12. Sync To GitHub
+   16. Configure RAM (ZRAM + Swap)
 
   ${GREEN}q. Quit${NC}
 ${BLUE}=====================================${NC}"
@@ -106,19 +91,12 @@ declare -A actions=(
     [3]=setup_language_environment
     [4]=install_language_packages
     [5]=init_git_lfs
-    [6]=restore_gnome_settings
-    [7]=enable_user_services
-    [8]=update_system_package_lists
-    [9]=update_lang_tool_lists
-    [10]=sync_gnome_settings
-    [11]=sync_from_github
-    [12]=sync_to_github
     [13]=run_nvidia_setup
     [14]=run_system_fixes
     [15]=run_cli_installer
+    [16]=configure_ram
     [-1]=run_preinstall
     [-2]=run_snap_removal
-    [-3]=run_dry_run
 )
 
 # ===============================

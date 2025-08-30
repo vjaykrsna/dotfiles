@@ -1,0 +1,30 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    pull_policy: if_not_present
+    ports:
+      - "${QDRANT_PORT}:${QDRANT_PORT}"
+      - "${QDRANT_GRPC_PORT}:${QDRANT_GRPC_PORT}"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    env_file:
+      - .env
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: "${QDRANT_GRPC_PORT}"
+      QDRANT__SERVICE__HTTP_PORT: "${QDRANT_PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${QDRANT_PORT}/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - qdrant_network
+
+volumes:
+  qdrant_data:
+
+networks:
+  qdrant_network:
+    driver: bridge

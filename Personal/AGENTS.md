@@ -17,8 +17,7 @@ This file provides guidance to agents when working with code in this repository.
 - Automated setup scripts for system provisioning
 
 ## Critical Commands
-- `startllm` - Start all services in correct order (Redis → PostgreSQL → LiteLLM)
-- `stopllm` - Stop all services in reverse order (LiteLLM → PostgreSQL → Redis)
+- `dockerctl` - Manage docker services (start, stop, restart, status, logs)
 - `./scripts/setup.sh` - Run the interactive setup utility
 - `source ~/.zshrc` - Reload shell configuration after changes
 
@@ -35,6 +34,15 @@ This file provides guidance to agents when working with code in this repository.
 - Environment variables follow UPPER_SNAKE_CASE naming
 - Docker Compose files use service-specific networks and volumes
 - YAML configuration uses anchors and references for DRY principles
+
+## Code Optimization Principles
+- Prioritize minimal solutions: Prefer single-function implementations over multiple helper functions
+- Automate user workflows: Implement automatic dependency handling rather than requiring explicit actions
+- Leverage language features: Use shell scripting features like array manipulation for cleaner code
+- Optimize for user experience: Design commands that anticipate user needs and reduce cognitive load
+- Write self-documenting code: Structure code with clear logic flow that minimizes need for comments
+- Eliminate redundancy: Combine similar operations and avoid duplicate code
+- Focus on core functionality: Strip away unnecessary features and focus on essential functionality
 
 ## Testing
 - Services must be started in dependency order
