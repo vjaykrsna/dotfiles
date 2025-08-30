@@ -40,7 +40,7 @@ install_packages_from_file() {
     local file="$1" cmd="$2"
     if ensure_file_nonempty "$file"; then
         log "Installing from $file..."
-        xargs -a "$file" -r --no-run-if-empty $cmd
+        xargs -a "$file" -r --no-run-if-empty sh -c "$cmd \"\$@\"" _
     fi
 }
 
@@ -119,7 +119,10 @@ install_language_packages() {
 
         cd \"$PWD\"
 
+        $(typeset -f ensure_file_nonempty)
         $(typeset -f install_packages_from_file)
+        $(typeset -f log)
+        log \"Installing npm global packages...\"
 
         install_packages_from_file scripts/packages/npm-globals.txt 'npm install -g'
         install_packages_from_file scripts/packages/cargo-crates.txt 'cargo install'
@@ -129,14 +132,6 @@ install_language_packages() {
     log "--- Language Package Installation Complete ---"
 }
 
-# ===============================
-# GIT LFS
-# ===============================
-init_git_lfs() {
-    log "--- Initializing Git LFS ---"
-    git lfs install
-    log "--- Git LFS Initialization Complete ---"
-}
 
 # ===============================
 # GNOME SETTINGS
@@ -181,17 +176,6 @@ run_snap_removal() {
 }
 
 
-# ===============================
-# COMPLETE SETUP
-# ===============================
-complete_setup() {
-    log "--- Running Complete Setup ---"
-    install_system_packages
-    setup_language_environment
-    install_language_packages
-    setup_zinit_starship
-    log "--- Complete Setup Finished ---"
-}
 
 # ===============================
 # SHELL ENVIRONMENT
@@ -212,10 +196,10 @@ run_nvidia_setup() {
 # ===============================
 # RAM CONFIGURATION
 # ===============================
-configure_ram() {
-    log "--- Configuring RAM ---"
-    bash scripts/myram.sh
-    log "--- RAM Configuration Complete ---"
+configure_system() {
+    log "--- Configuring System (RAM + Power) ---"
+    bash scripts/myconfig.sh
+    log "--- System Configuration Complete ---"
 }
 
 # ===============================

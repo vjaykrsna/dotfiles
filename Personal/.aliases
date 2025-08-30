@@ -3,10 +3,8 @@
 # ==================================================================
 
 # Basic navigation and utilities
-alias cls='clear'
 alias ls='eza'
 alias ll='eza -alh --icons'
-alias la='eza -a'
 alias cd='z'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -16,10 +14,8 @@ alias bat='batcat'
 # Zsh editing
 alias editzsh="micro $HOME/.zshrc"
 alias reloadzsh="source $HOME/.zshrc"
-alias dotsync="$HOME/.dotfiles/scripts/daily-sync.sh"
 
 # Git aliases
-alias gs='git status'
 commit() { git commit -m "$*"; }
 alias lgit='lazygit'
 gitlog() { git log --oneline --graph --decorate --all -n "${1:-5}"; }

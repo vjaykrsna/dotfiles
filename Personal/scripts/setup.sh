@@ -52,29 +52,21 @@ show_menu() {
 ${BLUE}=====================================${NC}
  ${YELLOW}Dotfiles Management Utility${NC}
 ${BLUE}=====================================${NC}
- ${GREEN}QUICK SETUP${NC}
-    0. Complete Setup (Fresh Install)
+ ${GREEN}PRE-INSTALLATION${NC}
+   1. Pre-Install System Setup
+   2. Remove Snap Packages
 
-  ${GREEN}SHELL ENVIRONMENT${NC}
-    1. Setup Shell Environment (zinit + starship)
+ ${GREEN}SYSTEM SETUP${NC}
+   3. Install System Packages
+   4. Setup Language Environment
+   5. Install Language Packages
+   6. Setup Shell Environment (zinit + starship)
 
-  ${GREEN}PACKAGES & TOOLS${NC}
-    2. Install System Packages
-    3. Setup Language Environment
-    4. Install Language Packages
-
-  ${GREEN}CONFIGURATION${NC}
-    5. Initialize Git LFS
-
-  ${GREEN}PRE-SETUP${NC}
-   -1. Pre-Install System Setup
-   -2. Remove Snap Packages
-
-  ${GREEN}HARDWARE & MAINTENANCE${NC}
-   13. Setup NVIDIA GPU
-   14. Apply System Fixes
-   15. Install CLI Tools
-   16. Configure RAM (ZRAM + Swap)
+ ${GREEN}HARDWARE & MAINTENANCE${NC}
+   7. Setup NVIDIA GPU
+   8. Apply System Fixes
+   9. Install CLI Tools
+  10. Configure System (RAM + Power)
 
   ${GREEN}q. Quit${NC}
 ${BLUE}=====================================${NC}"
@@ -85,18 +77,16 @@ ${BLUE}=====================================${NC}"
 # MENU ACTIONS
 # ===============================
 declare -A actions=(
-    [0]=complete_setup
-    [1]=setup_shell_environment
-    [2]=install_system_packages
-    [3]=setup_language_environment
-    [4]=install_language_packages
-    [5]=init_git_lfs
-    [13]=run_nvidia_setup
-    [14]=run_system_fixes
-    [15]=run_cli_installer
-    [16]=configure_ram
-    [-1]=run_preinstall
-    [-2]=run_snap_removal
+    [1]=run_preinstall
+    [2]=run_snap_removal
+    [3]=install_system_packages
+    [4]=setup_language_environment
+    [5]=install_language_packages
+    [6]=setup_shell_environment
+    [7]=run_nvidia_setup
+    [8]=run_system_fixes
+    [9]=run_cli_installer
+    [10]=configure_system
 )
 
 # ===============================
@@ -114,11 +104,6 @@ while true; do
         break
     fi
 
-    # Confirm full setup
-    if [[ "$choice" == "0" ]]; then
-        read -rp "⚠️  Complete Setup will run everything. Continue? (y/N) " ans
-        [[ "$ans" != [yY] ]] && continue
-    fi
 
     if [[ -n "${actions[$choice]:-}" ]]; then
         with_dotfiles_root "${actions[$choice]}"
