@@ -21,5 +21,12 @@ if command -v fc-cache &> /dev/null; then
     fc-cache -fv
 fi
 
+warn "› Installing Sekiro GRUB theme..."
+if [ ! -d "/tmp/sekiro_grub_theme" ]; then
+    git clone https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme
+fi
+(cd /tmp/sekiro_grub_theme && sudo bash install.sh)
+rm -rf /tmp/sekiro_grub_theme
+
 ok "Post-install configuration complete!"
 info "💡 You may want to run 'setup.sh' to check system health."
