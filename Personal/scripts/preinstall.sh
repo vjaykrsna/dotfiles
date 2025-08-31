@@ -15,7 +15,7 @@ warn "This script requires sudo access for system updates"
 
 # Check if running with sudo
 if [[ $EUID -ne 0 ]]; then
-    error "Please run with sudo: sudo $0"
+	error "Please run with sudo: sudo $0"
 fi
 
 # Update package lists
@@ -31,9 +31,9 @@ warn "› Installing essential build tools..."
 apt install -y build-essential curl wget git software-properties-common
 
 # Install Flatpak if not present
-if ! command -v flatpak &> /dev/null; then
-    warn "› Installing Flatpak..."
-    apt install -y flatpak gnome-software-plugin-flatpak
+if ! command -v flatpak &>/dev/null; then
+	warn "› Installing Flatpak..."
+	apt install -y flatpak gnome-software-plugin-flatpak
 fi
 
 # Clean up

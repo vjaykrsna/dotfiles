@@ -2,18 +2,18 @@
 
 # put this in your shell rc (~/.zshrc or ~/.bashrc)
 yadma() {
-  local target="$1"
-  local ignorefile="$HOME/.gitignore"
+	local target="$1"
+	local ignorefile="$HOME/.gitignore"
 
-  # ensure .gitignore exists
-  [ -f "$ignorefile" ] || echo "*" > "$ignorefile"
+	# ensure .gitignore exists
+	[ -f "$ignorefile" ] || echo "*" >"$ignorefile"
 
-  # if target isn’t already whitelisted, add it
-  if ! grep -qx "!.${target##$HOME/}" "$ignorefile"; then
-    echo "!${target##$HOME/}" >> "$ignorefile"
-  fi
+	# if target isn’t already whitelisted, add it
+	if ! grep -qx "!.${target##$HOME/}" "$ignorefile"; then
+		echo "!${target##$HOME/}" >>"$ignorefile"
+	fi
 
-  # stage + commit
-  yadm add "$target"
-  echo "✅ Whitelisted and staged: $target"
+	# stage + commit
+	yadm add "$target"
+	echo "✅ Whitelisted and staged: $target"
 }

@@ -1,142 +1,153 @@
 #autoload
 # Ultimate Developer Cleanup Utility (Zsh-safe & Streamlined)
 cleanup() {
-    set -euo pipefail
-IFS=$'\n\t'
+	set -euo pipefail
+	IFS=$'\n\t'
 
-DRY_RUN=false
-typeset -A freed_space
+	DRY_RUN=false
+	typeset -A freed_space
 
-# --- COLORS & LOGGING ---
-GREEN='\033[0;32m'; YELLOW='\033[0;33m'; BLUE='\033[0;34m'; RED='\033[0;31m'; NC='\033[0m'
-info()  { echo -e "${BLUE}ℹ️  $*${NC}"; }
-ok()    { echo -e "${GREEN}✅ $*${NC}"; }
-warn()  { echo -e "${YELLOW}⚠️  $*${NC}"; }
-error() { echo -e "${RED}❌ $*${NC}"; return 1; }
+	# --- COLORS & LOGGING ---
+	GREEN='\033[0;32m'
+	YELLOW='\033[0;33m'
+	BLUE='\033[0;34m'
+	RED='\033[0;31m'
+	NC='\033[0m'
+	info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
+	ok() { echo -e "${GREEN}✅ $*${NC}"; }
+	warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
+	error() {
+		echo -e "${RED}❌ $*${NC}"
+		return 1
+	}
 
-# --- SAFE GLOB EXPANSION ---
-_expand_glob() {
-    local pattern="$1"
-    setopt nullglob dotglob
-    echo ${(f)"$(print -l $pattern)"}  # Zsh-safe array
-}
+	# --- SAFE GLOB EXPANSION ---
+	_expand_glob() {
+		local pattern="$1"
+		setopt nullglob dotglob
+		# Use a more shfmt-friendly way to expand globs in Zsh
+		local -a paths
+		paths=($~pattern)
+		echo "${paths[@]}"
+	}
 
-# --- CLEANUP ITEM ---
-_cleanup_item() {
-    local pattern="$1" description="$2"
+	# --- CLEANUP ITEM ---
+	_cleanup_item() {
+		local pattern="$1" description="$2"
 
-    [[ -z "$pattern" || "$pattern" == "/" || "$pattern" == "$HOME" ]] && error "Unsafe path: $pattern" && return
+		[[ -z "$pattern" || "$pattern" == "/" || "$pattern" == "$HOME" ]] && error "Unsafe path: $pattern" && return
 
-    local -a paths=($(_expand_glob "$pattern"))
-    [[ ${#paths[@]} -eq 0 ]] && return
+		local -a paths=($(_expand_glob "$pattern"))
+		[[ ${#paths[@]} -eq 0 ]] && return
 
-    local total_size=0
-    for path in "${paths[@]}"; do
-        [[ ! -e "$path" ]] && continue
-        local size=$(du -sb -- "$path" 2>/dev/null | awk '{print $1}')
-        total_size=$(( total_size + size ))
-        [[ "$DRY_RUN" == true ]] && warn "[DRY RUN] Would delete $description: $path ($(numfmt --to=iec-i --suffix=B $size))"
-    done
+		local total_size=0
+		for path in "${paths[@]}"; do
+			[[ ! -e "$path" ]] && continue
+			local size=$(du -sb -- "$path" 2>/dev/null | awk '{print $1}')
+			total_size=$((total_size + size))
+			[[ "$DRY_RUN" == true ]] && warn "[DRY RUN] Would delete $description: $path ($(numfmt --to=iec-i --suffix=B $size))"
+		done
 
-    if [[ "$DRY_RUN" == false && $total_size -gt 0 ]]; then
-        info "Deleting $description from $pattern..."
-        rm -rf -- "${paths[@]}" || warn "Some paths in $description could not be deleted"
-    fi
+		if [[ "$DRY_RUN" == false && $total_size -gt 0 ]]; then
+			info "Deleting $description from $pattern..."
+			rm -rf -- "${paths[@]}" || warn "Some paths in $description could not be deleted"
+		fi
 
-    freed_space["$description"]=$(( ${freed_space["$description"]:-0} + total_size ))
-}
+		freed_space["$description"]=$((${freed_space["$description"]:-0} + total_size))
+	}
 
-# --- SAFE COMMAND EXECUTION ---
-_cleanup_cmd() {
-    local description="$1"; shift
-    if [[ "$DRY_RUN" == true ]]; then
-        warn "[DRY RUN] Would run: $description"
-    else
-        info "Running: $description"
-        "$@" || warn "$description failed"
-    fi
-}
+	# --- SAFE COMMAND EXECUTION ---
+	_cleanup_cmd() {
+		local description="$1"
+		shift
+		if [[ "$DRY_RUN" == true ]]; then
+			warn "[DRY RUN] Would run: $description"
+		else
+			info "Running: $description"
+			"$@" || warn "$description failed"
+		fi
+	}
 
-# --- BASIC CLEANUP ---
-cleanup_basic() {
-    info "--- Starting Basic Cleanup ---"
-    _cleanup_cmd "APT Cleanup" sudo apt-get clean
-    _cleanup_cmd "APT Autoclean" sudo apt-get autoclean
-    _cleanup_cmd "APT Autoremove" sudo apt-get autoremove --purge -y
-    _cleanup_cmd "Flatpak Uninstall Unused" flatpak uninstall --unused -y
-    _cleanup_cmd "Journal Cleanup" sudo journalctl --vacuum-size=1M
+	# --- BASIC CLEANUP ---
+	cleanup_basic() {
+		info "--- Starting Basic Cleanup ---"
+		_cleanup_cmd "APT Cleanup" sudo apt-get clean
+		_cleanup_cmd "APT Autoclean" sudo apt-get autoclean
+		_cleanup_cmd "APT Autoremove" sudo apt-get autoremove --purge -y
+		_cleanup_cmd "Flatpak Uninstall Unused" flatpak uninstall --unused -y
+		_cleanup_cmd "Journal Cleanup" sudo journalctl --vacuum-size=1M
 
-    _cleanup_item "$HOME/.cache/thumbnails/*" "Thumbnail Caches"
-    _cleanup_item "$HOME/.cache/google-chrome" "Chrome Cache"
-    _cleanup_item "$HOME/.cache/mozilla/firefox" "Firefox Cache"
-    _cleanup_item "$HOME/.cache/zen" "Zen Browser Cache"
-    _cleanup_item "$HOME/.var/app/app.zen_browser.zen/cache" "Zen Flatpak Cache"
-    _cleanup_item "$HOME/.cache/yarn" "Yarn Cache"
-    _cleanup_item "$HOME/.pnpm-store" "PNPM Store"
-    _cleanup_item "$HOME/.local/share/Trash/files/*" "Trash Files"
-    _cleanup_item "$HOME/.local/share/Trash/info/*" "Trash Info"
-    _cleanup_item "/var/lib/snapd/cache/*" "Snap Cache"
-    _cleanup_item "/var/cache/man/*" "Man-db Cache"
-    _cleanup_cmd "Systemd Temp Cleanup" sudo systemctl clean --what=temporary --what=cache
-    _cleanup_item "/var/lib/systemd/coredump/*" "Systemd Core Dumps"
-    _cleanup_item "$HOME/.npm/_logs/*" "NPM Logs"
-    _cleanup_item "$HOME/.cache/node-gyp/*" "Node-gyp Cache"
-    _cleanup_item "$HOME/.vscode/extensions/.obsolete/*" "VSCode Obsolete Extensions"
-    _cleanup_item "$HOME/go/pkg/mod/cache" "Go Module Cache"
-    ok "--- Basic Cleanup Complete ---"
-}
+		_cleanup_item "$HOME/.cache/thumbnails/*" "Thumbnail Caches"
+		_cleanup_item "$HOME/.cache/google-chrome" "Chrome Cache"
+		_cleanup_item "$HOME/.cache/mozilla/firefox" "Firefox Cache"
+		_cleanup_item "$HOME/.cache/zen" "Zen Browser Cache"
+		_cleanup_item "$HOME/.var/app/app.zen_browser.zen/cache" "Zen Flatpak Cache"
+		_cleanup_item "$HOME/.cache/yarn" "Yarn Cache"
+		_cleanup_item "$HOME/.pnpm-store" "PNPM Store"
+		_cleanup_item "$HOME/.local/share/Trash/files/*" "Trash Files"
+		_cleanup_item "$HOME/.local/share/Trash/info/*" "Trash Info"
+		_cleanup_item "/var/lib/snapd/cache/*" "Snap Cache"
+		_cleanup_item "/var/cache/man/*" "Man-db Cache"
+		_cleanup_cmd "Systemd Temp Cleanup" sudo systemctl clean --what=temporary --what=cache
+		_cleanup_item "/var/lib/systemd/coredump/*" "Systemd Core Dumps"
+		_cleanup_item "$HOME/.npm/_logs/*" "NPM Logs"
+		_cleanup_item "$HOME/.cache/node-gyp/*" "Node-gyp Cache"
+		_cleanup_item "$HOME/.vscode/extensions/.obsolete/*" "VSCode Obsolete Extensions"
+		_cleanup_item "$HOME/go/pkg/mod/cache" "Go Module Cache"
+		ok "--- Basic Cleanup Complete ---"
+	}
 
-# --- ADVANCED CLEANUP ---
-cleanup_advanced() {
-    info "--- Starting Advanced Cleanup ---"
-    cleanup_basic
+	# --- ADVANCED CLEANUP ---
+	cleanup_advanced() {
+		info "--- Starting Advanced Cleanup ---"
+		cleanup_basic
 
-    _cleanup_item "$HOME/.m2/repository/*" "Maven Repository"
-    _cleanup_item "$HOME/.gradle/caches/*" "Gradle Caches"
-    _cleanup_item "$HOME/.ivy2/cache/*" "Ivy2 Cache"
-    _cleanup_item "$HOME/.cargo/registry/cache/*" "Cargo Registry Cache"
-    _cleanup_item "$HOME/.cargo/git/db/*" "Cargo Git DB"
-    _cleanup_item "$HOME/Personal/**/target" "Rust Target Folders"
+		_cleanup_item "$HOME/.m2/repository/*" "Maven Repository"
+		_cleanup_item "$HOME/.gradle/caches/*" "Gradle Caches"
+		_cleanup_item "$HOME/.ivy2/cache/*" "Ivy2 Cache"
+		_cleanup_item "$HOME/.cargo/registry/cache/*" "Cargo Registry Cache"
+		_cleanup_item "$HOME/.cargo/git/db/*" "Cargo Git DB"
+		_cleanup_item "$HOME/Personal/**/target" "Rust Target Folders"
 
-    _cleanup_cmd "Python Venv Cleanup" find "$HOME" -type d \( -name "venv" -o -name ".venv" \) -prune -exec rm -rf -- {} +
-    _cleanup_cmd "Core Dumps Cleanup" find "$HOME" -type f -name "core.*" -exec rm -f -- {} +
+		_cleanup_cmd "Python Venv Cleanup" find "$HOME" -type d \( -name "venv" -o -name ".venv" \) -prune -exec rm -rf -- {} +
+		_cleanup_cmd "Core Dumps Cleanup" find "$HOME" -type f -name "core.*" -exec rm -f -- {} +
 
-    warn "› Aggressive cleanup: will remove Docker volumes and run git GC."
-    read -q "REPLY?Are you sure you want to continue? (y/n) "
-    echo
-    if [[ "$REPLY" =~ ^[Yy]$ ]]; then
-        _cleanup_cmd "Docker System Prune (All, including Volumes)" sudo docker system prune -af --volumes
-        _cleanup_cmd "Git Garbage Collection" find "$HOME/Personal" -name ".git" -type d -prune -exec git --git-dir={} gc --prune=now --aggressive \;
-        _cleanup_cmd "Journald Vacuum (Aggressive)" sudo journalctl --vacuum-time=2weeks
-    fi
-    ok "--- Advanced Cleanup Complete ---"
-}
+		warn "› Aggressive cleanup: will remove Docker volumes and run git GC."
+		read -q "REPLY?Are you sure you want to continue? (y/n) "
+		echo
+		if [[ "$REPLY" =~ ^[Yy]$ ]]; then
+			_cleanup_cmd "Docker System Prune (All, including Volumes)" sudo docker system prune -af --volumes
+			_cleanup_cmd "Git Garbage Collection" find "$HOME/Personal" -name ".git" -type d -prune -exec git --git-dir={} gc --prune=now --aggressive \;
+			_cleanup_cmd "Journald Vacuum (Aggressive)" sudo journalctl --vacuum-time=2weeks
+		fi
+		ok "--- Advanced Cleanup Complete ---"
+	}
 
-# --- REPORTING ---
-show_report() {
-    info "--- Cleanup Report ---"
-    local total_freed=0
+	# --- REPORTING ---
+	show_report() {
+		info "--- Cleanup Report ---"
+		local total_freed=0
 
-    # Total space freed
-    for key in ${(k)freed_space}; do
-        total_freed=$(( total_freed + freed_space[$key] ))
-    done
-    echo -e "${GREEN}Total space freed:${NC} $(numfmt --to=iec-i --suffix=B $total_freed)"
+		# Total space freed
+		for key in "${!freed_space[@]}"; do
+			total_freed=$((total_freed + freed_space[$key]))
+		done
+		echo -e "${GREEN}Total space freed:${NC} $(numfmt --to=iec-i --suffix=B $total_freed)"
 
-    # Top 5 cache hogs
-    info "--- Top 5 Cache Hogs ---"
-    (for k in ${(k)freed_space}; do
-        echo "${freed_space[$k]} $k"
-    done) | sort -rn | head -n 5 | while read -r line; do
-        local size=$(echo "$line" | awk '{print $1}')
-        local desc=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
-        echo "  - $desc ($(numfmt --to=iec-i --suffix=B $size))"
-    done
-}
+		# Top 5 cache hogs
+		info "--- Top 5 Cache Hogs ---"
+		(for k in "${!freed_space[@]}"; do
+			echo "${freed_space[$k]} $k"
+		done) | sort -rn | head -n 5 | while read -r line; do
+			local size=$(echo "$line" | awk '{print $1}')
+			local desc=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
+			echo "  - $desc ($(numfmt --to=iec-i --suffix=B $size))"
+		done
+	}
 
-# --- MENU ---
-show_menu() {
-    echo -e "
+	# --- MENU ---
+	show_menu() {
+		echo -e "
 ${BLUE}=====================================${NC}
  ${YELLOW}Ultimate Developer Cleanup Utility${NC}
 ${BLUE}=====================================${NC}
@@ -144,23 +155,23 @@ ${BLUE}=====================================${NC}
  ${GREEN}2. Advanced Cleanup${NC} (Aggressive)
  ${GREEN}q. Quit${NC}
 ${BLUE}=====================================${NC}"
-    echo -n -e "${YELLOW}Enter your choice: ${NC}"
-}
+		echo -n -e "${YELLOW}Enter your choice: ${NC}"
+	}
 
-# --- ARG PARSING ---
-[[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
+	# --- ARG PARSING ---
+	[[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
 
-# --- MAIN LOOP ---
-while true; do
-    show_menu
-    read -r choice
-    case "$choice" in
-        1) cleanup_basic ;;
-        2) cleanup_advanced ;;
-        [qQ]) break ;;
-        *) error "Invalid option. Try again." ;;
-    esac
-done
+	# --- MAIN LOOP ---
+	while true; do
+		show_menu
+		read -r choice
+		case "$choice" in
+		1) cleanup_basic ;;
+		2) cleanup_advanced ;;
+		[qQ]) break ;;
+		*) error "Invalid option. Try again." ;;
+		esac
+	done
 
-show_report
+	show_report
 }
