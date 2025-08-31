@@ -26,7 +26,6 @@ alias cpu='btop'
 alias temp='sensors'
 alias usage='du -sh .[!.]* * 2>/dev/null | awk '\''$1 ~ /K$/ && $1+0 >= 50 || $1 ~ /M|G$/'\'' | sort -hr'
 alias update='sudo apt update && sudo apt upgrade -y'
-alias cleanup='sudo apt autoremove --purge -y && sudo apt clean'
 alias netcheck='ping -c 4 google.com'
 alias ports='sudo lsof -i -P -n | grep LISTEN'
 

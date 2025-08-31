@@ -53,6 +53,7 @@ python3
 ripgrep
 sqlite3
 thefuck
+shfmt
 starship
 unzip
 vlc
