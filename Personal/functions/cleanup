@@ -1,11 +1,14 @@
 #autoload
 # Ultimate Developer Cleanup Utility (Zsh-safe & Streamlined)
 cleanup() {
+	# Save original IFS to ensure we can restore it
+	local _cleanup_original_ifs="$IFS"
+	setopt local_options
 	set -euo pipefail
-	IFS=$'\n\t'
+	local IFS=$'\n\t'
 
 	DRY_RUN=false
-	typeset -A freed_space
+	local -A freed_space
 
 	# --- COLORS & LOGGING ---
 	GREEN='\033[0;32m'
@@ -41,11 +44,11 @@ cleanup() {
 		[[ ${#paths[@]} -eq 0 ]] && return
 
 		local total_size=0
-		for path in "${paths[@]}"; do
-			[[ ! -e "$path" ]] && continue
-			local size=$(du -sb -- "$path" 2>/dev/null | awk '{print $1}')
+		for item_path in "${paths[@]}"; do
+			[[ ! -e "$item_path" ]] && continue
+			local size=$(/usr/bin/du -sb -- "$item_path" 2>/dev/null | /usr/bin/awk '{print $1}')
 			total_size=$((total_size + size))
-			[[ "$DRY_RUN" == true ]] && warn "[DRY RUN] Would delete $description: $path ($(numfmt --to=iec-i --suffix=B $size))"
+			[[ "$DRY_RUN" == true ]] && warn "[DRY RUN] Would delete $description: $item_path ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
 		done
 
 		if [[ "$DRY_RUN" == false && $total_size -gt 0 ]]; then
@@ -132,16 +135,16 @@ cleanup() {
 		for key in "${!freed_space[@]}"; do
 			total_freed=$((total_freed + freed_space[$key]))
 		done
-		echo -e "${GREEN}Total space freed:${NC} $(numfmt --to=iec-i --suffix=B $total_freed)"
+		echo -e "${GREEN}Total space freed:${NC} $(/usr/bin/numfmt --to=iec-i --suffix=B $total_freed)"
 
 		# Top 5 cache hogs
 		info "--- Top 5 Cache Hogs ---"
 		(for k in "${!freed_space[@]}"; do
 			echo "${freed_space[$k]} $k"
-		done) | sort -rn | head -n 5 | while read -r line; do
-			local size=$(echo "$line" | awk '{print $1}')
-			local desc=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
-			echo "  - $desc ($(numfmt --to=iec-i --suffix=B $size))"
+		done) | /usr/bin/sort -rn | /usr/bin/head -n 5 | while read -r line; do
+			local size=$(echo "$line" | /usr/bin/awk '{print $1}')
+			local desc=$(echo "$line" | /usr/bin/cut -d' ' -f2-)
+			echo "  - $desc ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
 		done
 	}
 
@@ -174,4 +177,10 @@ ${BLUE}=====================================${NC}"
 	done
 
 	show_report
+
+	# Restore IFS to its original state to prevent shell corruption
+	IFS="$_cleanup_original_ifs"
+
+	# Undefine all helper functions to prevent namespace pollution
+	unfunction info ok warn error _expand_glob _cleanup_item _cleanup_cmd cleanup_basic cleanup_advanced show_report show_menu 2>/dev/null || true
 }
