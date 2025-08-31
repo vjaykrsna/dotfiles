@@ -260,26 +260,8 @@ router_settings:
   cache: true
   cache_params:
     type: redis
-  num_retries: 2                    # Retry up to 2 times per model key
-  retry_after: 3                    # Wait 3 seconds between retries
-  timeout: 60                       # 60 second timeout per request
-  allowed_fails: 2                  # Allow 3 fails per minute before cooling down a key
-  cooldown_time: 90
 
 litellm_settings:
   drop_params: true
   turn_off_message_logging: true
   set_verbose: false
-  # ADD THIS: Additional retry/error handling settings
-  num_retries: 15                    # Global retry setting as backup
-  request_timeout: 60               # Request timeout in seconds
-  # Retry policy for specific error types
-  retry_policy:
-    InternalServerErrorRetries: 10   # Retry 500 errors 10 times
-    TimeoutErrorRetries: 3          # Retry timeouts 3 times
-    RateLimitErrorRetries: 5        # Retry rate limits 5 times
-  # Handle specific error types differently
-  # fallbacks: [
-  #   {"gemini-2.5-pro": ["qwen3-coder"]},
-  #   {"gemini-2.5-flash": ["qwen3-coder"]}
-  # ]
