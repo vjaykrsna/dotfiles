@@ -1,16 +1,63 @@
-# Ignore everything by default
+# ========================================================
+# IGNORE EVERYTHING BY DEFAULT
+========================================================
 *
 
-# Track specific files (negative patterns)
+# ========================================================
+# WHITELIST SAFE DOTFILES
+========================================================
+!.bashrc
+!.zshrc
+!.profile
+!.gitconfig
 !.gitignore
-!.env
-!.plan.md
+!.env                # tracked but encrypted (see .gitattributes)
+!.config/starship.toml
 
-# Track all personal files
+# Personal scripts & projects
 !Personal/
 !Personal/**
 
+# ========================================================
+# SENSITIVE FILES (tracked only via yadm-crypt)
+========================================================
+!.ssh/
+!.gnupg/
 
-!.bashrc
-!.profile
-Personal/**/AGENTS.md
+# ========================================================
+# EXPLICITLY IGNORED (junk, cache, or unsafe)
+========================================================
+# Shell history
+.bash_history
+.zsh_history
+
+# GnuPG runtime sockets
+.gnupg/S.*
+.gnupg/*.lock
+
+# SSH pubkeys (public, no need to track)
+.ssh/*.pub
+.ssh/authorized_keys
+
+# Package caches & tmp
+.cache/
+.npm/
+.nvm/
+.var/
+.vscode/
+.bun/
+.android/
+.dotnet/
+.mozilla/
+.pki/
+.qwen/
+.node_repl_history
+.zcompdump
+
+# Misc local-only junk
+.sudo_as_admin_successful
+.wget-hsts
+.DS_Store
+Thumbs.db
+.roo/
+AGENTS.md
