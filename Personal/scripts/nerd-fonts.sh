@@ -4,46 +4,53 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# This function is intended to be sourced by other scripts that have already
-# sourced 'installer.sh' to provide the logging functions (info, ok, warn, etc.)
+
+# Logging functions (simple version)
+info() { echo "[INFO] $1"; }
+ok() { echo "[OK] $1"; }
+warn() { echo "[WARN] $1"; }
 
 install_nerd_fonts() {
     info "--- Installing Nerd Fonts ---"
-    local FONT_DIR="/usr/local/share/fonts/nerd-fonts"
+    local FONT_DIR="$HOME/.local/share/fonts"
     local TMP_DIR="/tmp"
 
+    mkdir -p "$FONT_DIR"
+
     # JetBrains Mono Nerd Font
-    if [ ! -d "$FONT_DIR/JetBrainsMono" ]; then
-        info "› Downloading JetBrains Mono Nerd Font..."
-        cd "$TMP_DIR"
-        curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
-        
-        info "› Installing JetBrains Mono Nerd Font..."
-        sudo mkdir -p "$FONT_DIR/JetBrainsMono"
-        sudo tar -xJf JetBrainsMono.tar.xz -C "$FONT_DIR/JetBrainsMono/"
-        rm JetBrainsMono.tar.xz
-        ok "  JetBrains Mono Nerd Font installed."
-    else
-        warn "› JetBrains Mono Nerd Font already installed. Skipping."
-    fi
+    info "› Downloading JetBrains Mono Nerd Font..."
+    cd "$TMP_DIR"
+    curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+    
+    info "› Installing JetBrains Mono Nerd Font..."
+    tar -xJf JetBrainsMono.tar.xz -C "$FONT_DIR/"
+    rm JetBrainsMono.tar.xz
+    ok "  JetBrains Mono Nerd Font installed."
 
     # Fira Code Nerd Font
-    if [ ! -d "$FONT_DIR/FiraCode" ]; then
-        info "› Downloading Fira Code Nerd Font..."
-        cd "$TMP_DIR"
-        curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.tar.xz
+    info "› Downloading Fira Code Nerd Font..."
+    cd "$TMP_DIR"
+    curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.tar.xz
 
-        info "› Installing Fira Code Nerd Font..."
-        sudo mkdir -p "$FONT_DIR/FiraCode"
-        sudo tar -xJf FiraCode.tar.xz -C "$FONT_DIR/FiraCode/"
-        rm FiraCode.tar.xz
-        ok "  Fira Code Nerd Font installed."
-    else
-        warn "› Fira Code Nerd Font already installed. Skipping."
-    fi
+    info "› Installing Fira Code Nerd Font..."
+    tar -xJf FiraCode.tar.xz -C "$FONT_DIR/"
+    rm FiraCode.tar.xz
+    ok "  Fira Code Nerd Font installed."
+
+    # Geist Mono Nerd Font
+    info "› Downloading Geist Mono Nerd Font..."
+    cd "$TMP_DIR"
+    curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/GeistMono.tar.xz
+
+    info "› Installing Geist Mono Nerd Font..."
+    tar -xJf GeistMono.tar.xz -C "$FONT_DIR/"
+    rm GeistMono.tar.xz
+    ok "  Geist Mono Nerd Font installed."
 
     info "› Rebuilding font cache..."
-    sudo fc-cache -fv
+    fc-cache -fv
     
     ok "--- Nerd Fonts Installation Complete ---"
 }
+
+install_nerd_fonts
