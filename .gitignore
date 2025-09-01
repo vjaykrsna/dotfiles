@@ -120,6 +120,13 @@ Thumbs.db
 .roo/
 AGENTS.md
 
+# Noisy files identified by user feedback
+.config/configstore/update-notifier-*
+.config/enchant/en_US.*
+.config/evolution/sources/system-proxy.source
+.config/gnome-initial-setup-done
+.config/vscode-sqltools/runningInfo.json
+
 # Sensitive files that should be encrypted
 .config/dconf/user
 .config/gsconnect/private.pem
