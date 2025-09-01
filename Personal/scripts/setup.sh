@@ -62,9 +62,10 @@ ${BLUE}=====================================${NC}
    8. Install CLI Tools (Interactive)
    9. Configure System (RAM + Power)
   10. Run Post-Install Configuration
- 
-  ${RED}MAINTENANCE${NC}
-  11. Remove Snap Packages (Interactive)
+  11. Install Nerd Fonts
+
+ ${RED}MAINTENANCE${NC}
+  12. Remove Snap Packages (Interactive)
 
   ${GREEN}q. Quit${NC}
 ${BLUE}=====================================${NC}"
@@ -83,7 +84,8 @@ declare -A actions=(
 	[8]=run_cli_installer
 	[9]=configure_system
 	[10]=run_post_install
-	[11]=run_snap_removal
+	[11]=run_nerd_fonts_installer
+	[12]=run_snap_removal
 )
 
 # --- MAIN LOOP ---

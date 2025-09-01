@@ -204,3 +204,10 @@ setup_zinit_starship() {
 	fc-cache -fv
 	log "--- Shell Environment Setup Complete ---"
 }
+
+# --- NERD FONTS ---
+run_nerd_fonts_installer() {
+	   info "--- Running Nerd Fonts Installer ---"
+	   source scripts/nerd-fonts.sh && install_nerd_fonts
+	   ok "--- Nerd Fonts Installation Complete ---"
+}
