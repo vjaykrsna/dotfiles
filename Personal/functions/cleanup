@@ -1,172 +1,172 @@
 #autoload
+# Ultimate Cleanup Utility - Extended Version
+
 cleanup() {
     emulate -L zsh
     set -u
-    local IFS=$'\n\t'
-
-    # --- CONFIG ---
-    DRY_RUN=false
-    local -A freed_space
+    local DRY_RUN=false
+    [[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
 
     local GREEN='\033[0;32m'
     local YELLOW='\033[0;33m'
     local BLUE='\033[0;34m'
     local RED='\033[0;31m'
     local NC='\033[0m'
+    typeset -A freed_space
 
     info()  { echo -e "${BLUE}ℹ️  $*${NC}"; }
     ok()    { echo -e "${GREEN}✅ $*${NC}"; }
     warn()  { echo -e "${YELLOW}⚠️  $*${NC}"; }
-    error() { echo -e "${RED}❌ $*${NC}"; return 1; }
+    error() { echo -e "${RED}❌ $*${NC}"; }
 
-    # --- SAFETY DELETE ---
+    # ----------------------
+    # Safe delete function
+    # ----------------------
     _safe_delete() {
-        local path="$1" use_sudo="${2:-false}" description="$3"
-
+        local path="$1" description="$2" use_sudo="${3:-false}"
         [[ -z "$path" || "$path" == "/" || "$path" == "$HOME" ]] && error "Unsafe path: $path" && return
-
-        # Expand globs safely
+        /usr/bin/echo "Processing $description..."
         setopt nullglob globdots extendedglob
-        local -a paths=($~path)
-        [[ ${#paths[@]} -eq 0 ]] && return
-
+        local -a files=($~path)
         local total=0
-        for p in "${paths[@]}"; do
-            [[ ! -e "$p" ]] && continue
-            local size=0
-            size=$(/usr/bin/du -sb -- "$p" 2>/dev/null | /usr/bin/awk '{print $1}') || size=0
+        for f in "${files[@]}"; do
+            [[ ! -e "$f" ]] && continue
+            local size=$(/usr/bin/du -sb -- "$f" 2>/dev/null | /usr/bin/awk '{print $1}') || size=0
             total=$((total + size))
-
             if [[ "$DRY_RUN" == true ]]; then
-                local human=$([[ $size -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B "$size" || echo "0B")
-                warn "[DRY RUN] Would delete $description: $p ($human)"
+                warn "[DRY RUN] Would delete $description: $f ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
             else
                 if [[ "$use_sudo" == true ]]; then
-                    /usr/bin/sudo /usr/bin/rm -rf -- "$p" 2>/dev/null || warn "Failed to delete $p"
+                    /usr/bin/sudo /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed to delete $f"
                 else
-                    /usr/bin/rm -rf -- "$p" 2>/dev/null || warn "Failed to delete $p"
+                    /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed to delete $f"
                 fi
             fi
         done
-
         [[ $total -gt 0 ]] && freed_space["$description"]=$(( ${freed_space["$description"]:-0} + total ))
     }
 
-    # --- COMMAND WRAPPER ---
-    _run_cmd() {
-        local description="$1"; shift
+    # ----------------------
+    # Run command and track space
+    # ----------------------
+    _run_and_track_space() {
+        local description="$1" monitor_path="$2"; shift 2
+        local before=0 after=0
+        [[ -d "$monitor_path" ]] && before=$(/usr/bin/du -sb -- "$monitor_path" 2>/dev/null | /usr/bin/awk '{print $1}') || before=0
         if [[ "$DRY_RUN" == true ]]; then
-            warn "[DRY RUN] Would run: $description"
+            warn "[DRY_RUN] Would run: $description"
         else
             info "Running: $description"
             "$@" || warn "$description failed"
         fi
+        [[ -d "$monitor_path" ]] && after=$(/usr/bin/du -sb -- "$monitor_path" 2>/dev/null | /usr/bin/awk '{print $1}') || after=0
+        local freed=$((before - after))
+        [[ $freed -gt 0 ]] && freed_space["$description"]=$(( ${freed_space["$description"]:-0} + freed ))
     }
 
-    _can_sudo() { /usr/bin/sudo -n true 2>/dev/null; }
-
-    # --- BASIC CLEANUP ---
+    # ----------------------
+    # Basic Cleanup
+    # ----------------------
     cleanup_basic() {
         info "--- Starting Basic Cleanup ---"
-        _run_cmd "APT Cleanup" /usr/bin/sudo /usr/bin/apt-get clean
-        _run_cmd "APT Autoclean" /usr/bin/sudo /usr/bin/apt-get autoclean
-        _run_cmd "APT Autoremove" /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y
-        _run_cmd "Flatpak Unused" /usr/bin/flatpak uninstall --unused -y
-        _run_cmd "Journal Cleanup" /usr/bin/sudo /usr/bin/journalctl --vacuum-size=1M
+        _safe_delete "$HOME/.cache/thumbnails/*" "Thumbnail Cache"
+        _safe_delete "$HOME/.cache/google-chrome" "Chrome Cache"
+        _safe_delete "$HOME/.cache/mozilla/firefox" "Firefox Cache"
+        _safe_delete "$HOME/.var/app/app.zen_browser.zen/cache/*" "Zen Browser Cache"
+        _safe_delete "$HOME/.local/share/Trash/files/*" "Trash Files"
+        _safe_delete "$HOME/.local/share/Trash/info/*" "Trash Info Files"
 
-        _safe_delete "$HOME/.cache/thumbnails/*" false "Thumbnail Caches"
-        _safe_delete "$HOME/.cache/google-chrome" false "Chrome Cache"
-        _safe_delete "$HOME/.cache/mozilla/firefox" false "Firefox Cache"
-        _safe_delete "$HOME/.cache/yarn" false "Yarn Cache"
-        _safe_delete "$HOME/.local/share/Trash/files/*" false "Trash Files"
-        _safe_delete "/var/cache/man/*" true "Man-db Cache"
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get clean
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get autoclean -y
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y
 
         ok "--- Basic Cleanup Complete ---"
     }
 
-    # --- PYTHON VENV CLEANUP ---
-    cleanup_python_venvs() {
-        local description="Python Virtual Envs"
-        info "Cleaning Python virtual environments (skipping pipx & poetry)..."
-        while IFS= read -r -d '' venv; do
-            local dir=$(/usr/bin/dirname "$venv")
-            [[ "$dir" == "$HOME/.local/share/pipx/venvs"* ]] && continue
-            [[ "$dir" == "$HOME/.cache/pypoetry"* ]] && continue
-            _safe_delete "$dir" false "$description"
-        done < <(/usr/bin/find "$HOME" -type f -name "pyvenv.cfg" -print0)
-    }
-
-    # --- DOCKER ---
-    cleanup_docker() {
-        local desc="Docker Cleanup"
-        _run_cmd "$desc" /usr/bin/sudo /usr/bin/docker system prune -af --volumes
-    }
-
-    # --- GIT GC ---
-    cleanup_git() {
-        local desc="Git Repos GC"
-        info "Running git gc under ~/Personal..."
-        /usr/bin/find "$HOME/Personal" -name ".git" -type d -prune -print0 | while IFS= read -r -d '' g; do
-            _run_cmd "Git GC in $g" /usr/bin/git --git-dir="$g" --work-tree="$(/usr/bin/dirname "$g")" gc --prune=now --aggressive
-        done
-    }
-
-    # --- ADVANCED CLEANUP ---
+    # ----------------------
+    # Advanced Cleanup
+    # ----------------------
     cleanup_advanced() {
         info "--- Starting Advanced Cleanup ---"
         cleanup_basic
 
-        _safe_delete "$HOME/.m2/repository/*" false "Maven Repository"
-        _safe_delete "$HOME/.gradle/caches/*" false "Gradle Caches"
-        _safe_delete "$HOME/.cargo/registry/cache/*" false "Cargo Registry Cache"
-        _safe_delete "$HOME/Personal/**/target" false "Rust Target Folders"
+        # Node / JavaScript
+        _safe_delete "$HOME/.npm" "NPM Cache" true
+        _safe_delete "$HOME/.npm/_logs/*" "NPM Logs"
+        _safe_delete "$HOME/.cache/yarn" "Yarn Cache"
+        _safe_delete "$HOME/.pnpm-store" "PNPM Store"
+        _safe_delete "$HOME/.cache/node-gyp/*" "Node-gyp Cache"
 
-        cleanup_python_venvs
+        # Python
+        _safe_delete "$HOME/.cache/pip" "Python pip cache"
+        _safe_delete "$HOME/.local/share/virtualenvs" "Python virtualenvs"
 
-        if [[ "$DRY_RUN" == false ]]; then
-            read -q "REPLY?Proceed with Docker & Git cleanup? (y/n) "; echo
-            [[ "$REPLY" =~ ^[Yy]$ ]] && cleanup_docker && cleanup_git || warn "Skipping Docker & Git cleanup."
-        else
-            warn "[DRY RUN] Skipping Docker & Git prompt, would run both"
-            cleanup_docker
-            cleanup_git
-        fi
+        # Rust / Cargo
+        _safe_delete "$HOME/.cargo/registry/cache/*" "Cargo Registry Cache"
+        _safe_delete "$HOME/Personal/**/target" "Rust Target Folders"
+
+        # Java / Maven / Gradle
+        _safe_delete "$HOME/.m2/repository/*" "Maven Repository"
+        _safe_delete "$HOME/.gradle/caches/*" "Gradle Cache"
+
+        # Go
+        _safe_delete "$HOME/go/pkg/mod/cache/*" "Go Module Cache"
+
+        # VSCode
+        _safe_delete "$HOME/.vscode/extensions/.obsolete/*" "VSCode Obsolete Extensions"
+
+        # System
+        _safe_delete "/var/lib/snapd/cache/*" "Snap Cache" true
+        _safe_delete "/var/cache/man/*" "Man-db Cache" true
+        _run_and_track_space "Flatpak Unused" "/var/lib/flatpak" /usr/bin/flatpak uninstall --unused -y
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/systemctl clean --what=temporary --what=cache
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/journalctl --vacuum-size=1M
+        _safe_delete "/var/lib/systemd/coredump/*" "Systemd Core Dumps" true
+
+        # Docker
+        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/docker system prune -af --volumes
+
+        # Git
+        /usr/bin/find "$HOME/Personal" -name ".git" -type d -prune -print0 | while IFS= read -r -d '' g; do
+            [[ "$DRY_RUN" == true ]] && warn "[DRY_RUN] Would run git gc in $g" && continue
+            /usr/bin/git --git-dir="$g" --work-tree="$(/usr/bin/dirname "$g")" gc --prune=now --aggressive
+        done
 
         ok "--- Advanced Cleanup Complete ---"
     }
 
-    # --- REPORT ---
+    # ----------------------
+    # Report
+    # ----------------------
     show_report() {
         info "--- Cleanup Report ---"
         local total=0
-        for k in "${(@k)freed_space}"; do
-            total=$((total + freed_space[$k]))
-        done
-        echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B "$total" || echo "0B")"
+        for k in "${(@k)freed_space}"; do total=$((total + freed_space[$k])); done
+        echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B $total || echo "0B")"
 
-        info "--- Top 5 Hogs ---"
+        if (( total == 0 )); then
+            warn "Nothing left to clean!"
+            return
+        fi
+
+        info "--- Top Freed ---"
         for line in "${(@f)$(for k in "${(@k)freed_space}"; do echo "${freed_space[$k]}|$k"; done | /usr/bin/sort -rn | /usr/bin/head -n5)}"; do
             local size="${line%%|*}"
             local desc="${line##*|}"
-            local human=$([[ $size -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B "$size" || echo "0B")
-            echo "  - $desc ($human)"
+            echo "  - $desc ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
         done
     }
 
-    # --- MENU ---
-    show_menu() {
-        echo -e "
-${BLUE}===== Ultimate Developer Cleanup Utility =====${NC}
- ${GREEN}1. Basic Cleanup${NC} (Safe)
- ${GREEN}2. Advanced Cleanup${NC} (Aggressive)
- ${GREEN}q. Quit${NC}"
-        echo -n -e "${YELLOW}Enter choice: ${NC}"
-    }
-
-    [[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
-
+    # ----------------------
+    # Menu
+    # ----------------------
     while true; do
-        show_menu
+        echo -e "\n${BLUE}===== Ultimate Cleanup Utility =====${NC}"
+        echo -e " ${GREEN}1.${NC} Basic Cleanup (safe)"
+        echo -e " ${GREEN}2.${NC} Advanced Cleanup (aggressive)"
+        echo -e " ${GREEN}q.${NC} Quit"
+        echo -n -e "${YELLOW}Enter choice: ${NC}"
+
         read -r choice
         case "$choice" in
             1) cleanup_basic ;;
@@ -177,6 +177,6 @@ ${BLUE}===== Ultimate Developer Cleanup Utility =====${NC}
     done
 
     show_report
-
-    unfunction info ok warn error _safe_delete _run_cmd _can_sudo cleanup_basic cleanup_python_venvs cleanup_docker cleanup_git cleanup_advanced show_report show_menu 2>/dev/null || true
 }
+
+cleanup "$@"
