@@ -166,6 +166,9 @@ AGENTS.md
 # Ignore heavy resource / media directories
 .local/share/gnome-shell/extensions/*/Resources/
 .local/share/gnome-shell/extensions/*/Resources/**
+# Font files are managed by LFS (see .gitattributes)
+!.local/share/fonts/
+!.local/share/fonts/**
 .local/share/gnome-shell/extensions/*/locale/
 .local/share/gnome-shell/extensions/*/locale/**
 .local/share/gnome-shell/extensions/*/icons/
