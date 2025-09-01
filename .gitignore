@@ -189,3 +189,7 @@ AGENTS.md
 .local/share/gnome-shell/extensions/*/COPYING*
 .local/share/gnome-shell/extensions/*/*.md
 .local/share/gnome-shell/extensions/*/*.txt
+
+# Manual additon
+!.qwen/
+!.qwen/settings.json
