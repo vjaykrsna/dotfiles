@@ -37,7 +37,7 @@ zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR"
 # ==================================================================
 # SHELL OPTIONS
 # ==================================================================
-setopt histignorealldups sharehistory extendedhistory incappendhistory
+setopt histignorealldups sharehistory extendedhistory incappendhistory histignorespace
 
 # ==================================================================
 # COMPLETION STYLING

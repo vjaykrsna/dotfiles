@@ -5,10 +5,11 @@ case $- in
 esac
 
 # History configuration
+HISTFILE="$HOME/.zsh_history"
 HISTCONTROL=ignoreboth
 shopt -s histappend
-HISTSIZE=1000
-HISTFILESIZE=2000
+HISTSIZE=10000
+HISTFILESIZE=10000
 
 # Check window size after each command
 shopt -s checkwinsize
