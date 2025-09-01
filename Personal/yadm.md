@@ -154,7 +154,7 @@ This will restore:
 
 ⚠️ **What won’t restore automatically**:
 
-* GNOME session/dconf (`.config/dconf/user`) is excluded (too volatile).
+* GNOME session/dconf (`.config/dconf/user`) is tracked to sync desktop settings.
 * Application-specific states (browser history, VSCode sessions, etc.).
 
 ---
@@ -191,7 +191,7 @@ If a config starts creating random junk, add an ignore rule under *Explicitly Ig
 ## 📌 Notes on Current Setup
 
 * **Whitelist-first strategy** → keeps repo minimal, reproducible, and portable.
-* **No GNOME dconf tracking** → avoids restoring volatile desktop/session data. Only wallpaper/autostart bits are tracked.
+* **GNOME dconf tracking enabled** → Restores desktop/session data for a consistent environment.
 * **Browser/editor states excluded** → prevents bloat.
 * **Personal scripts fully tracked** → ensures your custom tooling is portable.
 
