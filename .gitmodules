@@ -1,0 +1,3 @@
+[submodule "Personal/myGithub/vscode-settings"]
+	path = Personal/myGithub/vscode-settings
+	url = https://github.com/vjaykrsna/vscode-settings.git
