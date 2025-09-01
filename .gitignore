@@ -81,6 +81,9 @@
 !/.local/share/
 !/.local/share/yadm/
 !/.local/share/yadm/archive
+.config/dconf/user
+.config/gsconnect/private.pem
+.config/gsconnect/certificate.pem
 
 # ========================================================
 # EXPLICITLY IGNORED (junk, caches, local)
@@ -127,10 +130,59 @@ AGENTS.md
 .config/gnome-initial-setup-done
 .config/vscode-sqltools/runningInfo.json
 
-# Sensitive files that should be encrypted
-.config/dconf/user
-.config/gsconnect/private.pem
-.config/gsconnect/certificate.pem
-
 # Python bytecode
 *.pyc
+
+# ========================================================
+# WHITELISTED FROM .LOCAL (portable / reproducible)
+# ========================================================
+# Un-ignore the parent directories first
+!.local/
+!.local/share/
+!.local/share/gnome-shell/
+!.local/share/gnome-shell/extensions/
+!.local/share/gnome-shell/extensions/*/
+
+# Track essential extension files
+!.local/share/gnome-shell/extensions/*/metadata.json
+!.local/share/gnome-shell/extensions/*/schemas/
+!.local/share/gnome-shell/extensions/*/schemas/**
+!.local/share/gnome-shell/extensions/*/extension.js
+!.local/share/gnome-shell/extensions/*/prefs.js
+!.local/share/gnome-shell/extensions/*/config.js
+!.local/share/gnome-shell/extensions/*/settings.js
+!.local/share/gnome-shell/extensions/*/*.py
+!.local/share/gnome-shell/extensions/*/preferences/
+!.local/share/gnome-shell/extensions/*/preferences/**
+!.local/share/gnome-shell/extensions/*/service/
+!.local/share/gnome-shell/extensions/*/service/**
+!.local/share/gnome-shell/extensions/*/shell/
+!.local/share/gnome-shell/extensions/*/shell/**
+!.local/share/gnome-shell/extensions/*/utils/
+!.local/share/gnome-shell/extensions/*/utils/**
+!.local/share/gnome-shell/extensions/*/PrefsLib/
+!.local/share/gnome-shell/extensions/*/PrefsLib/**
+
+# Ignore heavy resource / media directories
+.local/share/gnome-shell/extensions/*/Resources/
+.local/share/gnome-shell/extensions/*/Resources/**
+.local/share/gnome-shell/extensions/*/locale/
+.local/share/gnome-shell/extensions/*/locale/**
+.local/share/gnome-shell/extensions/*/icons/
+.local/share/gnome-shell/extensions/*/icons/**
+.local/share/gnome-shell/extensions/*/images/
+.local/share/gnome-shell/extensions/*/images/**
+.local/share/gnome-shell/extensions/*/sounds/
+.local/share/gnome-shell/extensions/*/sounds/**
+.local/share/gnome-shell/extensions/*/data/
+.local/share/gnome-shell/extensions/*/data/**
+.local/share/gnome-shell/extensions/*/docs/
+.local/share/gnome-shell/extensions/*/docs/**
+.local/share/gnome-shell/extensions/*/cache/
+.local/share/gnome-shell/extensions/*/cache/**
+.local/share/gnome-shell/extensions/*/README*
+.local/share/gnome-shell/extensions/*/CHANGELOG*
+.local/share/gnome-shell/extensions/*/LICENSE*
+.local/share/gnome-shell/extensions/*/COPYING*
+.local/share/gnome-shell/extensions/*/*.md
+.local/share/gnome-shell/extensions/*/*.txt

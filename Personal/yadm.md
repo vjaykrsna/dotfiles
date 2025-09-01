@@ -203,11 +203,13 @@ This repository uses `git lfs` (Large File Storage) to manage large binary files
 
 ### Current `git lfs` Configuration
 
-*   **Tracked files**: `*.png` and `*.jpg` files in the `Personal/Wallpaper/` directory.
+*   **Tracked files**:
+    * `*.png` and `*.jpg` files in the `Personal/Wallpaper/` directory.
+    * Font files (`.ttf`, `.otf`, `.woff`, `.woff2`) in the `.local/share/fonts/` directory.
 
 ### Workflow for Large Files
 
-1.  **Add the file**: Place the large file in the appropriate directory (e.g., `Personal/Wallpaper/`).
+1.  **Add the file**: Place the large file in the appropriate directory (e.g., `Personal/Wallpaper/` or `.local/share/fonts/`).
 2.  **Track the file type**: If it's a new file type, run `yadm lfs track "*.new_extension"`.
 3.  **Add the file to git**: Run `yadm add <path_to_file>`.
 4.  **Commit and push**: Commit and push your changes as usual.
