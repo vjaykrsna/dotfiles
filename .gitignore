@@ -26,6 +26,12 @@
 !.ssh/
 !.gnupg/
 
+# yadm encrypted archive
+!/.local/
+!/.local/share/
+!/.local/share/yadm/
+!/.local/share/yadm/archive
+
 # ========================================================
 # EXPLICITLY IGNORED (junk, cache, or unsafe)
 # ========================================================

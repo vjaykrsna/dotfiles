@@ -1,0 +1,145 @@
+# ==============================
+# Starship: Beauty + Beast Prompt
+# Minimal, Clean, Optimized
+# ==============================
+
+# ----- Prompt Layout -----
+# Two lines: info (top), arrow (bottom)
+format = """
+$username\
+$directory\
+$git_branch$git_status\
+$python$nodejs$golang$rust\
+$docker_context$aws\
+$cmd_duration$jobs$status\
+\n$character
+"""
+
+# Extra blank line between prompts
+add_newline = true
+
+# ==============================
+# Character (Prompt Arrow)
+# ==============================
+[character]
+success_symbol = "[➜](bold green) "
+error_symbol = "[✗](bold red) "
+vicmd_symbol = "[❮](bold blue) "
+
+# ==============================
+# Username
+# ==============================
+[username]
+format = "[$user]($style) "
+style_user = "dimmed bold green"
+style_root = "bold red"
+disabled = false
+show_always = false
+
+# ==============================
+# Directory
+# ==============================
+[directory]
+style = "bold cyan dimmed"
+read_only_style = "bold red"
+home_symbol = "~"
+truncation_length = 3
+truncation_symbol = "…/"
+format = "[$path]($style) "
+
+# ==============================
+# Git
+# ==============================
+[git_branch]
+symbol = " "
+style = "bold yellow"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+format = "[$all_status$ahead_behind]($style) "
+style = "bold green"
+ignore_submodules = true  # Speed boost
+
+# ==============================
+# Programming Languages
+# ==============================
+[python]
+symbol = "🐍 "
+style = "bold purple"
+format = "[$symbol$version]($style) [($virtualenv)](dimmed italic) "
+
+[nodejs]
+symbol = "⬢ "
+style = "bold green"
+format = "[$symbol$version]($style) "
+
+[golang]
+symbol = " "
+style = "bold cyan"
+format = "[$symbol$version]($style) "
+
+[rust]
+symbol = "🦀 "
+style = "bold red"
+format = "[$symbol$version]($style) "
+
+# ==============================
+# Cloud & Containers
+# ==============================
+[docker_context]
+symbol = "🐳 "
+style = "bold blue"
+format = "[$symbol$context]($style) "
+
+[aws]
+symbol = "☁️ "
+style = "bold yellow"
+format = "[$symbol$profile]($style) "
+
+# ==============================
+# Command Duration
+# ==============================
+[cmd_duration]
+min_time = 1000           # Show only if > 1s
+format = "⏱ [$duration]($style) "
+style = "bold yellow"
+
+# ==============================
+# Background Jobs
+# ==============================
+[jobs]
+symbol = "⚙️ "
+style = "bold blue"
+format = "[$symbol$number]($style) "
+
+# ==============================
+# Exit Status
+# ==============================
+[status]
+style = "bold red"
+symbol = "✗ "
+format = "[$symbol$status]($style) "
+disabled = false
+
+# ==============================
+# Time
+# ==============================
+[time]
+disabled = true
+time_format = "%H:%M"
+style = "dimmed bold magenta"
+format = "[$time]($style) "
+
+# ==============================
+# Disabled Modules (Performance)
+# ==============================
+[package]
+disabled = true
+[java]
+disabled = true
+[ruby]
+disabled = true
+[terraform]
+disabled = true
+[helm]
+disabled = true
