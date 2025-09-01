@@ -12,28 +12,78 @@
 !.gitconfig
 !.gitmodules
 !.gitignore
+!.gitattributes
 !.env                # tracked but encrypted (see .gitattributes)
 !.config/
-!.config/starship.toml
+!.config/**
 
-# Personal scripts & projects
+# Personal List
 !Personal/
 !Personal/**
+
+# ========================================================
+# WHITELISTED CONFIGS (portable / reproducible)
+# ========================================================
+# Input Remapper (keyboard/gamepad)
+!.config/input-remapper-2/config.json
+!.config/input-remapper-2/presets/
+!.config/input-remapper-2/xmodmap.json
+
+# Micro editor (bindings only)
+!.config/micro/bindings.json
+
+# GSConnect (optional reproducible setup)
+!.config/gsconnect/certificate.pem
+!.config/gsconnect/private.pem
+
+# Rygel / Media server
+!.config/Rygel/MediaExport*.xml
+!.config/rygel.conf
+
+# User directories / environment
+!.config/user-dirs.dirs
+!.config/user-dirs.locale
+
+# Autostart scripts & personal setups
+!.config/autostart/guake.desktop
+!.config/background
+
+# ========================================================
+# IGNORE COMMON CACHE, TEMP, AND LOG FILES
+# ========================================================
+.config/**/[cC]ache/
+.config/**/*.tmp
+.config/**/*.temp
+.config/**/{history,log,logs}
+
+# Exclude noisy application configs
+.config/BraveSoftware/
+.config/Code/
+.config/google-chrome/
+.config/chromium/
+.config/microsoft-edge-beta/
+.config/microsoft-edge-dev/
+.config/Code/User/workspaceStorage/
+
+# Runtime / session files (local-only)
+.config/input-remapper-2/runtime/
+.config/pulse/*-runtime
+.config/pulse/cookie
+.config/ibus/bus/*
+.config/micro/buffers/history
 
 # ========================================================
 # SENSITIVE FILES (tracked only via yadm-crypt)
 # ========================================================
 !.ssh/
 !.gnupg/
-
-# yadm encrypted archive
 !/.local/
 !/.local/share/
 !/.local/share/yadm/
 !/.local/share/yadm/archive
 
 # ========================================================
-# EXPLICITLY IGNORED (junk, cache, or unsafe)
+# EXPLICITLY IGNORED (junk, caches, local)
 # ========================================================
 # Shell history
 .bash_history
@@ -69,3 +119,11 @@
 Thumbs.db
 .roo/
 AGENTS.md
+
+# Sensitive files that should be encrypted
+.config/dconf/user
+.config/gsconnect/private.pem
+.config/gsconnect/certificate.pem
+
+# Python bytecode
+*.pyc

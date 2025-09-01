@@ -1,0 +1,10 @@
+# This file tells yadm which files to encrypt.
+# Paths are relative to the home directory.
+
+.ssh/
+.gnupg/
+.env
+.git-credentials
+.config/gsconnect/private.pem
+.config/gsconnect/certificate.pem
+.config/dconf/user

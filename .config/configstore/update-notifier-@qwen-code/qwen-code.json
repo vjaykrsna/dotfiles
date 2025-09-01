@@ -1,0 +1,10 @@
+{
+	"optOut": false,
+	"lastUpdateCheck": 1756555146144,
+	"update": {
+		"latest": "0.0.10-nightly.0",
+		"current": "0.0.10-nightly.0",
+		"type": "nightly",
+		"name": "@qwen-code/qwen-code"
+	}
+}
