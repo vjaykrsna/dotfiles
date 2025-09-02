@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 run_snap_removal_interactive() {
 	warn "🚨 Make sure you have backups! This will remove snap and its packages."

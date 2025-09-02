@@ -3,7 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 command -v prime-select >/dev/null || {
 	error "Install nvidia-prime first."

@@ -6,7 +6,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 info "🚀 Running Post-Install Configuration"
 
@@ -25,7 +25,7 @@ warn "› Installing Sekiro GRUB theme..."
 if [ ! -d "/tmp/sekiro_grub_theme" ]; then
 	git clone https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme
 fi
-(cd /tmp/sekiro_grub_theme && sudo bash install.sh)
+(cd /tmp/sekiro_grub_theme && run_privileged bash install.sh)
 rm -rf /tmp/sekiro_grub_theme
 
 ok "Post-install configuration complete!"

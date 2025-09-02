@@ -5,7 +5,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 # --- USER HANDLING ---
 USERNAME="${2:-${SUDO_USER:-$USER}}"

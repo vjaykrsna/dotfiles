@@ -3,13 +3,13 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 run_cli_installer_interactive() {
 	# --- TOOLS ---
 	declare -A tools=(
-		[1]="Qwen Code:@qwen-code/qwen-code@latest"
-		[2]="Google Gemini CLI:@google/gemini-cli"
+		[1]="Qwen Code:@qwen-code/qwen-code@nightly"
+		[2]="Google Gemini CLI:@google/gemini-cli@preview"
 		[3]="Charmland Crush:@charmland/crush"
 	)
 

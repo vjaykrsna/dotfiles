@@ -1,0 +1,229 @@
+Sep 02 19:35:06 Aspire7 gnome-shell[32030]: JS ERROR: TypeError: this.actor is null
+                                            _syncEnabled@resource:///org/gnome/shell/ui/windowManager.js:144:25
+                                            onStopped@resource:///org/gnome/shell/ui/windowManager.js:161:35
+                                            _makeEaseCallback/<@resource:///org/gnome/shell/ui/environment.js:65:22
+                                            _easeActorProperty/<@resource:///org/gnome/shell/ui/environment.js:247:60
+                                            _destroyWindowDone@resource:///org/gnome/shell/ui/windowManager.js:1611:21
+                                            onStopped@resource:///org/gnome/shell/ui/windowManager.js:1579:39
+                                            _makeEaseCallback/<@resource:///org/gnome/shell/ui/environment.js:65:22
+                                            _easeActor/<@resource:///org/gnome/shell/ui/environment.js:160:64
+                                            @resource:///org/gnome/shell/ui/init.js:21:20
+Sep 02 19:38:25 Aspire7 localsearch-3[32531]: Owner of volume monitor org.gtk.vfs.AfcVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 localsearch-3[32531]: Owner of volume monitor org.gtk.vfs.GPhoto2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 localsearch-3[32531]: Owner of volume monitor org.gtk.vfs.MTPVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 localsearch-3[32531]: Owner of volume monitor org.gtk.vfs.GoaVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 localsearch-3[32531]: Owner of volume monitor org.gtk.vfs.UDisks2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Connection to xwayland lost
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: (../src/core/meta-context.c:596):meta_context_terminate: runtime check failed: (priv->state == META_CONTEXT_STATE_RUNNING)
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: g_main_loop_is_running: assertion 'loop != NULL' failed
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: (../src/core/meta-context.c:597):meta_context_terminate: runtime check failed: (g_main_loop_is_running (priv->main_loop))
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: g_main_loop_quit: assertion 'loop != NULL' failed
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Object .Gjs_status_brightness_BrightnessItem (0x618ab2491d80), has been already disposed — impossible to set any property on it. This might be caused by the object having been destroyed from C code using something such as destroy(), dispose(), or remove() vfuncs.
+                                            == Stack trace for context 0x618aaf25b560 ==
+                                            #0   618aaf351648 i   resource:///org/gnome/shell/ui/status/brightness.js:49 (7d1e0e3db50 @ 89)
+                                            #1   618aaf3515c8 i   resource:///org/gnome/shell/ui/status/brightness.js:26 (7d1e0e3da60 @ 12)
+                                            #2   618aaf351528 i   resource:///org/gnome/shell/ui/main.js:281 (12990e0c8470 @ 119)
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Owner of volume monitor org.gtk.vfs.AfcVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Owner of volume monitor org.gtk.vfs.GPhoto2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Owner of volume monitor org.gtk.vfs.MTPVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Owner of volume monitor org.gtk.vfs.GoaVolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Owner of volume monitor org.gtk.vfs.UDisks2VolumeMonitor disconnected from the bus; removing drives/volumes/mounts
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Object .Gjs_status_backgroundApps_BackgroundAppsToggle (0x618ab2578b20), has been already disposed — impossible to set any property on it. This might be caused by the object having been destroyed from C code using something such as destroy(), dispose(), or remove() vfuncs.
+                                            == Stack trace for context 0x618aaf25b560 ==
+                                            #0   618aaf3516f8 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:197 (7d1e0e4b420 @ 163)
+                                            #1   618aaf351648 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:201 (7d1e0e4b470 @ 34)
+                                            #2   618aaf3515c8 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:164 (7d1e0e4b2e0 @ 12)
+                                            #3   618aaf351528 i   resource:///org/gnome/shell/ui/main.js:281 (12990e0c8470 @ 119)
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Object St.BoxLayout (0x618ab071d870), has been already disposed — impossible to access it. This might be caused by the object having been destroyed from C code using something such as destroy(), dispose(), or remove() vfuncs.
+                                            == Stack trace for context 0x618aaf25b560 ==
+                                            #0   7ffd2d428130 b   resource:///org/gnome/shell/ui/popupMenu.js:965 (15b791f126a0 @ 22)
+                                            #1   7ffd2d4281f0 b   resource:///org/gnome/shell/ui/popupMenu.js:983 (15b791f12830 @ 23)
+                                            #2   618aaf351648 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:208 (7d1e0e4b470 @ 107)
+                                            #3   618aaf3515c8 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:164 (7d1e0e4b2e0 @ 12)
+                                            #4   618aaf351528 i   resource:///org/gnome/shell/ui/main.js:281 (12990e0c8470 @ 119)
+Sep 02 19:38:25 Aspire7 gnome-shell[32030]: Object .Gjs_ui_popupMenu_PopupMenuItem (0x618ab0719e30), has been already disposed — impossible to set any property on it. This might be caused by the object having been destroyed from C code using something such as destroy(), dispose(), or remove() vfuncs.
+                                            == Stack trace for context 0x618aaf25b560 ==
+                                            #0   618aaf351648 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:244 (7d1e0e4b470 @ 340)
+                                            #1   618aaf3515c8 i   resource:///org/gnome/shell/ui/status/backgroundApps.js:164 (7d1e0e4b2e0 @ 12)
+                                            #2   618aaf351528 i   resource:///org/gnome/shell/ui/main.js:281 (12990e0c8470 @ 119)
+Sep 02 19:38:26 Aspire7 systemd[31790]: mpris-proxy.service: Failed with result 'exit-code'.
+Sep 02 19:38:26 Aspire7 evolution-calen[32210]: Error setting property 'ConnectionStatus' on interface org.gnome.evolution.dataserver.Source: The connection is closed (g-io-error-quark, 18)
+Sep 02 19:38:26 Aspire7 evolution-addre[32347]: Error setting property 'ConnectionStatus' on interface org.gnome.evolution.dataserver.Source: The connection is closed (g-io-error-quark, 18)
+Sep 02 19:38:26 Aspire7 30-systemd-environment-d-generator[133968]: /usr/lib/environment.d/99-environment.conf:4: invalid syntax (around "EXTRA_OPTS"), ignoring.
+Sep 02 19:38:26 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.systemd1' requested by ':1.2' (uid=119 pid=134046 comm="/usr/libexec/gnome-session-binary --autostart /usr" label="unconfined")
+Sep 02 19:38:26 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activated service 'org.freedesktop.systemd1' failed: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:26 Aspire7 gnome-session-binary[134046]: WARNING: Could not check if unit gnome-session-wayland@gnome-login.target is active: Error calling StartServiceByName for org.freedesktop.systemd1: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.a11y.Bus' requested by ':1.4' (uid=119 pid=134065 comm="/usr/bin/gnome-shell" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.a11y.Bus'
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134122]: dbus-daemon[134122]: Activating service name='org.a11y.atspi.Registry' requested by ':1.0' (uid=119 pid=134065 comm="/usr/bin/gnome-shell" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134122]: dbus-daemon[134122]: Successfully activated service 'org.a11y.atspi.Registry'
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.gnome.Shell.Screencast' requested by ':1.3' (uid=119 pid=134065 comm="/usr/bin/gnome-shell" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.3' (uid=119 pid=134065 comm="/usr/bin/gnome-shell" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.gnome.Shell.Notifications' requested by ':1.3' (uid=119 pid=134065 comm="/usr/bin/gnome-shell" label="unconfined")
+Sep 02 19:38:27 Aspire7 gnome-shell[134065]: Failed to parse saved session file: Failed to open file “/var/lib/gdm3/.config/mutter/sessions/108bb48808c1d8d41e175682210673438800001340460000.ms”: No such file or directory
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.gnome.Shell.Notifications'
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.systemd1' requested by ':1.21' (uid=119 pid=134245 comm="/usr/libexec/gsd-housekeeping" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activated service 'org.freedesktop.systemd1' failed: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.systemd1' requested by ':1.9' (uid=119 pid=134168 comm="/usr/libexec/gsd-sharing" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activated service 'org.freedesktop.systemd1' failed: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:27 Aspire7 gsd-sharing[134168]: Failed to StopUnit service: GDBus.Error:org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:27 Aspire7 gsd-sharing[134168]: Failed to StopUnit service: GDBus.Error:org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.portal.IBus' requested by ':1.24' (uid=119 pid=134230 comm="ibus-daemon --panel disable" label="unconfined")
+Sep 02 19:38:27 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.portal.IBus'
+Sep 02 19:38:28 Aspire7 wireplumber[134030]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS05-5:1.0-0408:a061
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134152]: Xlib:  extension "DRI2" missing on display ":1024".
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.portal.IBus' requested by ':1.33' (uid=119 pid=134383 comm="ibus-daemon --panel disable -r --xim" label="unconfined")
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.portal.IBus'
+Sep 02 19:38:28 Aspire7 gsd-color[134178]: gtk_main_quit: assertion 'main_loops != NULL' failed
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.gnome.ScreenSaver' requested by ':1.23' (uid=119 pid=134253 comm="/usr/libexec/gsd-power" label="unconfined")
+Sep 02 19:38:28 Aspire7 gsd-media-keys[134215]: Failed to grab accelerator for keybinding settings:playback-repeat
+Sep 02 19:38:28 Aspire7 gsd-media-keys[134215]: Failed to grab accelerator for keybinding settings:hibernate
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.gnome.ScreenSaver'
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.gnome.Shell.Screencast'
+Sep 02 19:38:28 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:28 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.36' (uid=119 pid=134382 comm="/usr/libexec/mutter-x11-frames" label="unconfined")
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.37' (uid=119 pid=134491 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134497]: Ignoring invalid max threads value 4294967295 > max (100000).
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gnome' requested by ':1.37' (uid=119 pid=134491 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.gnome.Settings.GlobalShortcutsProvider' requested by ':1.39' (uid=119 pid=134507 comm="/usr/libexec/xdg-desktop-portal-gnome" label="unconfined")
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.gnome.Settings.GlobalShortcutsProvider'
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gnome'
+Sep 02 19:38:28 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.37' (uid=119 pid=134491 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+Sep 02 19:38:29 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+Sep 02 19:38:29 Aspire7 /usr/libexec/gdm-wayland-session[134042]: dbus-daemon[134042]: [session uid=119 pid=134042 pidfd=5] Activating service name='org.freedesktop.secrets' requested by ':1.37' (uid=119 pid=134491 comm="/usr/libexec/xdg-desktop-portal" label="unconfined")
+Sep 02 19:38:29 Aspire7 gnome-keyring-daemon[134534]: discover_other_daemon: 1
+Sep 02 19:38:46 Aspire7 gdm-password][134882]: gkr-pam: unable to locate daemon control file
+Sep 02 19:38:46 Aspire7 30-systemd-environment-d-generator[134891]: /usr/lib/environment.d/99-environment.conf:4: invalid syntax (around "EXTRA_OPTS"), ignoring.
+Sep 02 19:38:47 Aspire7 gsd-media-keys[134215]: Unable to get default source
+Sep 02 19:38:47 Aspire7 gsd-media-keys[134215]: Unable to get default sink
+Sep 02 19:38:47 Aspire7 gnome-keyring-daemon[135104]: discover_other_daemon: 1
+Sep 02 19:38:47 Aspire7 gnome-keyring-daemon[135106]: discover_other_daemon: 1
+Sep 02 19:38:47 Aspire7 gnome-keyring-daemon[135107]: discover_other_daemon: 1
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dpkcs11-135096.scope: Failed to add PIDs to scope's control group: No such process
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dpkcs11-135096.scope: Failed with result 'resources'.
+Sep 02 19:38:47 Aspire7 systemd[134888]: Failed to start app-gnome-gnome\x2dkeyring\x2dpkcs11-135096.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dsecrets-135101.scope: No PIDs left to attach to the scope's control group, refusing.
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dsecrets-135101.scope: Failed with result 'resources'.
+Sep 02 19:38:47 Aspire7 systemd[134888]: Failed to start app-gnome-gnome\x2dkeyring\x2dsecrets-135101.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dssh-135095.scope: No PIDs left to attach to the scope's control group, refusing.
+Sep 02 19:38:47 Aspire7 systemd[134888]: app-gnome-gnome\x2dkeyring\x2dssh-135095.scope: Failed with result 'resources'.
+Sep 02 19:38:47 Aspire7 systemd[134888]: Failed to start app-gnome-gnome\x2dkeyring\x2dssh-135095.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:47 Aspire7 gnome-session-binary[135045]: GnomeDesktop-WARNING: Could not create transient scope for PID 135113: GDBus.Error:org.freedesktop.DBus.Error.UnixProcessIdUnknown: Failed to set unit properties: No such process
+Sep 02 19:38:48 Aspire7 wireplumber[134907]: s-monitors-utils: skipping device libcamera:\_SB_.PCI0.XHC_.RHUB.HS05-5:1.0-0408:a061
+Sep 02 19:38:48 Aspire7 systemd[134888]: Dependency failed for org.gnome.SettingsDaemon.XSettings.service - GNOME XSettings service.
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-spice\x2dvdagent-135242.scope: No PIDs left to attach to the scope's control group, refusing.
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-spice\x2dvdagent-135242.scope: Failed with result 'resources'.
+Sep 02 19:38:48 Aspire7 systemd[134888]: Failed to start app-gnome-spice\x2dvdagent-135242.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:48 Aspire7 at-spi2-registr[135158]: Failed to register client: GDBus.Error:org.gnome.SessionManager.AlreadyRegistered: Unable to register client
+Sep 02 19:38:48 Aspire7 at-spi2-registr[135158]: Unable to register client with session manager
+Sep 02 19:38:48 Aspire7 gnome-session-binary[135045]: GnomeDesktop-WARNING: Could not create transient scope for PID 135340: GDBus.Error:org.freedesktop.DBus.Error.UnixProcessIdUnknown: Failed to set unit properties: No such process
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-im\x2dlaunch-135284.scope: No PIDs left to attach to the scope's control group, refusing.
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-im\x2dlaunch-135284.scope: Failed with result 'resources'.
+Sep 02 19:38:48 Aspire7 systemd[134888]: Failed to start app-gnome-im\x2dlaunch-135284.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-ubuntu\x2dreport\x2don\x2dupgrade-135308.scope: No PIDs left to attach to the scope's control group, refusing.
+Sep 02 19:38:48 Aspire7 systemd[134888]: app-gnome-ubuntu\x2dreport\x2don\x2dupgrade-135308.scope: Failed with result 'resources'.
+Sep 02 19:38:48 Aspire7 systemd[134888]: Failed to start app-gnome-ubuntu\x2dreport\x2don\x2dupgrade-135308.scope - Application launched by gnome-session-binary.
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension Bluetooth-Battery-Meter@maniacx.github.com: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/Bluetooth-Battery-Meter@maniacx.github.com/lib/bluetoothToggle.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/Bluetooth-Battery-Meter@maniacx.github.com/lib/bluetoothToggle.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension blur-my-shell@aunetx: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/blur-my-shell@aunetx/conveniences/settings_updater.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/blur-my-shell@aunetx/conveniences/settings_updater.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension caffeine@patapon.info: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/caffeine@patapon.info/mprisMediaPlayer2.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/caffeine@patapon.info/mprisMediaPlayer2.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension AlphabeticalAppGrid@stuarthayhurst: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/AlphabeticalAppGrid@stuarthayhurst/lib/AppGridHelper.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/AlphabeticalAppGrid@stuarthayhurst/lib/AppGridHelper.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension auto-accent-colour@Wartybix: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/auto-accent-colour@Wartybix/utils.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/auto-accent-colour@Wartybix/utils.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gnome-shell[135125]: Extension auto-adwaita-colors@celiopy: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/auto-adwaita-colors@celiopy/utils.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/auto-adwaita-colors@celiopy/utils.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:48 Aspire7 gsd-color[135219]: gtk_main_quit: assertion 'main_loops != NULL' failed
+Sep 02 19:38:48 Aspire7 gsd-keyboard[135229]: g_variant_unref: assertion 'value != NULL' failed
+Sep 02 19:38:49 Aspire7 gsd-media-keys[135231]: Failed to grab accelerator for keybinding settings:playback-repeat
+Sep 02 19:38:49 Aspire7 gsd-media-keys[135231]: Failed to grab accelerator for keybinding settings:hibernate
+Sep 02 19:38:49 Aspire7 gsd-xsettings[135559]: Failed to get current UI scaling factor: GDBus.Error:org.freedesktop.DBus.Error.NameHasNoOwner: Name "org.gnome.Mutter.X11" does not exist
+Sep 02 19:38:49 Aspire7 org.gnome.Shell.Screencast[135192]: Xlib:  extension "DRI2" missing on display ":0".
+Sep 02 19:38:49 Aspire7 gnome-shell[135125]: Extension clipboard-indicator@tudmotu.com: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/clipboard-indicator@tudmotu.com/registry.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/clipboard-indicator@tudmotu.com/registry.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:49 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:49 Aspire7 gnome-shell[135125]: Extension gsconnect@andyholmes.github.io: GLib.FileError: Failed to open file “/home/vijay/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/org.gnome.Shell.Extensions.GSConnect.gresource”: open() failed: No such file or directory
+                                             
+                                             Stack trace:
+                                               setup@file:///home/vijay/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/utils/setup.js:258:18
+                                               GSConnectExtension@file:///home/vijay/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/extension.js:360:15
+                                               _callExtensionInit@resource:///org/gnome/shell/ui/extensionSystem.js:521:17
+                                               async*loadExtension@resource:///org/gnome/shell/ui/extensionSystem.js:430:33
+                                               _loadExtensions@resource:///org/gnome/shell/ui/extensionSystem.js:750:24
+                                               async*_enableAllExtensions@resource:///org/gnome/shell/ui/extensionSystem.js:756:48
+                                               _sessionUpdated@resource:///org/gnome/shell/ui/extensionSystem.js:791:20
+                                               async*init@resource:///org/gnome/shell/ui/extensionSystem.js:77:14
+                                               _initializeUI@resource:///org/gnome/shell/ui/main.js:338:22
+                                               start@resource:///org/gnome/shell/ui/main.js:189:11
+                                               @resource:///org/gnome/shell/ui/init.js:12:47
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:49 Aspire7 gnome-shell[134065]: Connection to xwayland lost
+Sep 02 19:38:49 Aspire7 gnome-shell[134065]: Xwayland terminated, exiting since it was mandatory
+Sep 02 19:38:49 Aspire7 gnome-shell[134065]: JS ERROR: Gio.IOErrorEnum: Xwayland exited unexpectedly
+                                             @resource:///org/gnome/shell/ui/init.js:21:20
+Sep 02 19:38:49 Aspire7 gnome-shell[135125]: Extension logomenu@aryan_k: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/logomenu@aryan_k/constants.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/logomenu@aryan_k/constants.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:49 Aspire7 gsd-power[134253]: update_mutter_backlight: assertion 'backlights != NULL' failed
+Sep 02 19:38:49 Aspire7 gnome-session-binary[134046]: WARNING: Application 'org.gnome.SettingsDaemon.PrintNotifications.desktop' killed by signal 15
+Sep 02 19:38:49 Aspire7 xdg-document-po[134497]: Error releasing name org.freedesktop.portal.Documents: The connection is closed
+Sep 02 19:38:49 Aspire7 /usr/libexec/gdm-wayland-session[134534]: discover_other_daemon: 1
+Sep 02 19:38:49 Aspire7 gnome-shell[135125]: Extension middleclickclose@paolo.tranquilli.gmail.com: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/middleclickclose@paolo.tranquilli.gmail.com/settingsWatch.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/middleclickclose@paolo.tranquilli.gmail.com/settingsWatch.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:49 Aspire7 gnome-shell[135125]: Extension tophat@fflewddur.github.io: ImportError: Unable to load file from: file:///home/vijay/.local/share/gnome-shell/extensions/tophat@fflewddur.github.io/file.js (Error opening file /home/vijay/.local/share/gnome-shell/extensions/tophat@fflewddur.github.io/file.js: No such file or directory)
+                                             
+                                             Stack trace:
+                                               @resource:///org/gnome/shell/ui/init.js:21:20
+                                               
+Sep 02 19:38:49 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:49 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:49 Aspire7 (udev-worker)[135053]: input18: Process '/bin/input-remapper-control --command autoload --device ' failed with exit code 2.
+Sep 02 19:38:50 Aspire7 (udev-worker)[135761]: input19: Process '/bin/input-remapper-control --command autoload --device ' failed with exit code 2.
+Sep 02 19:38:50 Aspire7 (udev-worker)[135053]: event14: Process '/bin/input-remapper-control --command autoload --device /dev/input/event14' failed with exit code 4.
+Sep 02 19:38:50 Aspire7 (udev-worker)[135761]: event15: Process '/bin/input-remapper-control --command autoload --device /dev/input/event15' failed with exit code 4.
+Sep 02 19:38:56 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:56 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:38:56 Aspire7 org.gnome.Characters[136337]: MESA-INTEL: warning: ../src/intel/vulkan/anv_formats.c:802: FINISHME: support YUV colorspace with DRM format modifiers
+Sep 02 19:38:56 Aspire7 org.gnome.Characters[136337]: MESA-INTEL: warning: ../src/intel/vulkan/anv_formats.c:834: FINISHME: support more multi-planar formats with DRM modifiers
+Sep 02 19:38:56 Aspire7 gnome-software[136343]: Failed to reload changed app filter: App filtering is globally disabled
+Sep 02 19:38:57 Aspire7 extension-manag[136455]: g_variant_get_string: assertion 'g_variant_is_of_type (value, G_VARIANT_TYPE_STRING) || g_variant_is_of_type (value, G_VARIANT_TYPE_OBJECT_PATH) || g_variant_is_of_type (value, G_VARIANT_TYPE_SIGNATURE)' failed
+Sep 02 19:38:57 Aspire7 gnome-software[136343]: Failed to reload changed app filter: App filtering is globally disabled
+Sep 02 19:38:59 Aspire7 systemd[133965]: mpris-proxy.service: Failed with result 'exit-code'.
+Sep 02 19:39:12 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:39:12 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:39:13 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:39:13 Aspire7 kernel: NVRM: No NVIDIA GPU found.
+Sep 02 19:39:49 Aspire7 update-notifier[138958]: libayatana-appindicator is deprecated. Please use libayatana-appindicator-glib in newly written code.
+Sep 02 19:39:50 Aspire7 update-notifier[138958]: libayatana-appindicator is deprecated. Please use libayatana-appindicator-glib in newly written code.

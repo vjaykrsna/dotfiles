@@ -19,7 +19,7 @@ with_dotfiles_root() {
 	popd >/dev/null
 }
 
-source ./scripts/installer.sh # installer functions
+source "$(dirname "$0")/installer.sh" # installer functions
 
 ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
 
@@ -95,16 +95,17 @@ while true; do
 	show_menu
 	read -r choice
 
-	# Exit options
 	if [[ "$choice" =~ ^[qQ]$ ]]; then
 		log "Exiting."
 		break
 	fi
 
-	if [[ -n "${actions[$choice]:-}" ]]; then
-		with_dotfiles_root "${actions[$choice]}"
-	else
-		error "Invalid option. Try again."
+	if [[ -n "$choice" ]]; then
+		if [[ -n "${actions[$choice]:-}" ]]; then
+			with_dotfiles_root "${actions[$choice]}" || true
+		else
+			error "Invalid option. Try again."
+		fi
 	fi
 	echo
 done

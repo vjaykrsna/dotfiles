@@ -9,6 +9,7 @@ BLUE='\033[0;34m'
 RED='\033[0;31m'
 NC='\033[0m'
 info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
+log() { echo -e "${BLUE}ℹ️  $*${NC}"; }
 ok() { echo -e "${GREEN}✅ $*${NC}"; }
 warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
 error() {
@@ -38,7 +39,7 @@ install_packages_from_file() {
 	local file="$1" cmd="$2"
 	if ensure_file_nonempty "$file"; then
 		log "Installing from $file..."
-		xargs -a "$file" -r --no-run-if-empty sh -c "$cmd \"\$@\"" _
+		xargs -a "$file" -r --no-run-if-empty sh -c "$(typeset -f run_privileged); $cmd \"\$@\"" _
 	fi
 }
 
@@ -51,7 +52,7 @@ install_system_packages() {
 	warn "Updating package lists..."
 	run_privileged apt-get update
 
-	install_packages_from_file scripts/packages/apt.txt "apt-get install -y --no-install-recommends"
+	install_packages_from_file scripts/packages/apt.txt "run_privileged apt-get install -y --no-install-recommends"
 	install_packages_from_file scripts/packages/flatpak.txt "flatpak install -y"
 }
 
@@ -147,7 +148,7 @@ run_cli_installer() {
 # --- PRE-INSTALL ---
 run_preinstall() {
 	info "--- Running Pre-Install Setup ---"
-	sudo bash scripts/preinstall.sh
+	run_privileged bash scripts/preinstall.sh
 	log "--- Pre-Install Setup Complete ---"
 }
 

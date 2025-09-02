@@ -8,7 +8,7 @@ IFS=$'\n\t'
 # --- Sourcing Dependencies ---
 # Note: This script is intended to be run standalone with sudo,
 # but we source this to get logging functions.
-source ./scripts/installer.sh
+source "$(dirname "$0")/installer.sh"
 
 info "🔧 Pre-Install System Preparation"
 warn "This script requires sudo access for system updates"

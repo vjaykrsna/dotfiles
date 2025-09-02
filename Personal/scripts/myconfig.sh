@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --- Sourcing Dependencies ---
-source ./scripts/installer.sh # For logging and utility functions
+source "$(dirname "$0")/installer.sh" # For logging and utility functions
 
 # --- RAM CONFIGURATION ---
 ZRAM_PERCENT=200   # % of RAM
