@@ -13,18 +13,21 @@ info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
 ok() { echo -e "${GREEN}✅ $*${NC}"; }
 warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
 error() { echo -e "${RED}❌ $*${NC}"; } # No exit here, setup.sh handles loop
+
+# --- SCRIPT CONTEXT ---
+# Ensures that scripts are run from the dotfiles root directory
 with_dotfiles_root() {
 	pushd "$(dirname "$0")/.." >/dev/null
 	"$@"
 	popd >/dev/null
 }
 
-source "$(dirname "$0")/installer.sh" # installer functions
+# Source the installer functions which contain the core logic
+source "$(dirname "$0")/installer.sh"
 
-ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
-
+# --- DEPENDENCY CHECKS ---
 check_basic_dependencies() {
-	log "Checking basic dependencies..."
+	info "Checking basic dependencies..."
 	local deps=(git curl jq git-lfs)
 	local missing=()
 	for dep in "${deps[@]}"; do
@@ -35,34 +38,94 @@ check_basic_dependencies() {
 		error "Please install: sudo apt install ${missing[*]}"
 		exit 1
 	fi
-	log "Basic dependencies satisfied."
+	ok "Basic dependencies satisfied."
 }
 
-validate_environment() {
-	check_basic_dependencies
+# --- AUTOMATED FULL SETUP ---
+run_all_setup() {
+    info "--- 🚀 Starting Automated Full System Setup ---"
+    check_basic_dependencies
+    with_dotfiles_root run_preinstall
+    with_dotfiles_root install_system_packages
+    with_dotfiles_root setup_language_environment
+    with_dotfiles_root install_language_packages
+    with_dotfiles_root setup_shell_environment
+    with_dotfiles_root run_nvidia_setup || warn "NVIDIA setup skipped or failed."
+    with_dotfiles_root run_system_fixes
+    with_dotfiles_root configure_system
+    with_dotfiles_root run_post_install
+    with_dotfiles_root run_nerd_fonts_installer
+    ok "--- ✅ Automated Full System Setup Complete ---"
 }
 
-# --- MENU DISPLAY ---
+# --- WRAPPER FUNCTIONS for scripts ---
+run_update_pkgs() {
+    info "--- Updating package lists ---"
+    "$(dirname "$0")/update_pkgs.sh"
+}
+
+run_gnome_sync_dump() {
+    info "--- Dumping GNOME settings ---"
+    "$(dirname "$0")/gnome-settings.sh" dump
+}
+
+run_gnome_sync_load() {
+    info "--- Loading GNOME settings ---"
+    "$(dirname "$0")/gnome-settings.sh" load
+}
+
+run_gnome_extensions_save() {
+    info "--- Saving GNOME extensions list ---"
+    "$(dirname "$0")/gnome-extensions.sh" save
+}
+
+run_gnome_extensions_install() {
+    info "--- Installing GNOME extensions ---"
+    "$(dirname "$0")/gnome-extensions.sh" install
+}
+
+run_system_sync_save() {
+    info "--- Saving system configurations ---"
+    "$(dirname "$0")/system-sync.sh" save
+}
+
+run_system_sync_diff() {
+    info "--- Diffing system configurations ---"
+    "$(dirname "$0")/system-sync.sh" diff
+}
+
+# --- INTERACTIVE MENU ---
 show_menu() {
 	echo -e "
 ${BLUE}=====================================${NC}
  ${YELLOW}Dotfiles Management Utility${NC}
 ${BLUE}=====================================${NC}
+ ${GREEN}AUTOMATED${NC}
+   a. Run Automated Full Setup
  ${GREEN}PRE-INSTALLATION${NC}
    1. Pre-Install System Setup
-  ${GREEN}SYSTEM SETUP${NC}
+ ${GREEN}SYSTEM SETUP${NC}
    2. Install System Packages
    3. Setup Language Environment
    4. Install Language Packages
    5. Setup Shell Environment (zinit + starship)
  
-  ${GREEN}HARDWARE & MAINTENANCE${NC}
+ ${GREEN}HARDWARE & MAINTENANCE${NC}
    6. Setup NVIDIA GPU
    7. Apply System Fixes
    8. Install CLI Tools (Interactive)
    9. Configure System (RAM + Power)
   10. Run Post-Install Configuration
   11. Install Nerd Fonts
+
+ ${GREEN}DOTFILES & SETTINGS SYNC${NC}
+  13. Update Package Lists (run on source machine)
+  14. DUMP GNOME Settings (run on source machine)
+  15. LOAD GNOME Settings (run on target machine)
+  16. SAVE GNOME Extensions List (run on source machine)
+  17. INSTALL GNOME Extensions (run on target machine)
+  18. SAVE System Configs (crontab, fstab, hosts)
+  19. DIFF System Configs
 
  ${RED}MAINTENANCE${NC}
   12. Remove Snap Packages (Interactive)
@@ -74,6 +137,7 @@ ${BLUE}=====================================${NC}"
 
 # --- MENU ACTIONS ---
 declare -A actions=(
+	[a]=run_all_setup
 	[1]=run_preinstall
 	[2]=install_system_packages
 	[3]=setup_language_environment
@@ -86,28 +150,48 @@ declare -A actions=(
 	[10]=run_post_install
 	[11]=run_nerd_fonts_installer
 	[12]=run_snap_removal
+    [13]=run_update_pkgs
+    [14]=run_gnome_sync_dump
+    [15]=run_gnome_sync_load
+    [16]=run_gnome_extensions_save
+    [17]=run_gnome_extensions_install
+    [18]=run_system_sync_save
+    [19]=run_system_sync_diff
 )
 
-# --- MAIN LOOP ---
-check_basic_dependencies
+# --- MAIN LOGIC ---
+main_interactive() {
+    check_basic_dependencies
+    while true; do
+        show_menu
+        read -r choice
 
-while true; do
-	show_menu
-	read -r choice
+        if [[ "$choice" =~ ^[qQ]$ ]]; then
+            info "Exiting."
+            break
+        fi
 
-	if [[ "$choice" =~ ^[qQ]$ ]]; then
-		log "Exiting."
-		break
-	fi
+        if [[ -n "$choice" ]]; then
+            if [[ -n "${actions[$choice]:-}" ]]; then
+                # For 'a', run directly without with_dotfiles_root as it handles it internally
+                if [[ "$choice" == "a" ]]; then
+                    "${actions[$choice]}"
+                else
+                    with_dotfiles_root "${actions[$choice]}" || true
+                fi
+            else
+                error "Invalid option. Try again."
+            fi
+        fi
+        echo
+    done
+}
 
-	if [[ -n "$choice" ]]; then
-		if [[ -n "${actions[$choice]:-}" ]]; then
-			with_dotfiles_root "${actions[$choice]}" || true
-		else
-			error "Invalid option. Try again."
-		fi
-	fi
-	echo
-done
+# --- SCRIPT ENTRYPOINT ---
+if [[ "$1" == "all" ]]; then
+    run_all_setup
+else
+    main_interactive
+fi
 
 cd "$start_dir"

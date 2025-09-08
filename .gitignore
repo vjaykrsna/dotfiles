@@ -4,7 +4,7 @@
 *
 
 # ========================================================
-# WHITELIST SAFE DOTFILES
+# SAFE DOTFILES TO TRACK
 # ========================================================
 !.bashrc
 !.zshrc
@@ -14,25 +14,30 @@
 !.gitignore
 !.gitattributes
 !.env                # tracked but encrypted (see .gitattributes)
-!.config/
-!.config/**
 
-# Personal List
+# ========================================================
+# PERSONAL FILES
+# ========================================================
 !Personal/
 !Personal/**
+!Applications/
+!Applications/**
 
 # ========================================================
-# WHITELISTED CONFIGS (portable / reproducible)
+# CONFIGS TO TRACK (portable / reproducible)
 # ========================================================
-# Input Remapper (keyboard/gamepad)
+!.config/
+!.config/dconf/gnome_settings.ini
+
+# Input Remapper
 !.config/input-remapper-2/config.json
 !.config/input-remapper-2/presets/
 !.config/input-remapper-2/xmodmap.json
 
-# Micro editor (bindings only)
+# Micro editor
 !.config/micro/bindings.json
 
-# GSConnect (optional reproducible setup)
+# GSConnect (only certs if reproducible setup)
 !.config/gsconnect/certificate.pem
 !.config/gsconnect/private.pem
 
@@ -44,64 +49,52 @@
 !.config/user-dirs.dirs
 !.config/user-dirs.locale
 
-# Autostart scripts & personal setups
+# Autostart & background
 !.config/autostart/guake.desktop
 !.config/background
 
-# ========================================================
-# IGNORE COMMON CACHE, TEMP, AND LOG FILES
-# ========================================================
-.config/**/[cC]ache/
-.config/**/*.tmp
-.config/**/*.temp
-.config/**/{history,log,logs}
+# Systemd services
+!.config/systemd/user/
+!.config/systemd/user/**
 
-# Exclude noisy application configs
-.config/BraveSoftware/
-.config/Code/
-.config/google-chrome/
-.config/chromium/
-.config/microsoft-edge-beta/
-.config/microsoft-edge-dev/
-.config/google-chrome-for-testing/
-.config/Code/User/workspaceStorage/
+# Starship prompt
+!.config/starship.toml
 
-# Runtime / session files (local-only)
-.config/input-remapper-2/runtime/
-.config/pulse/*-runtime
-.config/pulse/cookie
-.config/ibus/bus/*
-.config/micro/buffers/history
+# Yadm config
+!.config/yadm/
+!.config/yadm/encrypt
+!.local/share/yadm/
+!.local/share/yadm/archive
 
 # ========================================================
-# SENSITIVE FILES (tracked only via yadm-crypt)
+# LOCAL SHARE FILES
 # ========================================================
-!.ssh/
+# Fonts (managed by Git LFS)
+!.local/share/fonts/
+!.local/share/fonts/**
+# GNOME Shell extensions (track only list)
+!.config/gnome-shell/extensions.txt
+!.local/share/gnome-shell/
+
+# ========================================================
+# THEMES & ICONS
+# ========================================================
+!.themes/
+!.themes/**
+!.icons/
+!.icons/**
+
+# ========================================================
+# CRYPTED / SENSITIVE
+# ========================================================
+!.ssh/config
+!.ssh/authorized_keys
+!.ssh/id_*
 !.gnupg/
-!/.local/
-!/.local/share/
-!/.local/share/yadm/
-!/.local/share/yadm/archive
-.config/dconf/user
-.config/gsconnect/private.pem
-.config/gsconnect/certificate.pem
 
 # ========================================================
-# EXPLICITLY IGNORED (junk, caches, local)
+# IGNORE CACHES, TEMP, NOISY LOCAL FILES
 # ========================================================
-# Shell history
-.bash_history
-.zsh_history
-
-# GnuPG runtime sockets
-.gnupg/S.*
-.gnupg/*.lock
-
-# SSH pubkeys (public, no need to track)
-.ssh/*.pub
-.ssh/authorized_keys
-
-# Package caches & tmp
 .cache/
 .npm/
 .nvm/
@@ -113,13 +106,9 @@
 .mozilla/
 .pki/
 .qwen/
+.gemini/
 .node_repl_history
 .zcompdump
-
-# Temp directories (clutter)
-**/temp/
-
-# Misc local-only junk
 .sudo_as_admin_successful
 .wget-hsts
 .DS_Store
@@ -127,42 +116,48 @@ Thumbs.db
 .roo/
 AGENTS.md
 
-# Noisy files identified by user feedback
+# Python bytecode
+*.pyc
+
+# Shell history
+.bash_history
+.zsh_history
+
+# GnuPG runtime
+.gnupg/S.*
+.gnupg/*.lock
+
+# SSH pubkeys (not needed)
+.ssh/*.pub
+
+# Input Remapper runtime
+.config/input-remapper-2/runtime/
+
+# Pulse & IBus runtime
+.config/pulse/*-runtime
+.config/pulse/cookie
+.config/ibus/bus/*
+
+# Micro runtime buffers
+.config/micro/buffers/history
+
+# App caches (noisy configs)
+.config/**/[cC]ache/
+.config/**/*.tmp
+.config/**/*.temp
+.config/**/{history,log,logs}
+.config/BraveSoftware/
+.config/Code/
+.config/Code/User/workspaceStorage/
+.config/google-chrome/
+.config/google-chrome-for-testing/
+.config/chromium/
+.config/microsoft-edge-beta/
+.config/microsoft-edge-dev/
+
+# Other noisy files
 .config/configstore/update-notifier-*
 .config/enchant/en_US.*
 .config/evolution/sources/system-proxy.source
 .config/gnome-initial-setup-done
 .config/vscode-sqltools/runningInfo.json
-
-# Python bytecode
-*.pyc
-
-# ========================================================
-# WHITELISTED FROM .LOCAL (portable / reproducible)
-# ========================================================
-# Un-ignore the parent directories first
-!.local/
-!.local/share/
-!.local/share/gnome-shell/
-!.local/share/gnome-shell/extensions/
-# Track all GNOME Shell extensions and their files robustly
-!.local/share/gnome-shell/extensions/**
-
-# Ignore common generated files within extensions that don't need to be tracked
-.local/share/gnome-shell/extensions/**/__pycache__/
-.local/share/gnome-shell/extensions/**/*.mo
-.local/share/gnome-shell/extensions/**/cache/
-
-# Font files are managed by LFS (see .gitattributes)
-!.local/share/fonts/
-!.local/share/fonts/**
-
-# AppImages installed via custom script
-!Applications/
-!Applications/**
-
-# Manual additon
-!.qwen/
-!.qwen/settings.json
-!.gemini/
-!.gemini/settings.json
