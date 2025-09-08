@@ -8,3 +8,4 @@
 .config/gsconnect/private.pem
 .config/gsconnect/certificate.pem
 .config/dconf/user
+**/.env

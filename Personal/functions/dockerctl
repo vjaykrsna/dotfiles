@@ -28,6 +28,11 @@ dockerctl() {
 			services+=("$(basename "$d")")
 		done
 	else
+		local CONFIG_FILE="$HOME/.config/dockerctl/config"
+		if [[ -f "$CONFIG_FILE" ]]; then
+			source "$CONFIG_FILE"
+		fi
+		local DOCKERCTL_PROJECTS_DIR="${DOCKERCTL_PROJECTS_DIR:-$HOME/Personal/myDocker}"
 		services=("$@")
 	fi
 

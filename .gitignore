@@ -157,6 +157,10 @@ AGENTS.md
 !.local/share/fonts/
 !.local/share/fonts/**
 
+# AppImages installed via custom script
+!Applications/
+!Applications/**
+
 # Manual additon
 !.qwen/
 !.qwen/settings.json
