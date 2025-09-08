@@ -19,13 +19,22 @@ termux() {
 		return 1
 	fi
 
-	# Launch Termux shell (preserve TERM and make it interactive)
+	# Determine shell and launch command
+	local termux_shell="/data/data/com.termux/files/usr/bin/bash"
+	if adb shell run-as com.termux test -x /data/data/com.termux/files/usr/bin/zsh; then
+		termux_shell="/data/data/com.termux/files/usr/bin/zsh"
+	fi
+	local command_to_run=("$termux_shell")
+	if [[ $# -gt 0 ]]; then
+		command_to_run=("$termux_shell" -c "$*")
+	fi
+
 	adb shell -t run-as com.termux env \
 		PATH="/data/data/com.termux/files/usr/bin:\$PATH" \
 		LD_LIBRARY_PATH="/data/data/com.termux/files/usr/lib" \
 		HOME="/data/data/com.termux/files/home" \
 		TMPDIR="/data/data/com.termux/files/usr/tmp" \
-		SHELL="/data/data/com.termux/files/usr/bin/bash" \
+		SHELL="$termux_shell" \
 		TERM="$TERM" \
-		/data/data/com.termux/files/usr/bin/bash
+		"${command_to_run[@]}"
 }

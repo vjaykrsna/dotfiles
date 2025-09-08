@@ -19,20 +19,38 @@ dockerctl() {
 	# Determine services
 	local services=()
 	if [[ "$1" == "all" ]]; then
-		for d in "$HOME/Personal/myDocker/"*/; do
+		local CONFIG_FILE="$HOME/.config/dockerctl/config"
+		if [[ -f "$CONFIG_FILE" ]]; then
+			source "$CONFIG_FILE"
+		fi
+		local DOCKERCTL_PROJECTS_DIR="${DOCKERCTL_PROJECTS_DIR:-$HOME/Personal/myDocker}"
+		for d in "$DOCKERCTL_PROJECTS_DIR/"*/; do
 			services+=("$(basename "$d")")
 		done
 	else
 		services=("$@")
 	fi
 
-	# Add dependencies for litellm if starting
-	if [[ " ${services[*]} " == *" litellm "* && "$action" == "start" ]]; then
-		[[ " ${services[*]} " != *" redis "* ]] && services=("redis" "${services[@]}")
+	# Add dependencies if starting
+	if [[ "$action" == "start" && -n "${DOCKERCTL_DEPS-}" ]]; then
+		local resolved_services=()
+		for service in "${services[@]}"; do
+			if [[ -n "${DOCKERCTL_DEPS[$service]-}" ]]; then
+				for dep in ${DOCKERCTL_DEPS[$service]}; do
+					if [[ ! " ${resolved_services[*]} " =~ " $dep " ]]; then
+						resolved_services+=("$dep")
+					fi
+				done
+			fi
+			if [[ ! " ${resolved_services[*]} " =~ " $service " ]]; then
+				resolved_services+=("$service")
+			fi
+		done
+		services=("${resolved_services[@]}")
 	fi
 
 	for service in "${services[@]}"; do
-		local dir="$HOME/Personal/myDocker/$service"
+		local dir="$DOCKERCTL_PROJECTS_DIR/$service"
 		if [[ ! -d "$dir" ]]; then
 			echo "❌ Service '$service' not found at $dir"
 			continue

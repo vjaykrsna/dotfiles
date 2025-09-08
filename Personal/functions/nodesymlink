@@ -6,8 +6,12 @@ nodesymlink() {
 	emulate -L zsh
 	setopt err_return no_unset
 
+	local CONFIG_FILE="$HOME/.config/nodesymlink/config"
+	if [[ -f "$CONFIG_FILE" ]]; then
+		source "$CONFIG_FILE"
+	fi
 	local NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-	local TARGET_DIR="$HOME/.local/bin"
+	local TARGET_DIR="${NODESYMLINK_TARGET_DIR:-$HOME/.local/bin}"
 
 	# Get current NVM version using nvm command (more reliable)
 	local current_version
@@ -26,7 +30,7 @@ nodesymlink() {
 	local NODE_CURRENT="$NVM_DIR/versions/node/v$current_version/bin"
 
 	# Default list of node-related executables
-	local bins=(node npm npx yarn pnpm corepack bun)
+	local bins=("${NODESYMLINK_BINS[@]:-node npm npx yarn pnpm corepack bun}")
 	[[ $# -gt 0 ]] && bins=("$@")
 
 	mkdir -p "$TARGET_DIR"
@@ -35,7 +39,7 @@ nodesymlink() {
 
 	for bin in "${bins[@]}"; do
 		if [[ -x "$NODE_CURRENT/$bin" ]]; then
-			ln -sf "$NODE_CURRENT/$bin" "$TARGET_DIR/$bin"
+			ln -sf "$NODE_CURRENT/$bin" "$TARGET_DIR/$bin" || warn "Failed to link $bin"
 			print "✅ Linked $bin -> $NODE_CURRENT/$bin"
 		else
 			print "⚠️  $bin not found in $NODE_CURRENT (skipping)"

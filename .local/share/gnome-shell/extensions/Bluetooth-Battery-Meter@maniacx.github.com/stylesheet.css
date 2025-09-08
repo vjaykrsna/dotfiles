@@ -1,0 +1,182 @@
+.bbm-submenu {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  transition: margin-top 200ms ease-out, margin-bottom 200ms ease-out;
+}
+.bbm-submenu.open {
+  margin-top: 6px;
+  margin-bottom: 6px;
+  background-color: rgba(128, 128, 128, 0.2) !important;
+  color: inherit !important;
+}
+.bbm-submenu.open:hover {
+  background-color: rgba(128, 128, 128, 0.2) !important;
+  color: inherit !important;
+}
+.bbm-bt-widget {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.bbm-bt-open-menu {
+  border-radius: 18px;
+}
+.bbm-bt-percentage-label {
+  text-align: center;
+}
+.bbm-panel-title-label {
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+  min-width: 16.2em;
+}
+.bbm-popup-menu {
+  background-color: transparent;
+}
+.bbm-popup-menu-box {
+  min-width: 15em;
+  background-color: transparent;
+}
+.bbm-popup-titlebox {
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+.bbm-popup-title {
+  font-weight: bold;
+  font-size: 0.9em;
+}
+.bbm-popupmenu-expander {
+  min-width: 6px;
+}
+.bbm-header-icon {
+  icon-size: 12px;
+}
+.bbm-panel-icon {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+.bbm-panel-expand-icon {
+  icon-size: 12px;
+  margin-right: 6px;
+  margin-left: 6px;
+}
+.bbm-header-button {
+  height: 18px;
+  width: 18px;
+  border-radius: 6px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+.bbm-panel-start-bin {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+.bbm-battery-veritcal-widget-label{
+  padding-top: 4px;
+  font-weight: bold;
+  font-size: 0.75em;
+  text-align: center;
+}
+.bbm-battery-vertical-widget-box {
+  min-width: 5em;
+}
+.bbm-battery-vertical-space-bin {
+  min-width: 20px
+}
+.bbm-menu-separator {
+  min-height: 1px;
+  margin-top: 8px;
+  background-color: rgba(128, 128, 128, 0.4);
+}
+.bbm-toggle-box {
+  border-radius: 6px;
+  background-color: rgba(128, 128, 128, 0.3);
+  margin-bottom: 3px;
+}
+.bbm-toggle-button {
+  padding: 0px;
+  height: 1.75em;
+  width: 3.4em;
+}
+.bbm-toggle-label {
+  font-weight: bold;
+  padding-bottom: 8px;
+  font-size: 0.75em;
+  max-width: 14.6em;
+}
+.bbm-box {
+  margin-top: 8px;
+  margin-bottom: 2px;
+  border-radius: 4px;
+}
+.bbm-toggle-button-separator {
+  min-width: 0.5px;
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+.bbm-option-menu-separator {
+  min-width: 13em;
+  min-height: 1px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  background-color: rgba(128, 128, 128, 0.4);
+}
+.bbm-subtitle-label {
+  font-weight: bold;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 0.75em;
+  max-width: 14.6em;
+}
+.bbm-slider-bin {
+  border-radius: 15px;
+  border: 2px solid transparent;
+  padding: 5px
+}
+.bbm-checkbtn-boxLayout {
+  width: 7em;
+}
+.bbm-checkbtn {
+  margin: 4px;
+}
+.bbm-checkbtn-box {
+  border-radius: 5px;
+}
+.bbm-checkbtn-icon {
+  icon-size: 12px;
+  padding: 0.5px;
+}
+.bbm-button-separator {
+  min-width: 1px;
+  margin-left: 3px;
+  margin-right: 3px;
+  background-color: rgba(128, 128, 128, 0.4);
+}
+.bbm-radiobtn-label {
+  font-weight: bold;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 0.75em;
+  max-width: 4.5em;
+}
+.bbm-radiobtn {
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+.bbm-radiobtn-box {
+  padding: 0;
+  border-radius: 999px;
+}
+.bbm-radio2btn-box {
+  width: 7em;
+}
+.bbm-radio3btn-box {
+  width: 4.5em;
+}
+.bbm-radio4btn-box {
+  width: 3.4em;
+}
+.bbm-radiobtn-icon {
+  icon-size: 10px;
+  padding: 0.5px;
+}
+

@@ -63,6 +63,7 @@
 .config/chromium/
 .config/microsoft-edge-beta/
 .config/microsoft-edge-dev/
+.config/google-chrome-for-testing/
 .config/Code/User/workspaceStorage/
 
 # Runtime / session files (local-only)
@@ -115,6 +116,9 @@
 .node_repl_history
 .zcompdump
 
+# Temp directories (clutter)
+**/temp/
+
 # Misc local-only junk
 .sudo_as_admin_successful
 .wget-hsts
@@ -141,55 +145,20 @@ AGENTS.md
 !.local/share/
 !.local/share/gnome-shell/
 !.local/share/gnome-shell/extensions/
-!.local/share/gnome-shell/extensions/*/
+# Track all GNOME Shell extensions and their files robustly
+!.local/share/gnome-shell/extensions/**
 
-# Track essential extension files
-!.local/share/gnome-shell/extensions/*/metadata.json
-!.local/share/gnome-shell/extensions/*/schemas/
-!.local/share/gnome-shell/extensions/*/schemas/**
-!.local/share/gnome-shell/extensions/*/extension.js
-!.local/share/gnome-shell/extensions/*/prefs.js
-!.local/share/gnome-shell/extensions/*/config.js
-!.local/share/gnome-shell/extensions/*/settings.js
-!.local/share/gnome-shell/extensions/*/*.py
-!.local/share/gnome-shell/extensions/*/preferences/
-!.local/share/gnome-shell/extensions/*/preferences/**
-!.local/share/gnome-shell/extensions/*/service/
-!.local/share/gnome-shell/extensions/*/service/**
-!.local/share/gnome-shell/extensions/*/shell/
-!.local/share/gnome-shell/extensions/*/shell/**
-!.local/share/gnome-shell/extensions/*/utils/
-!.local/share/gnome-shell/extensions/*/utils/**
-!.local/share/gnome-shell/extensions/*/PrefsLib/
-!.local/share/gnome-shell/extensions/*/PrefsLib/**
+# Ignore common generated files within extensions that don't need to be tracked
+.local/share/gnome-shell/extensions/**/__pycache__/
+.local/share/gnome-shell/extensions/**/*.mo
+.local/share/gnome-shell/extensions/**/cache/
 
-# Ignore heavy resource / media directories
-.local/share/gnome-shell/extensions/*/Resources/
-.local/share/gnome-shell/extensions/*/Resources/**
 # Font files are managed by LFS (see .gitattributes)
 !.local/share/fonts/
 !.local/share/fonts/**
-.local/share/gnome-shell/extensions/*/locale/
-.local/share/gnome-shell/extensions/*/locale/**
-.local/share/gnome-shell/extensions/*/icons/
-.local/share/gnome-shell/extensions/*/icons/**
-.local/share/gnome-shell/extensions/*/images/
-.local/share/gnome-shell/extensions/*/images/**
-.local/share/gnome-shell/extensions/*/sounds/
-.local/share/gnome-shell/extensions/*/sounds/**
-.local/share/gnome-shell/extensions/*/data/
-.local/share/gnome-shell/extensions/*/data/**
-.local/share/gnome-shell/extensions/*/docs/
-.local/share/gnome-shell/extensions/*/docs/**
-.local/share/gnome-shell/extensions/*/cache/
-.local/share/gnome-shell/extensions/*/cache/**
-.local/share/gnome-shell/extensions/*/README*
-.local/share/gnome-shell/extensions/*/CHANGELOG*
-.local/share/gnome-shell/extensions/*/LICENSE*
-.local/share/gnome-shell/extensions/*/COPYING*
-.local/share/gnome-shell/extensions/*/*.md
-.local/share/gnome-shell/extensions/*/*.txt
 
 # Manual additon
 !.qwen/
 !.qwen/settings.json
+!.gemini/
+!.gemini/settings.json

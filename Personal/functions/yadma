@@ -9,11 +9,17 @@ yadma() {
 	[ -f "$ignorefile" ] || echo "*" >"$ignorefile"
 
 	# if target isn’t already whitelisted, add it
-	if ! grep -qx "!.${target##$HOME/}" "$ignorefile"; then
+	if grep -qx "!.${target##$HOME/}" "$ignorefile"; then
+		echo "ℹ️  $target is already whitelisted."
+	else
 		echo "!${target##$HOME/}" >>"$ignorefile"
+		echo "✅ Whitelisted $target"
 	fi
 
 	# stage + commit
-	yadm add "$target"
-	echo "✅ Whitelisted and staged: $target"
+	if yadm add "$target"; then
+		echo "✅ Staged: $target"
+	else
+		echo "❌ Failed to stage: $target"
+	fi
 }

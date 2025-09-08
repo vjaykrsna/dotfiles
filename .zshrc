@@ -168,7 +168,7 @@ fi
 # FUNCTIONS
 # ==================================================================
 fpath=($HOME/Personal/functions $fpath)
-autoload -U extract dockerctl nodesymlink termux yadma cleanup
+autoload -U extract dockerctl nodesymlink termux yadma cleanup install_appimage
 
 # bun completions
 [ -s "/home/vijay/.bun/_bun" ] && source "/home/vijay/.bun/_bun"

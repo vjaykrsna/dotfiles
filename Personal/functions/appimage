@@ -1,8 +1,8 @@
 #autoload
 
 # Pro AppImage installer: moves to ~/Applications, creates .desktop, extracts icon
-# Usage: installappimage_pro
-installappimage_pro() {
+install_appimage() {
+    set -e
 	# 1️⃣ Ask for AppImage path
 	read -rp "Enter full path to the AppImage: " APPIMAGE_PATH
 	if [ ! -f "$APPIMAGE_PATH" ]; then
@@ -11,7 +11,11 @@ installappimage_pro() {
 	fi
 
 	# 2️⃣ Ensure ~/Applications exists
-	local APPDIR="$HOME/Applications"
+	local CONFIG_FILE="$HOME/.config/appimage_installer/config"
+	if [[ -f "$CONFIG_FILE" ]]; then
+		source "$CONFIG_FILE"
+	fi
+	local APPDIR="${APPIMAGE_INSTALL_DIR:-$HOME/Applications}"
 	mkdir -p "$APPDIR"
 
 	# 3️⃣ Prepare destination
@@ -70,7 +74,8 @@ Categories=${CATEGORY};
 EOL
 
 	# 7️⃣ Update desktop database
-	update-desktop-database "$HOME/.local/share/applications" 2>/dev/null || true
+	update-desktop-database "$HOME/.local/share/applications"
+	desktop-file-validate "$DESKTOP_FILE"
 
 	echo "✅ $APP_NAME added to Applications menu!"
 	echo "You can now search it in your launcher."

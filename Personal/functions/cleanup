@@ -1,10 +1,20 @@
 #autoload
-# Ultimate Cleanup Utility - Extended Version
+# Refactored Ultimate Cleanup Utility
 
 cleanup() {
     emulate -L zsh
     set -u
     local DRY_RUN=false
+    local AUTO_MODE="none"  # "none", "basic", "advanced"
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run) DRY_RUN=true; shift ;;
+            --auto) AUTO_MODE="advanced"; shift ;;
+            --auto=basic) AUTO_MODE="basic"; shift ;;
+            --auto=advanced) AUTO_MODE="advanced"; shift ;;
+            *) break ;;
+        esac
+    done
     [[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
 
     local GREEN='\033[0;32m'
@@ -14,167 +24,235 @@ cleanup() {
     local NC='\033[0m'
     typeset -A freed_space
 
-    info()  { echo -e "${BLUE}ℹ️  $*${NC}"; }
-    ok()    { echo -e "${GREEN}✅ $*${NC}"; }
-    warn()  { echo -e "${YELLOW}⚠️  $*${NC}"; }
-    error() { echo -e "${RED}❌ $*${NC}"; }
+    # Log cleanup activity
+    _log_cleanup() {
+        local log_file="$HOME/.cache/cleanup.log"
+        local timestamp=$(/usr/bin/date '+%Y-%m-%d %H:%M:%S')
+        /usr/bin/mkdir -p "$(/usr/bin/dirname "$log_file")"
+        /usr/bin/echo "[$timestamp] $*" >> "$log_file"
+    }
 
-    # ----------------------
-    # Safe delete function
-    # ----------------------
+    # --- Logging helpers ---
+    log() {
+        /usr/bin/echo -e "$1$2$NC"
+        _log_cleanup "$2"
+    }
+    info()  { log "$BLUE" "ℹ️  $*"; }
+    ok()    { log "$GREEN" "✅ $*"; }
+    warn()  { log "$YELLOW" "⚠️  $*"; }
+    error() { log "$RED" "❌ $*"; }
+
+    # --- Safe delete ---
     _safe_delete() {
-        local path="$1" description="$2" use_sudo="${3:-false}"
-        [[ -z "$path" || "$path" == "/" || "$path" == "$HOME" ]] && error "Unsafe path: $path" && return
-        /usr/bin/echo "Processing $description..."
+        local path="$1" desc="$2" sudo_flag="${3:-false}"
+        
+        # Enhanced safety check: reject raw home directory
+        if [[ "$path" == "$HOME" || "$path" == "$HOME/" ]]; then
+            error "Unsafe path: $path (refuses raw home directory)"
+            return
+        fi
+        [[ -z "$path" || "$path" == "/" ]] && error "Unsafe path: $path" && return
+
         setopt nullglob globdots extendedglob
         local -a files=($~path)
         local total=0
+
         for f in "${files[@]}"; do
             [[ ! -e "$f" ]] && continue
-            local size=$(/usr/bin/du -sb -- "$f" 2>/dev/null | /usr/bin/awk '{print $1}') || size=0
+            local size=$(/usr/bin/du -sb -- "$f" 2>/dev/null | /usr/bin/awk '{print $1}')
             total=$((total + size))
-            if [[ "$DRY_RUN" == true ]]; then
-                warn "[DRY RUN] Would delete $description: $f ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
+
+            if $DRY_RUN; then
+                warn "[DRY RUN] Would delete $desc: $f ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
             else
-                if [[ "$use_sudo" == true ]]; then
-                    /usr/bin/sudo /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed to delete $f"
+                if $sudo_flag; then
+                    /usr/bin/sudo /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
                 else
-                    /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed to delete $f"
+                    /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
                 fi
             fi
         done
-        [[ $total -gt 0 ]] && freed_space["$description"]=$(( ${freed_space["$description"]:-0} + total ))
+
+        [[ $total -gt 0 ]] && freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + total ))
     }
 
-    # ----------------------
-    # Run command and track space
-    # ----------------------
+    # --- Run and track space by monitoring path ---
     _run_and_track_space() {
-        local description="$1" monitor_path="$2"; shift 2
+        local desc="$1" monitor="$2"; shift 2
         local before=0 after=0
-        [[ -d "$monitor_path" ]] && before=$(/usr/bin/du -sb -- "$monitor_path" 2>/dev/null | /usr/bin/awk '{print $1}') || before=0
-        if [[ "$DRY_RUN" == true ]]; then
-            warn "[DRY_RUN] Would run: $description"
-        else
-            info "Running: $description"
-            "$@" || warn "$description failed"
+
+        if [[ -d "$monitor" ]]; then
+            if [[ "$monitor" == "/var/"* ]]; then
+                before=$(/usr/bin/sudo /usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
+            else
+                before=$(/usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
+            fi
         fi
-        [[ -d "$monitor_path" ]] && after=$(/usr/bin/du -sb -- "$monitor_path" 2>/dev/null | /usr/bin/awk '{print $1}') || after=0
+
+        if $DRY_RUN; then
+            warn "[DRY RUN] Would run: $desc"
+        else
+            info "Running: $desc"
+            "$@" || warn "$desc failed"
+        fi
+
+        if [[ -d "$monitor" ]]; then
+            if [[ "$monitor" == "/var/"* ]]; then
+                after=$(/usr/bin/sudo /usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
+            else
+                after=$(/usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
+            fi
+        fi
         local freed=$((before - after))
-        [[ $freed -gt 0 ]] && freed_space["$description"]=$(( ${freed_space["$description"]:-0} + freed ))
+        [[ $freed -gt 0 ]] && freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + freed ))
     }
 
-    # ----------------------
-    # Basic Cleanup
-    # ----------------------
+    # --- Run and parse space from command output ---
+    _run_and_parse_space() {
+        local desc="$1" regex="$2"; shift 2
+
+        if $DRY_RUN; then
+            warn "[DRY RUN] Would run: $desc"
+            return
+        fi
+
+        info "Running: $desc"
+        local output=$("$@" 2>&1)
+        local total=0
+
+        while read -r freed_h; do
+            [[ -z "$freed_h" ]] && continue
+            local b=$(/usr/bin/echo "$freed_h" | /usr/bin/numfmt --from=iec --suffix=B 2>/dev/null)
+            (( $? == 0 )) && total=$((total + b))
+        done <<< "$(/usr/bin/echo "$output" | /usr/bin/grep -oP "$regex")"
+
+        [[ $total -gt 0 ]] && freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + total ))
+    }
+
+    # --- Git cleanup ---
+    _git_gc_and_track_space() {
+        local desc="Git Garbage Collection" base="$HOME/Personal"
+        local before=0 after=0
+
+        before=$(/usr/bin/find "$base" -name ".git" -type d -prune -exec /usr/bin/du -scb {} + 2>/dev/null | /usr/bin/grep total$ | /usr/bin/awk '{print $1}')
+
+        if $DRY_RUN; then
+            warn "[DRY RUN] Would run git gc in $base"
+            return
+        fi
+
+        info "Running: $desc"
+        /usr/bin/find "$base" -name ".git" -type d -prune -print0 | while IFS= read -r -d '' g; do
+            /usr/bin/git --git-dir="$g" --work-tree="$(/usr/bin/dirname "$g")" gc --prune=now --aggressive >/dev/null 2>&1
+        done
+
+        after=$(/usr/bin/find "$base" -name ".git" -type d -prune -exec /usr/bin/du -scb {} + 2>/dev/null | /usr/bin/grep total$ | /usr/bin/awk '{print $1}')
+        local freed=$((before - after))
+        [[ $freed -gt 0 ]] && freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + freed ))
+    }
+
+    # --- Cleanup targets ---
+    local -a BASIC_PATHS=(
+        "$HOME/.cache/thumbnails/*:Thumbnail Cache"
+        "$HOME/.cache/google-chrome:Chrome Cache"
+        "$HOME/.cache/mozilla/firefox:Firefox Cache"
+        "$HOME/.var/app/app.zen_browser.zen/cache/*:Zen Browser Cache"
+        "$HOME/.local/share/Trash/files/*:Trash Files"
+        "$HOME/.local/share/Trash/info/*:Trash Info Files"
+    )
+
+    local -a ADVANCED_PATHS=(
+        "$HOME/.npm:NPM Cache:true"
+        "$HOME/.npm/_logs/*:NPM Logs"
+        "$HOME/.cache/yarn:Yarn Cache"
+        "$HOME/.pnpm-store:PNPM Store"
+        "$HOME/.cache/node-gyp/*:Node-gyp Cache"
+        "$HOME/.cache/pip:Python pip cache"
+        "$HOME/.local/share/virtualenvs:Python virtualenvs"
+        "$HOME/.cargo/registry/cache/*:Cargo Registry Cache"
+        "$HOME/Personal/**/target:Rust Target Folders"
+        "$HOME/.m2/repository/*:Maven Repository"
+        "$HOME/.gradle/caches/*:Gradle Cache"
+        "$HOME/go/pkg/mod/cache/*:Go Module Cache"
+        "$HOME/.vscode/extensions/.obsolete/*:VSCode Obsolete Extensions"
+        "/var/lib/snapd/cache/*:Snap Cache:true"
+        "/var/cache/man/*:Man-db Cache:true"
+        "/var/lib/systemd/coredump/*:Systemd Core Dumps:true"
+    )
+
     cleanup_basic() {
         info "--- Starting Basic Cleanup ---"
-        _safe_delete "$HOME/.cache/thumbnails/*" "Thumbnail Cache"
-        _safe_delete "$HOME/.cache/google-chrome" "Chrome Cache"
-        _safe_delete "$HOME/.cache/mozilla/firefox" "Firefox Cache"
-        _safe_delete "$HOME/.var/app/app.zen_browser.zen/cache/*" "Zen Browser Cache"
-        _safe_delete "$HOME/.local/share/Trash/files/*" "Trash Files"
-        _safe_delete "$HOME/.local/share/Trash/info/*" "Trash Info Files"
+        for entry in "${BASIC_PATHS[@]}"; do
+            local path desc sudo_flag
+            IFS=':' read -r path desc sudo_flag <<< "$entry"
+            sudo_flag="${sudo_flag:-false}"
+            _safe_delete "$path" "$desc" "$sudo_flag"
+        done
 
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get clean
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get autoclean -y
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y
+        _safe_delete "/var/cache/apt/archives/*" "APT Cache Clean" true
+        _run_and_parse_space "APT Autoclean" 'cleared \K[0-9,.]+[ a-zA-Z]+' /usr/bin/sudo /usr/bin/apt-get autoclean -y
+        _run_and_parse_space "APT Autoremove" 'After this operation, (?:an additional )?\\K[0-9,.]+ [a-zA-Z]+' /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y
 
         ok "--- Basic Cleanup Complete ---"
     }
 
-    # ----------------------
-    # Advanced Cleanup
-    # ----------------------
     cleanup_advanced() {
         info "--- Starting Advanced Cleanup ---"
         cleanup_basic
 
-        # Node / JavaScript
-        _safe_delete "$HOME/.npm" "NPM Cache" true
-        _safe_delete "$HOME/.npm/_logs/*" "NPM Logs"
-        _safe_delete "$HOME/.cache/yarn" "Yarn Cache"
-        _safe_delete "$HOME/.pnpm-store" "PNPM Store"
-        _safe_delete "$HOME/.cache/node-gyp/*" "Node-gyp Cache"
-
-        # Python
-        _safe_delete "$HOME/.cache/pip" "Python pip cache"
-        _safe_delete "$HOME/.local/share/virtualenvs" "Python virtualenvs"
-
-        # Rust / Cargo
-        _safe_delete "$HOME/.cargo/registry/cache/*" "Cargo Registry Cache"
-        _safe_delete "$HOME/Personal/**/target" "Rust Target Folders"
-
-        # Java / Maven / Gradle
-        _safe_delete "$HOME/.m2/repository/*" "Maven Repository"
-        _safe_delete "$HOME/.gradle/caches/*" "Gradle Cache"
-
-        # Go
-        _safe_delete "$HOME/go/pkg/mod/cache/*" "Go Module Cache"
-
-        # VSCode
-        _safe_delete "$HOME/.vscode/extensions/.obsolete/*" "VSCode Obsolete Extensions"
-
-        # System
-        _safe_delete "/var/lib/snapd/cache/*" "Snap Cache" true
-        _safe_delete "/var/cache/man/*" "Man-db Cache" true
-        _run_and_track_space "Flatpak Unused" "/var/lib/flatpak" /usr/bin/flatpak uninstall --unused -y
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/systemctl clean --what=temporary --what=cache
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/journalctl --vacuum-size=1M
-        _safe_delete "/var/lib/systemd/coredump/*" "Systemd Core Dumps" true
-
-        # Docker
-        [[ "$DRY_RUN" == true ]] || /usr/bin/sudo /usr/bin/docker system prune -af --volumes
-
-        # Git
-        /usr/bin/find "$HOME/Personal" -name ".git" -type d -prune -print0 | while IFS= read -r -d '' g; do
-            [[ "$DRY_RUN" == true ]] && warn "[DRY_RUN] Would run git gc in $g" && continue
-            /usr/bin/git --git-dir="$g" --work-tree="$(/usr/bin/dirname "$g")" gc --prune=now --aggressive
+        for entry in "${ADVANCED_PATHS[@]}"; do
+            local path desc sudo_flag
+            IFS=':' read -r path desc sudo_flag <<< "$entry"
+            sudo_flag="${sudo_flag:-false}"
+            _safe_delete "$path" "$desc" "$sudo_flag"
         done
+
+        _run_and_track_space "Flatpak Unused" "/var/lib/flatpak" /usr/bin/flatpak uninstall --unused -y
+        _run_and_parse_space "Journal Vacuum" 'freed \\K[0-9.]+[a-zA-Z]+' /usr/bin/sudo /usr/bin/journalctl --rotate --vacuum-time=1s
+        _run_and_parse_space "Docker Prune" 'Total reclaimed space:\\s*\\K[0-9.]+[A-Za-z]+' /usr/bin/sudo /usr/bin/docker system prune -af --volumes
+
+        _git_gc_and_track_space
 
         ok "--- Advanced Cleanup Complete ---"
     }
 
-    # ----------------------
-    # Report
-    # ----------------------
     show_report() {
         info "--- Cleanup Report ---"
         local total=0
         for k in "${(@k)freed_space}"; do total=$((total + freed_space[$k])); done
-        echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B $total || echo "0B")"
+        echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B $total || echo '0B')"
 
-        if (( total == 0 )); then
-            warn "Nothing left to clean!"
-            return
-        fi
+        (( total == 0 )) && warn "Nothing left to clean!" && return
 
         info "--- Top Freed ---"
         for line in "${(@f)$(for k in "${(@k)freed_space}"; do echo "${freed_space[$k]}|$k"; done | /usr/bin/sort -rn | /usr/bin/head -n5)}"; do
-            local size="${line%%|*}"
-            local desc="${line##*|}"
+            local size="${line%%|*}" desc="${line##*|}"
             echo "  - $desc ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
         done
     }
 
-    # ----------------------
-    # Menu
-    # ----------------------
-    while true; do
-        echo -e "\n${BLUE}===== Ultimate Cleanup Utility =====${NC}"
-        echo -e " ${GREEN}1.${NC} Basic Cleanup (safe)"
-        echo -e " ${GREEN}2.${NC} Advanced Cleanup (aggressive)"
-        echo -e " ${GREEN}q.${NC} Quit"
-        echo -n -e "${YELLOW}Enter choice: ${NC}"
+    # --- Menu ---
+    if [[ "$AUTO_MODE" == "advanced" ]]; then
+        cleanup_advanced
+    elif [[ "$AUTO_MODE" == "basic" ]]; then
+        cleanup_basic
+    else
+        while true; do
+            echo -e "\n${BLUE}===== Ultimate Cleanup Utility =====${NC}"
+            echo -e " ${GREEN}1.${NC} Basic Cleanup (safe)"
+            echo -e " ${GREEN}2.${NC} Advanced Cleanup (aggressive)"
+            echo -e " ${GREEN}q.${NC} Quit"
+            echo -n -e "${YELLOW}Enter choice: ${NC}"
 
-        read -r choice
-        case "$choice" in
-            1) cleanup_basic ;;
-            2) cleanup_advanced ;;
-            [qQ]) break ;;
-            *) error "Invalid option" ;;
-        esac
-    done
+            read -r choice
+            case "$choice" in
+                1) cleanup_basic ;;
+                2) cleanup_advanced ;;
+                [qQ]) break ;;
+                *) error "Invalid option" ;;
+            esac
+        done
+    fi
 
     show_report
 }
