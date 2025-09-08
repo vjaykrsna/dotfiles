@@ -34,7 +34,7 @@ This document is a **master guide** for managing this repo—written so even an 
 * **What gets encrypted**:
 
   * SSH keys (`~/.ssh/`)
-  * GnuPG keys (`~/.gnupg/`)
+  * `.gnupg/` directory (for GPG keys, if you choose to use them)
   * `.env` files
   * Git credentials (`.git-credentials`)
   * GSConnect certs (`certificate.pem`, `private.pem`)
@@ -69,7 +69,7 @@ This document is a **master guide** for managing this repo—written so even an 
 
 * Master list of encrypted paths.
 * Drives `yadm encrypt` → creates `~/.local/share/yadm/archive`.
-* Examples in current setup: `.ssh/`, `.gnupg/`, `.env`, `gsconnect` keys.
+* Examples in current setup: `.ssh/id_*`, `.env`, `gsconnect` keys.
 
 ### `.gitmodules`
 
@@ -105,57 +105,47 @@ yadm push
 
 ---
 
-## 🔐 Handling Secrets
+## 🔐 Handling Secrets (Symmetric Encryption)
 
-### Encrypt new files
+This setup uses **`openssl` symmetric encryption**, which is simpler and more robust than the GPG default.
 
-1. Add path to `.config/yadm/encrypt`.
-2. Add same path to `.gitignore` (explicit ignore).
-3. Run:
+*   **How it works**: Your files are encrypted directly with a key derived from your passphrase.
+*   **Disaster Recovery**: The **only thing you need to remember is your passphrase**. There is no separate GPG key to back up.
 
-   ```bash
-   yadm encrypt
-   yadm add ~/.local/share/yadm/archive
-   ```
+### Encrypting a New File
 
-### Update encrypted files
+1.  **Whitelist the file**: Add a `!` rule for the file in your `.gitignore` so `git` can track it.
+2.  **Add path to encrypt list**: Add the file's path to `.config/yadm/encrypt`.
+3.  **Run `yadm encrypt`**: This will encrypt the new file along with all others.
+4.  **Commit changes**: `yadm add .` and `yadm commit`. `yadm` handles the encrypted archive automatically.
 
-1. Edit file normally.
-2. Run:
-
-   ```bash
-   yadm encrypt
-   yadm add ~/.local/share/yadm/archive
-   ```
-
-### Decrypt on new machine
+### Decrypting on a New Machine
 
 ```bash
 yadm decrypt
 ```
+This will prompt for your passphrase and restore all your secrets.
 
 ---
 
-## 🖥️ Restoring Environment
+## 🖥️ Restoring Environment with the Master Script
 
-On a new machine:
+On a new machine, after cloning and decrypting, the master setup script automates the entire environment restoration.
 
 ```bash
-yadm clone <repo-url>  
-yadm decrypt          # restore secrets  
+# For a fully automated, non-interactive setup:
+~/Personal/scripts/setup.sh all
+
+# For an interactive menu:
+~/Personal/scripts/setup.sh
 ```
 
-This will restore:
-
-* Shell configs, aliases, and functions
-* Personal scripts (`~/Personal/`)
-* Select desktop configs (`autostart`, `wallpapers`, `input-remapper`)
-* User directory layouts
-
-⚠️ **What won’t restore automatically**:
-
-* GNOME session/dconf (`.config/dconf/user`) is tracked to sync desktop settings.
-* Application-specific states (browser history, VSCode sessions, etc.).
+This script handles:
+*   **System Packages**: Installs all `apt`, `flatpak`, `pipx`, `npm`, and `cargo` packages.
+*   **GNOME Desktop**: Restores your complete desktop environment—themes, keybindings, fonts, and settings—using `gnome-settings.sh`.
+*   **GNOME Extensions**: Reinstalls all your enabled GNOME extensions using `gnome-extensions.sh`.
+*   **Shell Environment**: Sets up Zinit and Starship.
+*   **System-Level Configs**: The `system-sync.sh` script helps you safely diff and restore configs like `crontab` and `/etc/fstab`.
 
 ---
 

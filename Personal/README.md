@@ -23,6 +23,13 @@ This repository contains my personal dotfiles, managed with [yadm](https://yadm.
     ```
 
 4.  **Run Setup Script:**
-    Run the interactive setup script to install applications, configure settings, and complete the setup:
+    Run the master setup script to automatically restore your entire environment.
+    
+    For a fully automated, non-interactive setup, run:
+    ```bash
+    ~/Personal/scripts/setup.sh all
+    ```
+    
+    For an interactive menu with all options, run:
     ```bash
     ~/Personal/scripts/setup.sh

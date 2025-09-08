@@ -2,16 +2,6 @@
 # Force sensitive files to be treated as binary
 # (prevents accidental diffs or merges that might leak secrets)
 # ==================================================================
-.ssh/id_*             filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.ssh/config           filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.gnupg/private-keys-v1.d/* filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.gnupg/secring.gpg    filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.gnupg/trustdb.gpg    filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.gnupg/pubring.kbx    filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.gnupg/gpg.conf       filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-# Optional secrets
-.env                  filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
-.git-credentials      filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt
 Personal/Wallpaper/*.png filter=lfs diff=lfs merge=lfs -text
 Personal/Wallpaper/*.jpg filter=lfs diff=lfs merge=lfs -text
 .local/share/fonts/*.ttf filter=lfs diff=lfs merge=lfs -text

@@ -13,7 +13,6 @@
 !.gitmodules
 !.gitignore
 !.gitattributes
-!.env                # tracked but encrypted (see .gitattributes)
 
 # ========================================================
 # PERSONAL FILES
@@ -27,21 +26,23 @@
 # CONFIGS TO TRACK (portable / reproducible)
 # ========================================================
 !.config/
+!.config/dconf/
 !.config/dconf/gnome_settings.ini
 
 # Input Remapper
+!.config/input-remapper-2/
 !.config/input-remapper-2/config.json
 !.config/input-remapper-2/presets/
 !.config/input-remapper-2/xmodmap.json
 
 # Micro editor
+!.config/micro/
 !.config/micro/bindings.json
 
 # GSConnect (only certs if reproducible setup)
-!.config/gsconnect/certificate.pem
-!.config/gsconnect/private.pem
 
 # Rygel / Media server
+!.config/Rygel/
 !.config/Rygel/MediaExport*.xml
 !.config/rygel.conf
 
@@ -50,10 +51,12 @@
 !.config/user-dirs.locale
 
 # Autostart & background
+!.config/autostart/
 !.config/autostart/guake.desktop
 !.config/background
 
 # Systemd services
+!.config/systemd/
 !.config/systemd/user/
 !.config/systemd/user/**
 
@@ -69,10 +72,14 @@
 # ========================================================
 # LOCAL SHARE FILES
 # ========================================================
+# Un-ignore the parent directories first
+!.local/
+!.local/share/
 # Fonts (managed by Git LFS)
 !.local/share/fonts/
 !.local/share/fonts/**
 # GNOME Shell extensions (track only list)
+!.config/gnome-shell/
 !.config/gnome-shell/extensions.txt
 !.local/share/gnome-shell/
 
@@ -87,10 +94,9 @@
 # ========================================================
 # CRYPTED / SENSITIVE
 # ========================================================
+!.ssh/
 !.ssh/config
 !.ssh/authorized_keys
-!.ssh/id_*
-!.gnupg/
 
 # ========================================================
 # IGNORE CACHES, TEMP, NOISY LOCAL FILES
