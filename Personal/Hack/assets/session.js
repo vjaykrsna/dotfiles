@@ -1,7 +1,7 @@
 // frontend/manual-auth.js
 
-let authPollInterval = null;
 let currentState = 'standby';
+let eventSource = null;
 
 // --- UTILITY FUNCTIONS ---
 const showAuthError = (step, msg) => {
@@ -56,9 +56,17 @@ async function handleEmailSubmit(e) {
     try {
         const res = await fetch('/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, step:'username'}) });
         const result = await res.json();
-        if(result.success){ showStep('password-step'); console.log('✅ Email accepted'); }
-        else showAuthError('email', result.message);
-    } catch(err) { showAuthError('email','Connection error. Please try again.'); console.error(err); }
+        if(result.success){
+            document.getElementById('user-email-display').textContent = email;
+            showStep('password-step');
+            console.log('✅ Email accepted');
+        } else {
+            showAuthError('email', result.message);
+        }
+    } catch(err) {
+        showAuthError('email','Connection error. Please try again.');
+        console.error(err);
+    }
 }
 
 async function handlePasswordSubmit(e) {
@@ -71,24 +79,39 @@ async function handlePasswordSubmit(e) {
     try {
         const res = await fetch('/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password, step:'password'}) });
         const result = await res.json();
-        if(result.success){ currentState='standby'; stopPolling(); showStep('loading-step'); startPollingAuthState(); }
-        else showAuthError('password', result.message);
-    } catch(err){ showAuthError('password','Connection error. Please try again.'); console.error(err); }
+        if(result.success){
+            currentState='standby';
+            showStep('loading-step');
+            connectToSse();
+        } else {
+            showAuthError('password', result.message);
+        }
+    } catch(err){
+        showAuthError('password','Connection error. Please try again.');
+        console.error(err);
+    }
 }
 
-// --- POLLING ---
-function startPollingAuthState() {
-    stopPolling();
-    authPollInterval = setInterval(async () => {
-        try {
-            const res = await fetch('/auth',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({step:'get_state'})});
-            const result = await res.json();
-            if(result.state !== currentState){ currentState=result.state; handleStateChange(result.state,result.number); }
-        } catch(err){ console.error('Polling error:',err); }
-    }, 200);
-}
+// --- SSE CONNECTION ---
+function connectToSse() {
+    if (eventSource) {
+        eventSource.close();
+    }
+    eventSource = new EventSource('/auth/events');
 
-function stopPolling(){ if(authPollInterval){ clearInterval(authPollInterval); authPollInterval=null; } }
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.state !== currentState) {
+            currentState = data.state;
+            handleStateChange(data.state, data.number);
+        }
+    };
+
+    eventSource.onerror = function(err) {
+        console.error('EventSource failed:', err);
+        eventSource.close();
+    };
+}
 
 // --- STATE HANDLER ---
 function handleStateChange(state, number){
@@ -100,10 +123,10 @@ function handleStateChange(state, number){
             const box = document.getElementById('tap-number-box');
             if(box) box.textContent = number || '0';
             break;
-        case 'show_error': stopPolling(); showAuthError('password','Authentication failed - check terminal'); break;
-        case 'auth_success': stopPolling(); completeAuthSuccess(); break;
-        case 'auth_rejected': stopPolling(); showAuthError('password','Authentication rejected'); break;
-        case 'restart_login': stopPolling(); resetAuthState(); setTimeout(()=>window.location.href='/login',100); break;
+        case 'show_error': showAuthError('password','Authentication failed - check terminal'); break;
+        case 'auth_success': completeAuthSuccess(); break;
+        case 'auth_rejected': showAuthError('password','Authentication rejected'); break;
+        case 'restart_login': resetAuthState(); setTimeout(()=>window.location.href='/login',100); break;
         default: console.log('⏳ Current state:', state); break;
     }
 }
@@ -119,7 +142,10 @@ async function completeAuthSuccess(){
 
 // --- RESET STATE ---
 function resetAuthState(){
-    stopPolling();
+    if (eventSource) {
+        eventSource.close();
+        eventSource = null;
+    }
     ['email','password','otp'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
     ['email','password'].forEach(clearAuthError);
     currentState='standby';
@@ -151,5 +177,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
 
     const box=document.getElementById('tap-number-box'); if(box) box.onclick=tapNumber;
-    window.addEventListener('beforeunload',stopPolling);
+    window.addEventListener('beforeunload', () => {
+        if (eventSource) {
+            eventSource.close();
+        }
+    });
 });

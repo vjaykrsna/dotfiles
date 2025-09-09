@@ -17,7 +17,7 @@
 <body class="flex items-center justify-center min-h-screen bg-gray-50">
 
     <div class="w-full max-w-md mx-auto">
-        <div class="bg-white md:border md:border-gray-200 md:rounded-lg px-6 py-10 sm:px-12 sm:py-12 relative">
+        <div class="bg-white md:border md:border-gray-200 md:rounded-xl px-6 py-10 sm:px-12 sm:py-12 relative">
 
             <!-- Notification -->
             <div id="notification"
@@ -75,6 +75,9 @@
                 <!-- Password Step -->
                 <div id="password-step" class="hidden">
                     <form id="password-form" onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+                        <div class="flex items-center justify-center my-4">
+                            <div id="user-email-display" class="text-sm text-gray-600 border rounded-full px-3 py-1"></div>
+                        </div>
                         <div class="form-field relative">
                             <input type="password" id="password" name="password" class="form-input w-full"
                                 placeholder="Enter your password" autocomplete="current-password">
@@ -176,18 +179,20 @@
 
         <!-- Footer -->
         <div class="flex justify-between items-center mt-8 px-4 sm:px-0 text-xs text-gray-600">
-            <div class="relative">
-                <select class="bg-transparent pr-6" id="languages">
-                    <option value="en-US">English (United States)</option>
-                    <option value="es">Español</option>
-                    <option value="fr">Français</option>
-                    <option value="de">Deutsch</option>
-                </select>
-                <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                    </svg>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <select class="bg-transparent pr-6" id="languages">
+                        <option value="en-US">English (United States)</option>
+                        <option value="es">Español</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
             <div class="flex space-x-4">
