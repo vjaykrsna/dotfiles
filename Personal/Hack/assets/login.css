@@ -128,7 +128,8 @@ select {
     height: 3rem;
     -webkit-animation: spinner 1.5s linear infinite;
     animation: spinner 1.5s linear infinite;
-    margin: 0 auto; /* Ensure horizontal centering */
+    margin: 0 auto;
+    /* Ensure horizontal centering */
 }
 
 /* Loading step - controlled by JavaScript only */

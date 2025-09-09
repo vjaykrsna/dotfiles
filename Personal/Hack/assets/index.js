@@ -33,4 +33,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         log(`Session check failed: ${err.message}`, '❌');
         // Safe fallback → assume logged out state
     }
+
+    const imageExists = async (url) => {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const updatePlaceholders = async () => {
+        const photo1 = document.querySelector('.photo-1 img');
+        const photo2 = document.querySelector('.photo-2 img');
+
+        if (await imageExists('/assets/img1.jpg')) {
+            photo1.src = '/assets/img1.jpg';
+        }
+
+        if (await imageExists('/assets/img2.jpg')) {
+            photo2.src = '/assets/img2.jpg';
+        }
+    };
+
+    updatePlaceholders();
 });
