@@ -1,106 +1,85 @@
-# ========================================================
-# IGNORE EVERYTHING BY DEFAULT
-# ========================================================
+# ==============================================================================
+# yadm Dotfiles .gitignore
+#
+# This file uses a whitelist-based strategy:
+# 1. Ignore everything by default (`*`).
+# 2. Explicitly un-ignore (`!`) the files and directories to be tracked.
+# 3. Explicitly re-ignore specific sub-folders, caches, and secrets.
+# ==============================================================================
+
+# 1. IGNORE EVERYTHING BY DEFAULT
+# ==============================================================================
 *
 
-# ========================================================
-# SAFE DOTFILES TO TRACK
-# ========================================================
-!.bashrc
-!.zshrc
-!.profile
-!.gitconfig
-!.gitmodules
-!.gitignore
-!.gitattributes
+# 2. WHITELIST - Files and Directories to Track
+# ==============================================================================
 
-# ========================================================
-# PERSONAL FILES
-# ========================================================
-!Personal/
-!Personal/**
-!Applications/
-!Applications/**
+# Core Shell & Git Configuration
+!/.bashrc
+!/.zshrc
+!/.profile
+!/.gitconfig
+!/.gitmodules
+!/.gitignore
+!/.gitattributes
 
-# ========================================================
-# CONFIGS TO TRACK (portable / reproducible)
-# ========================================================
-!.config/
-!.config/dconf/
-!.config/dconf/gnome_settings.ini
+# Personal Scripts, Projects, and Applications
+!/Personal/
+!/Personal/**
+!/Applications/
+!/Applications/**
 
-# Input Remapper
-!.config/input-remapper-2/
-!.config/input-remapper-2/config.json
-!.config/input-remapper-2/presets/
-!.config/input-remapper-2/xmodmap.json
+# Desktop Environment: Themes, Icons, Fonts
+!/.themes/
+!/.themes/**
+!/.icons/
+!/.icons/**
+!/.local/
+!/.local/share/
+!/.local/share/fonts/
+!/.local/share/fonts/**
+!/.local/share/gnome-shell/
 
-# Micro editor
-!.config/micro/
-!.config/micro/bindings.json
+# Application Configurations (~/.config/)
+!/.config/
+!/.config/autostart/
+!/.config/autostart/guake.desktop
+!/.config/background
+!/.config/dconf/
+!/.config/dconf/gnome_settings.ini
+!/.config/gnome-shell/
+!/.config/gnome-shell/extensions.txt
+!/.config/input-remapper-2/
+!/.config/input-remapper-2/config.json
+!/.config/input-remapper-2/presets/
+!/.config/input-remapper-2/xmodmap.json
+!/.config/micro/
+!/.config/micro/bindings.json
+!/.config/Rygel/
+!/.config/Rygel/MediaExport*.xml
+!/.config/rygel.conf
+!/.config/starship.toml
+!/.config/systemd/
+!/.config/systemd/user/
+!/.config/systemd/user/**
+!/.config/user-dirs.dirs
+!/.config/user-dirs.locale
+!/.config/yadm/
+!/.config/yadm/encrypt
 
-# GSConnect (only certs if reproducible setup)
+# yadm Archive
+!/.local/share/yadm/
+!/.local/share/yadm/archive
 
-# Rygel / Media server
-!.config/Rygel/
-!.config/Rygel/MediaExport*.xml
-!.config/rygel.conf
+# SSH Configuration (Public keys are safe)
+!/.ssh/
+!/.ssh/config
+!/.ssh/authorized_keys
 
-# User directories / environment
-!.config/user-dirs.dirs
-!.config/user-dirs.locale
+# 3. BLACKLIST - Caches, Runtime Files, and Secrets
+# ==============================================================================
 
-# Autostart & background
-!.config/autostart/
-!.config/autostart/guake.desktop
-!.config/background
-
-# Systemd services
-!.config/systemd/
-!.config/systemd/user/
-!.config/systemd/user/**
-
-# Starship prompt
-!.config/starship.toml
-
-# Yadm config
-!.config/yadm/
-!.config/yadm/encrypt
-!.local/share/yadm/
-!.local/share/yadm/archive
-
-# ========================================================
-# LOCAL SHARE FILES
-# ========================================================
-# Un-ignore the parent directories first
-!.local/
-!.local/share/
-# Fonts (managed by Git LFS)
-!.local/share/fonts/
-!.local/share/fonts/**
-# GNOME Shell extensions (track only list)
-!.config/gnome-shell/
-!.config/gnome-shell/extensions.txt
-!.local/share/gnome-shell/
-
-# ========================================================
-# THEMES & ICONS
-# ========================================================
-!.themes/
-!.themes/**
-!.icons/
-!.icons/**
-
-# ========================================================
-# CRYPTED / SENSITIVE
-# ========================================================
-!.ssh/
-!.ssh/config
-!.ssh/authorized_keys
-
-# ========================================================
-# IGNORE CACHES, TEMP, NOISY LOCAL FILES
-# ========================================================
+# General Caches & Temporary Directories
 .cache/
 .npm/
 .nvm/
@@ -113,41 +92,23 @@
 .pki/
 .qwen/
 .gemini/
+.roo/
+
+# Common Junk Files
+.DS_Store
+Thumbs.db
+AGENTS.md
+*.pyc
+
+# Shell History & Runtime Files
+.bash_history
+.zsh_history
 .node_repl_history
 .zcompdump
 .sudo_as_admin_successful
 .wget-hsts
-.DS_Store
-Thumbs.db
-.roo/
-AGENTS.md
 
-# Python bytecode
-*.pyc
-
-# Shell history
-.bash_history
-.zsh_history
-
-# GnuPG runtime
-.gnupg/S.*
-.gnupg/*.lock
-
-# SSH pubkeys (not needed)
-.ssh/*.pub
-
-# Input Remapper runtime
-.config/input-remapper-2/runtime/
-
-# Pulse & IBus runtime
-.config/pulse/*-runtime
-.config/pulse/cookie
-.config/ibus/bus/*
-
-# Micro runtime buffers
-.config/micro/buffers/history
-
-# App caches (noisy configs)
+# Noisy Application Configs & Caches
 .config/**/[cC]ache/
 .config/**/*.tmp
 .config/**/*.temp
@@ -155,15 +116,37 @@ AGENTS.md
 .config/BraveSoftware/
 .config/Code/
 .config/Code/User/workspaceStorage/
-.config/google-chrome/
-.config/google-chrome-for-testing/
 .config/chromium/
-.config/microsoft-edge-beta/
-.config/microsoft-edge-dev/
-
-# Other noisy files
 .config/configstore/update-notifier-*
 .config/enchant/en_US.*
 .config/evolution/sources/system-proxy.source
 .config/gnome-initial-setup-done
+.config/google-chrome/
+.config/google-chrome-for-testing/
+.config/ibus/bus/*
+.config/input-remapper-2/runtime/
+.config/micro/buffers/history
+.config/microsoft-edge-beta/
+.config/microsoft-edge-dev/
+.config/pulse/*-runtime
+.config/pulse/cookie
 .config/vscode-sqltools/runningInfo.json
+
+# GnuPG Runtime Files
+.gnupg/S.*
+.gnupg/*.lock
+
+# ---
+# Final Override for Encrypted Files
+# ---
+# NOTE: The patterns in this section should mirror those in the
+# ~/.config/yadm/encrypt file. This ensures the unencrypted source
+# files are ignored by Git, while the encrypted archive is tracked.
+/.ssh/id_*
+!/.ssh/id_*.pub # Public keys are safe and should be tracked
+/.gnupg/
+/.env
+/.git-credentials
+/.config/gsconnect/private.pem
+/.config/gsconnect/certificate.pem
+**/.env

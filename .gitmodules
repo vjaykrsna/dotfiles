@@ -1,3 +1,6 @@
 [submodule "Personal/myGithub/vscode-settings"]
 	path = Personal/myGithub/vscode-settings
 	url = https://github.com/vjaykrsna/vscode-settings.git
+[submodule "Personal/myGithub/gsconnect-mount-manager"]
+	path = Personal/myGithub/gsconnect-mount-manager
+	url = https://github.com/vjaykrsna/gsconnect-mount-manager.git

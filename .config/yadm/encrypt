@@ -2,7 +2,6 @@
 # Paths are relative to the home directory.
 
 .ssh/id_*
-!ssh/id_*.pub
 .gnupg/
 .env
 .git-credentials

@@ -54,22 +54,13 @@ This document is a **master guide** for managing this repo—written so even an 
   * Common ignores (caches, logs, browser profiles, temp)
   * Explicit ignores (history, runtime sockets, junk)
 
-### `.gitattributes`
-
-* Defines which files are handled by `yadm-crypt`.
-* Uses:
-
-  ```
-  filter=yadm-crypt diff=yadm-crypt merge=yadm-crypt  
-  ```
-
-  → Encrypt/decrypt seamlessly when committing/pulling.
-
 ### `.config/yadm/encrypt`
 
-* Master list of encrypted paths.
-* Drives `yadm encrypt` → creates `~/.local/share/yadm/archive`.
-* Examples in current setup: `.ssh/id_*`, `.env`, `gsconnect` keys.
+* **Master list of encrypted paths.**
+* This file contains a simple list of files and directories that should be encrypted.
+* When you run `yadm encrypt`, `yadm` bundles these files into a single encrypted archive located at `~/.local/share/yadm/archive`.
+* This archive is what gets committed to the repository, keeping your source secrets safe.
+* Examples in the current setup include `.ssh/id_*`, `.env`, and `gsconnect` keys.
 
 ### `.gitmodules`
 
@@ -194,8 +185,10 @@ This repository uses `git lfs` (Large File Storage) to manage large binary files
 ### Current `git lfs` Configuration
 
 *   **Tracked files**:
-    * `*.png` and `*.jpg` files in the `Personal/Wallpaper/` directory.
-    * Font files (`.ttf`, `.otf`, `.woff`, `.woff2`) in the `.local/share/fonts/` directory.
+    *   **Wallpapers**: `*.png` and `*.jpg` files in the `Personal/Wallpaper/` directory.
+    *   **Fonts**: Font files (`.ttf`, `.otf`, `.woff`, `.woff2`) in the `.local/share/fonts/` directory.
+    *   **General Media**: All common image, video, and audio formats (`.jpeg`, `.gif`, `.svg`, `.mp4`, `.mp3`, etc.).
+    *   **Documents & Archives**: Large documents and archives like `.pdf`, `.zip`, `.rar`, and `.iso`.
 
 ### Workflow for Large Files
 
