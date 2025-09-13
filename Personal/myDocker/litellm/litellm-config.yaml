@@ -6,16 +6,16 @@
 
 common_pro_params: &pro_defaults
   model: gemini/gemini-2.5-pro
-  rpm: 4
-  tpm: 250000
+  rpm: 3
+  tpm: 125000
   stream: false
   thinking:
     type: disabled
 
 common_flash_params: &flash_defaults
   model: gemini/gemini-2.5-flash
-  rpm: 4
-  tpm: 250000
+  rpm: 3
+  tpm: 125000
   stream: false
   thinking:
     type: disabled
