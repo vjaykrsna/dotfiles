@@ -4,6 +4,7 @@ IFS=$'\n\t'
 
 # --- CONFIG & UTILITY ---
 start_dir=$(pwd)
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 BLUE='\033[0;34m'
@@ -61,37 +62,37 @@ run_all_setup() {
 # --- WRAPPER FUNCTIONS for scripts ---
 run_update_pkgs() {
     info "--- Updating package lists ---"
-    "$(dirname "$0")/update_pkgs.sh"
+    "$SCRIPT_DIR/update_pkgs.sh"
 }
 
 run_gnome_sync_dump() {
     info "--- Dumping GNOME settings ---"
-    "$(dirname "$0")/gnome-settings.sh" dump
+    "$SCRIPT_DIR/gnome-settings.sh" dump
 }
 
 run_gnome_sync_load() {
     info "--- Loading GNOME settings ---"
-    "$(dirname "$0")/gnome-settings.sh" load
+    "$SCRIPT_DIR/gnome-settings.sh" load
 }
 
 run_gnome_extensions_save() {
     info "--- Saving GNOME extensions list ---"
-    "$(dirname "$0")/gnome-extensions.sh" save
+    "$SCRIPT_DIR/gnome-extensions.sh" save
 }
 
 run_gnome_extensions_install() {
     info "--- Installing GNOME extensions ---"
-    "$(dirname "$0")/gnome-extensions.sh" install
+    "$SCRIPT_DIR/gnome-extensions.sh" install
 }
 
 run_system_sync_save() {
     info "--- Saving system configurations ---"
-    "$(dirname "$0")/system-sync.sh" save
+    "$SCRIPT_DIR/system-sync.sh" save
 }
 
 run_system_sync_diff() {
     info "--- Diffing system configurations ---"
-    "$(dirname "$0")/system-sync.sh" diff
+    "$SCRIPT_DIR/system-sync.sh" diff
 }
 
 # --- INTERACTIVE MENU ---
@@ -188,7 +189,7 @@ main_interactive() {
 }
 
 # --- SCRIPT ENTRYPOINT ---
-if [[ "$1" == "all" ]]; then
+if [[ "${1-}" == "all" ]]; then
     run_all_setup
 else
     main_interactive

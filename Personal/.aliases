@@ -30,6 +30,27 @@ alias netcheck='ping -c 4 google.com'
 alias ports='sudo lsof -i -P -n | grep LISTEN'
 
 # Custom Apps
-alias myzram='watch -n 1 "free -h && echo && zramctl && zramctl --bytes --output=NAME,DATA,COMPR | awk '\''NR==2 && \$3>0 {printf \"Compression Ratio: %.2f : 1\\n\", \$2/\$3}'\''"'
-alias hackerui="$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox"
+myzram() {
+    local C_TITLE='\033[1;36m' # Bold Cyan
+    local C_HEADER='\033[1;33m' # Bold Yellow
+    local C_VALUE='\033[0;32m'  # Green
+    local C_RESET='\033[0m'     # Reset Color
+
+    printf "${C_TITLE}===== ZRAM Status Report =====${C_RESET}\n\n"
+    printf "${C_HEADER}📊 Memory Usage:${C_RESET}\n"
+    free -h | sed 's/^/  /'
+    echo
+
+    printf "${C_HEADER}📦 ZRAM Device Status:${C_RESET}\n"
+    zramctl | column -t | sed 's/^/  /'
+    echo
+
+    printf "${C_HEADER}📈 Compression Ratio:${C_RESET}\n"
+    local ratio_info=$(zramctl --bytes --output=NAME,DATA,COMPR)
+    local ratio=$(echo "$ratio_info" | awk 'NR==2 && $3>0 {printf "%.2f : 1", $2/$3}')
+    printf "  Compression Ratio: ${C_VALUE}%s${C_RESET}\n" "$ratio"
+    printf "\n${C_TITLE}============================${C_RESET}\n"
+}
+alias hackerui='$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox'
 alias dockerui='lazydocker'
+alias yadmcode='GIT_DIR=~/.local/share/yadm/repo.git code ~'

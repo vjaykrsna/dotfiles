@@ -201,8 +201,12 @@ setup_zinit_starship() {
 		log "Starship configuration ready."
 	}
 
-	warn "Rebuilding font cache..."
-	fc-cache -fv
+	if command -v fc-cache &>/dev/null; then
+		warn "Rebuilding font cache..."
+		fc-cache -fv
+	else
+		warn "Skipping font cache rebuild: fc-cache not found."
+	fi
 	log "--- Shell Environment Setup Complete ---"
 }
 

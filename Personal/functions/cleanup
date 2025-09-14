@@ -10,12 +10,18 @@ cleanup() {
         case "$1" in
             --dry-run) DRY_RUN=true; shift ;;
             --auto) AUTO_MODE="advanced"; shift ;;
-            --auto=basic) AUTO_MODE="basic"; shift ;;
-            --auto=advanced) AUTO_MODE="advanced"; shift ;;
+            --auto=*)
+                local val="${1#*=}"
+                if [[ "$val" == "basic" || "$val" == "advanced" ]]; then
+                    AUTO_MODE="$val"
+                else
+                    error "Invalid value for --auto: $val"
+                    return 1
+                fi
+                shift ;;
             *) break ;;
         esac
     done
-    [[ "${1-}" == "--dry-run" ]] && DRY_RUN=true && shift
 
     local GREEN='\033[0;32m'
     local YELLOW='\033[0;33m'
@@ -23,6 +29,8 @@ cleanup() {
     local RED='\033[0;31m'
     local NC='\033[0m'
     typeset -A freed_space
+    local -a BASIC_PATHS
+    local -a ADVANCED_PATHS
 
     # Log cleanup activity
     _log_cleanup() {
@@ -46,15 +54,30 @@ cleanup() {
     _safe_delete() {
         local path="$1" desc="$2" sudo_flag="${3:-false}"
         
-        # Enhanced safety check: reject raw home directory
-        if [[ "$path" == "$HOME" || "$path" == "$HOME/" ]]; then
-            error "Unsafe path: $path (refuses raw home directory)"
+        # Enhanced safety check: resolve path and compare against home
+        local resolved_path
+        if command -v realpath &>/dev/null; then
+            resolved_path=$(realpath -m -- "$path" 2>/dev/null)
+        elif command -v readlink &>/dev/null; then
+            resolved_path=$(readlink -f -- "$path" 2>/dev/null)
+        else
+            resolved_path="$path" # Fallback if no resolver is available
+        fi
+
+        if [[ "$resolved_path" == "$HOME" ]]; then
+            error "Unsafe path: $path resolves to home directory"
             return
         fi
         [[ -z "$path" || "$path" == "/" ]] && error "Unsafe path: $path" && return
 
-        setopt nullglob globdots extendedglob
-        local -a files=($~path)
+        local -a files=()
+        if [[ "$path" == *"*"* ]]; then
+            # Use localoptions to scope globbing changes to this function
+            setopt localoptions nullglob globdots extendedglob
+            files=($~path)
+        elif [[ -e "$path" ]]; then
+            files=("$path")
+        fi
         local total=0
 
         for f in "${files[@]}"; do
@@ -66,6 +89,10 @@ cleanup() {
                 warn "[DRY RUN] Would delete $desc: $f ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
             else
                 if $sudo_flag; then
+                    if ! command -v sudo &>/dev/null; then
+                        warn "sudo command not found, cannot delete: $f"
+                        continue
+                    fi
                     /usr/bin/sudo /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
                 else
                     /usr/bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
@@ -78,6 +105,10 @@ cleanup() {
 
     # --- Run and track space by monitoring path ---
     _run_and_track_space() {
+        if ! command -v du &>/dev/null || ! command -v awk &>/dev/null; then
+            warn "Skipping '$1': missing 'du' or 'awk'."
+            return
+        fi
         local desc="$1" monitor="$2"; shift 2
         local before=0 after=0
 
@@ -109,6 +140,10 @@ cleanup() {
 
     # --- Run and parse space from command output ---
     _run_and_parse_space() {
+        if ! command -v numfmt &>/dev/null || ! command -v grep &>/dev/null; then
+            warn "Skipping '$1': missing 'numfmt' or 'grep'."
+            return
+        fi
         local desc="$1" regex="$2"; shift 2
 
         if $DRY_RUN; then
@@ -131,6 +166,10 @@ cleanup() {
 
     # --- Git cleanup ---
     _git_gc_and_track_space() {
+        if ! command -v find &>/dev/null || ! command -v du &>/dev/null || ! command -v grep &>/dev/null || ! command -v awk &>/dev/null || ! command -v git &>/dev/null; then
+            warn "Skipping Git GC: missing one of find, du, grep, awk, git."
+            return
+        fi
         local desc="Git Garbage Collection" base="$HOME/Personal"
         local before=0 after=0
 
@@ -151,34 +190,126 @@ cleanup() {
         [[ $freed -gt 0 ]] && freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + freed ))
     }
 
-    # --- Cleanup targets ---
-    local -a BASIC_PATHS=(
-        "$HOME/.cache/thumbnails/*:Thumbnail Cache"
-        "$HOME/.cache/google-chrome:Chrome Cache"
-        "$HOME/.cache/mozilla/firefox:Firefox Cache"
-        "$HOME/.var/app/app.zen_browser.zen/cache/*:Zen Browser Cache"
-        "$HOME/.local/share/Trash/files/*:Trash Files"
-        "$HOME/.local/share/Trash/info/*:Trash Info Files"
-    )
+    # --- Load paths from config ---
+    _load_cleanup_paths() {
+        local config_file="$HOME/.config/cleanup/paths.conf"
+        if [[ ! -f "$config_file" ]]; then
+            error "Config file not found: $config_file"
+            return 1
+        fi
 
-    local -a ADVANCED_PATHS=(
-        "$HOME/.npm:NPM Cache:true"
-        "$HOME/.npm/_logs/*:NPM Logs"
-        "$HOME/.cache/yarn:Yarn Cache"
-        "$HOME/.pnpm-store:PNPM Store"
-        "$HOME/.cache/node-gyp/*:Node-gyp Cache"
-        "$HOME/.cache/pip:Python pip cache"
-        "$HOME/.local/share/virtualenvs:Python virtualenvs"
-        "$HOME/.cargo/registry/cache/*:Cargo Registry Cache"
-        "$HOME/Personal/**/target:Rust Target Folders"
-        "$HOME/.m2/repository/*:Maven Repository"
-        "$HOME/.gradle/caches/*:Gradle Cache"
-        "$HOME/go/pkg/mod/cache/*:Go Module Cache"
-        "$HOME/.vscode/extensions/.obsolete/*:VSCode Obsolete Extensions"
-        "/var/lib/snapd/cache/*:Snap Cache:true"
-        "/var/cache/man/*:Man-db Cache:true"
-        "/var/lib/systemd/coredump/*:Systemd Core Dumps:true"
-    )
+        local mode="basic"
+        BASIC_PATHS=()
+        ADVANCED_PATHS=()
+
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            # Ignore comments
+            [[ "$line" =~ ^\s*# ]] && continue
+
+            if [[ -z "$line" ]]; then
+                mode="advanced"
+                continue
+            fi
+
+            # Expand environment variables like $HOME
+            local expanded_line=${line//\$HOME/$HOME}
+
+            if [[ "$mode" == "basic" ]]; then
+                BASIC_PATHS+=("$expanded_line")
+            else
+                ADVANCED_PATHS+=("$expanded_line")
+            fi
+        done < "$config_file"
+        return 0
+    }
+
+    # --- Cleanup broken symlinks ---
+    _cleanup_broken_symlinks() {
+        local desc="Broken Symlinks"
+        local search_path="$HOME"
+        info "Searching for and removing broken symlinks in $search_path..."
+
+        local -a broken_links=()
+        # Use a loop to handle potential errors with find and large numbers of files
+        while IFS= read -r -d '' link; do
+            broken_links+=("$link")
+        done < <(/usr/bin/find "$search_path" -xtype l -print0 2>/dev/null)
+        
+        local count=${#broken_links[@]}
+
+        if (( count == 0 )); then
+            ok "No broken symlinks found."
+            return
+        fi
+
+        if $DRY_RUN; then
+            warn "[DRY RUN] Would delete $count broken symlinks from $search_path"
+            for link in "${broken_links[@]}"; do
+                warn "[DRY RUN] Would delete $desc: $link"
+            done
+            # Just add a placeholder for the report, space is negligible
+            freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + count ))
+            return
+        fi
+
+        info "Removing $count broken symlinks..."
+        for link in "${broken_links[@]}"; do
+            /usr/bin/rm -- "$link" 2>/dev/null
+        done
+        ok "Removed $count broken symlinks."
+        freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + count ))
+    }
+
+    # --- Cleanup old kernels ---
+    _cleanup_old_kernels() {
+        local desc="Old Kernels"
+        info "Searching for old kernels to remove..."
+
+        if ! /usr/bin/command -v dpkg-query &> /dev/null; then
+            warn "Skipping old kernel cleanup: not a Debian-based system."
+            return
+        fi
+
+        local current_kernel_image="linux-image-$(/usr/bin/uname -r)"
+        local current_kernel_headers="linux-headers-$(/usr/bin/uname -r)"
+
+        local all_images=()
+        mapfile -t all_images < <(/usr/bin/dpkg-query -W -f='${Package}\n' 'linux-image-[0-9]*' 2>/dev/null | /usr/bin/sort -V)
+        
+        local all_headers=()
+        mapfile -t all_headers < <(/usr/bin/dpkg-query -W -f='${Package}\n' 'linux-headers-[0-9]*' 2>/dev/null | /usr/bin/sort -V)
+
+        if (( ${#all_images[@]} < 2 && ${#all_headers[@]} < 2 )); then
+            ok "No old kernels to remove (less than 2 installed)."
+            return
+        fi
+
+        local latest_image="${all_images[-1]}"
+        local latest_headers="${all_headers[-1]}"
+
+        local kernels_to_keep=("$current_kernel_image" "$current_kernel_headers" "$latest_image" "$latest_headers")
+        local unique_kernels_to_keep
+        unique_kernels_to_keep=(${(u)kernels_to_keep})
+
+        local all_kernels=("${all_images[@]}" "${all_headers[@]}")
+        
+        local kernels_to_remove=()
+        for kernel in "${all_kernels[@]}"; do
+            if ! [[ " ${unique_kernels_to_keep[*]} " =~ " ${kernel} " ]]; then
+                kernels_to_remove+=("$kernel")
+            fi
+        done
+        
+        local unique_kernels_to_remove
+        unique_kernels_to_remove=(${(u)kernels_to_remove})
+
+        if (( ${#unique_kernels_to_remove[@]} == 0 )); then
+            ok "No old kernels to remove."
+            return
+        fi
+
+        _run_and_parse_space "$desc" 'After this operation, (?:an additional )?\\K[0-9,.]+ [a-zA-Z]+' /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y "${unique_kernels_to_remove[@]}"
+    }
 
     cleanup_basic() {
         info "--- Starting Basic Cleanup ---"
@@ -192,6 +323,8 @@ cleanup() {
         _safe_delete "/var/cache/apt/archives/*" "APT Cache Clean" true
         _run_and_parse_space "APT Autoclean" 'cleared \K[0-9,.]+[ a-zA-Z]+' /usr/bin/sudo /usr/bin/apt-get autoclean -y
         _run_and_parse_space "APT Autoremove" 'After this operation, (?:an additional )?\\K[0-9,.]+ [a-zA-Z]+' /usr/bin/sudo /usr/bin/apt-get autoremove --purge -y
+
+        _cleanup_broken_symlinks
 
         ok "--- Basic Cleanup Complete ---"
     }
@@ -212,6 +345,7 @@ cleanup() {
         _run_and_parse_space "Docker Prune" 'Total reclaimed space:\\s*\\K[0-9.]+[A-Za-z]+' /usr/bin/sudo /usr/bin/docker system prune -af --volumes
 
         _git_gc_and_track_space
+        _cleanup_old_kernels
 
         ok "--- Advanced Cleanup Complete ---"
     }
@@ -232,6 +366,8 @@ cleanup() {
     }
 
     # --- Menu ---
+    _load_cleanup_paths || return 1
+
     if [[ "$AUTO_MODE" == "advanced" ]]; then
         cleanup_advanced
     elif [[ "$AUTO_MODE" == "basic" ]]; then

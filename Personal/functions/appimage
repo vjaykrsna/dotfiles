@@ -48,7 +48,7 @@ install_appimage() {
 	# 5️⃣ Extract icon from AppImage (if available)
 	local ICON_PATH="$HOME/.local/share/icons/${APP_NAME// /_}.png"
 	if command -v bsdtar >/dev/null 2>&1; then
-		bsdtar -tf "$DEST_PATH" | grep -Ei '\.(png|svg)$' | head -n1 | while read -r iconfile; do
+		bsdtar -tf "$DEST_PATH" 2>/dev/null | grep -Ei '\.(png|svg)$' | head -n1 | while read -r iconfile; do
 			mkdir -p "$(dirname "$ICON_PATH")"
 			bsdtar -xf "$DEST_PATH" "$iconfile" --to-stdout >"$ICON_PATH"
 			break

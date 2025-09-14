@@ -41,7 +41,7 @@ save_snap() {
 save_npm() {
     if command -v npm &> /dev/null; then
         info "Updating npm global package list..."
-        npm list -g --depth=0 | awk -F ' ' '/@/ {print $2}' > "$SAVE_DIR/npm-globals.txt"
+        npm list -g --depth=0 | awk -F ' ' '/@/ {print $2}' | sed 's/@[^@]*$/@latest/' > "$SAVE_DIR/npm-globals.txt"
         ok "npm list updated."
     fi
 }
@@ -65,7 +65,7 @@ save_cargo() {
 save_bun() {
     if command -v bun &> /dev/null; then
         info "Updating Bun global package list..."
-        bun pm -g ls --bare | cut -d'@' -f1 > "$SAVE_DIR/bun-globals.txt"
+        bun pm -g ls --bare 2>/dev/null | cut -d'@' -f1 > "$SAVE_DIR/bun-globals.txt"
         ok "Bun list updated."
     fi
 }

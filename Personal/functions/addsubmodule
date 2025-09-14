@@ -37,7 +37,7 @@ addsubmodule() {
         [[ "$repo_path" == "$search_dir" ]] && continue
 
         # Skip if already a submodule
-        if ! git -C "$search_dir" config --file .gitmodules --get-regexp "^submodule\..*\.path$" | grep -qx "$repo_path"; then
+        if ! git -C "$search_dir" config --file .gitmodules --get-regexp "^submodule\..*\.path$" 2>/dev/null | grep -qx "$repo_path"; then
             nested_repos+=("$repo_path")
         fi
     done < <(find "$search_dir" -type d -name ".git")
