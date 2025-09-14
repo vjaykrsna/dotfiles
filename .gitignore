@@ -67,6 +67,10 @@
 !/.config/user-dirs.locale
 !/.config/yadm/
 !/.config/yadm/encrypt
+!/.config/cleanup/
+!/.config/cleanup/paths.conf
+!/.config/dockerctl/
+!/.config/dockerctl/config
 
 # yadm Archive
 !/.local/share/yadm/
