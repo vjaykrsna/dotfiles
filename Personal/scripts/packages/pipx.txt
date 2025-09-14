@@ -1,3 +1,2 @@
 black
-gnome-extensions-cli
 uv

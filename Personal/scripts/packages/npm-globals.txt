@@ -1,4 +1,6 @@
 bun@latest
+corepack@latest
 firecrawl-mcp@latest
+nodemon@latest
 npm@latest
 pnpm@latest
