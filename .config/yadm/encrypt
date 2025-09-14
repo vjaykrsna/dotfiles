@@ -8,3 +8,6 @@
 .config/gsconnect/private.pem
 .config/gsconnect/certificate.pem
 **/.env
+.var/app/app.zen_browser.zen/.zen/*/key4.db
+.var/app/app.zen_browser.zen/.zen/*/logins.json
+.var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
