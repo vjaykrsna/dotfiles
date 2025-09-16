@@ -65,7 +65,7 @@ save_cargo() {
 save_bun() {
     if command -v bun &> /dev/null; then
         info "Updating Bun global package list..."
-        bun pm -g ls --bare 2>/dev/null | cut -d'@' -f1 > "$SAVE_DIR/bun-globals.txt"
+        bun pm -g ls --bare 2> /dev/null | cut -d'@' -f1 > "$SAVE_DIR/bun-globals.txt"
         ok "Bun list updated."
     fi
 }

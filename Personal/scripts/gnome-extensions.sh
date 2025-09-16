@@ -50,18 +50,55 @@ install_extensions() {
     # xargs removes newlines and passes them as separate arguments.
     xargs -a "$EXTENSIONS_FILE" gext install
     ok "All extensions installed."
+
+    # Compile schemas for newly installed extensions
+    info "Compiling GNOME extension schemas..."
+    for ext_uuid in $(cat "$EXTENSIONS_FILE"); do
+        ext_path="$HOME/.local/share/gnome-shell/extensions/$ext_uuid"
+        if [ -d "$ext_path/schemas" ]; then
+            info "Compiling schemas for $ext_uuid..."
+            glib-compile-schemas "$ext_path/schemas"
+        fi
+    done
+    ok "Schema compilation completed."
+}
+
+# --- INTERACTIVE MODE ---
+interactive_mode() {
+    echo "GNOME Extensions Management:"
+    echo "1. Save list of installed extensions"
+    echo "2. Install extensions from saved list"
+    echo -n "Choose an option (1-2): "
+    read -r choice
+
+    case "$choice" in
+    1)
+        save_extensions
+        ;;
+    2)
+        install_extensions
+        ;;
+    *)
+        echo "Invalid option. Exiting."
+        exit 1
+        ;;
+    esac
 }
 
 # --- MAIN LOGIC ---
 case "${1:-}" in
-    save)
-        save_extensions
-        ;;
-    install)
-        install_extensions
-        ;;
-    *)
-        echo "Usage: $0 {save|install}"
-        exit 1
-        ;;
+save)
+    save_extensions
+    ;;
+install)
+    install_extensions
+    ;;
+interactive | "")
+    interactive_mode
+    ;;
+*)
+    echo "Usage: $0 {save|install|interactive}"
+    echo "If no argument provided, runs in interactive mode."
+    exit 1
+    ;;
 esac

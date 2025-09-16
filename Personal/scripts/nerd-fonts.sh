@@ -4,29 +4,28 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# Logging functions
-info() { echo "[INFO] $1"; }
-ok()   { echo "[OK] $1"; }
-warn() { echo "[WARN] $1"; }
-error(){ echo "[ERROR] $1"; }
+# --- Sourcing Dependencies (only when running standalone) ---
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+fi
 
 # Function to clean up unused fonts and reduce storage usage
 cleanup_unused_fonts() {
     local FONT_DIR="$HOME/.local/share/fonts"
-    
+
     info "Current font directory size:"
     du -sh "$FONT_DIR"
-    
+
     info "Whitelisting essential font weights (Regular, Italic, Medium, Bold + Italics)..."
-    
+
     find "$FONT_DIR" -type f -name "*NerdFont*" \
         -not -regex ".*NerdFont-\(Regular\|Italic\|RegularItalic\|Medium\|MediumItalic\|Bold\|BoldItalic\)\.\(ttf\|otf\)" \
-        -delete 2>/dev/null || true
-    
+        -delete 2> /dev/null || true
+
     info "Font cleanup completed."
     info "New font directory size:"
     du -sh "$FONT_DIR"
-    
+
     info "Fonts kept:"
     ls -1 "$FONT_DIR" | grep "NerdFont" | sort || true
 }
@@ -37,7 +36,7 @@ install_selective_fonts() {
     local FONT_DIR="$HOME/.local/share/fonts"
     local TMP_DIR="/tmp"
     mkdir -p "$FONT_DIR"
-    
+
     if [[ -f "$FONT_DIR/JetBrainsMonoNerdFont-Regular.ttf" ]] || [[ -f "$FONT_DIR/JetBrainsMonoNerdFont-Regular.otf" ]]; then
         info "› JetBrains Mono already installed, skipping download."
     else
@@ -52,12 +51,12 @@ install_selective_fonts() {
             error "Failed to download JetBrains Mono Nerd Font"
         fi
     fi
-    
+
     cleanup_unused_fonts
-    
+
     info "› Rebuilding font cache..."
     fc-cache -v "$FONT_DIR"
-    
+
     ok "--- Selective Nerd Fonts Installation Complete ---"
 }
 
@@ -67,13 +66,13 @@ install_all_fonts() {
     local FONT_DIR="$HOME/.local/share/fonts"
     local TMP_DIR="/tmp"
     mkdir -p "$FONT_DIR"
-    
+
     declare -A FONTS=(
         ["JetBrainsMono"]="JetBrainsMono"
         ["FiraCode"]="FiraCode"
         ["GeistMono"]="GeistMono"
     )
-    
+
     for FONT in "${!FONTS[@]}"; do
         if [[ -f "$FONT_DIR/${FONT}NerdFont-Regular.ttf" ]] || [[ -f "$FONT_DIR/${FONT}NerdFont-Regular.otf" ]]; then
             info "› $FONT already installed, skipping download."
@@ -90,12 +89,12 @@ install_all_fonts() {
             fi
         fi
     done
-    
+
     cleanup_unused_fonts
-    
+
     info "› Rebuilding font cache..."
     fc-cache -v "$FONT_DIR"
-    
+
     ok "--- All Nerd Fonts Installation Complete ---"
 }
 
@@ -108,4 +107,7 @@ install_nerd_fonts() {
     fi
 }
 
-install_nerd_fonts "$@"
+# Allow running standalone or sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    install_nerd_fonts "$@"
+fi

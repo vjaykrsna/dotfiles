@@ -26,43 +26,69 @@ ok() { echo -e "${GREEN}✅ $*${NC}"; }
 # --- SAVE FUNCTION ---
 save_configs() {
     info "Saving system configurations..."
-    
+
     # Save crontab
     crontab -l > "$CONFIG_DIR/crontab.txt"
-    
+
     # Save fstab
     cp /etc/fstab "$CONFIG_DIR/fstab"
-    
+
     # Save hosts file
     cp /etc/hosts "$CONFIG_DIR/hosts"
-    
+
     ok "System configurations saved to $CONFIG_DIR."
 }
 
 # --- DIFF FUNCTION ---
 diff_configs() {
     info "Comparing stored configurations with live system..."
-    
+
     info "--- Crontab ---"
     diff -u "$CONFIG_DIR/crontab.txt" <(crontab -l) || true
-    
+
     info "--- fstab ---"
     diff -u "$CONFIG_DIR/fstab" /etc/fstab || true
-    
+
     info "--- hosts ---"
     diff -u "$CONFIG_DIR/hosts" /etc/hosts || true
 }
 
-# --- MAIN LOGIC ---
-case "${1:-}" in
-    save)
+# --- INTERACTIVE MODE ---
+interactive_mode() {
+    echo "System Configuration Management:"
+    echo "1. Save (backup) current system configs"
+    echo "2. Compare (diff) configs with saved version"
+    echo -n "Choose an option (1-2): "
+    read -r choice
+
+    case "$choice" in
+    1)
         save_configs
         ;;
-    diff)
+    2)
         diff_configs
         ;;
     *)
-        echo "Usage: $0 {save|diff}"
+        echo "Invalid option. Exiting."
         exit 1
         ;;
+    esac
+}
+
+# --- MAIN LOGIC ---
+case "${1:-}" in
+save)
+    save_configs
+    ;;
+diff)
+    diff_configs
+    ;;
+interactive | "")
+    interactive_mode
+    ;;
+*)
+    echo "Usage: $0 {save|diff|interactive}"
+    echo "If no argument provided, runs in interactive mode."
+    exit 1
+    ;;
 esac

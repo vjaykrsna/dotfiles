@@ -5,17 +5,19 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Sourcing Dependencies ---
+# --- Sourcing Dependencies (only when running standalone) ---
 # Note: This script is intended to be run standalone with sudo,
 # but we source this to get logging functions.
-source "$(dirname "$0")/installer.sh"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    source "$(dirname "$0")/installer.sh"
+fi
 
 info "🔧 Pre-Install System Preparation"
 warn "This script requires sudo access for system updates"
 
 # Check if running with sudo
 if [[ $EUID -ne 0 ]]; then
-	error "Please run with sudo: sudo $0"
+    error "Please run with sudo: sudo $0"
 fi
 
 # Update package lists
@@ -31,9 +33,9 @@ warn "› Installing essential build tools..."
 apt install -y build-essential curl wget git software-properties-common
 
 # Install Flatpak if not present
-if ! command -v flatpak &>/dev/null; then
-	warn "› Installing Flatpak..."
-	apt install -y flatpak gnome-software-plugin-flatpak
+if ! command -v flatpak &> /dev/null; then
+    warn "› Installing Flatpak..."
+    apt install -y flatpak gnome-software-plugin-flatpak
 fi
 
 # Clean up
