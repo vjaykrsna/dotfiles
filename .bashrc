@@ -1,71 +1,76 @@
-# If not running interactively, don't do anything
-case $- in
-    *i*) ;;
-      *) return;;
-esac
+#!/usr/bin/env bash
 
-# History configuration
+# Exit early for non-interactive shells
+[[ $- != *i* ]] && return
+
+# -----------------------------
+# History (shared with zsh)
+# -----------------------------
 HISTFILE="$HOME/.zsh_history"
 HISTCONTROL=ignoreboth
-shopt -s histappend
 HISTSIZE=10000
 HISTFILESIZE=10000
+shopt -s histappend
 
-# Check window size after each command
-shopt -s checkwinsize
+__sync_history() { history -a; history -n; }
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}__sync_history"
 
-# Make less more friendly for non-text input files
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# Set chroot identifier
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# Set prompt with color support
+# -----------------------------
+# Prompt & terminal
+# -----------------------------
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
+    *) color_prompt=no;;
 esac
 
-if [ "$color_prompt" = yes ]; then
+# Guard against missing /etc/debian_chroot
+if [[ -z ${debian_chroot:-} && -f /etc/debian_chroot ]]; then
+    debian_chroot=$(< /etc/debian_chroot)
+else
+    debian_chroot=""
+fi
+
+if [[ $color_prompt == yes ]]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 
-# Set window title for xterm
 case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*) ;;
+    xterm*|rxvt*) PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1";;
 esac
 
-unset color_prompt force_color_prompt
-
-# Color support for ls and grep
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+# -----------------------------
+# Color support for ls/grep
+# -----------------------------
+if command -v dircolors >/dev/null 2>&1; then
+    eval "$(dircolors -b "${HOME}/.dircolors" 2>/dev/null || dircolors -b)"
     alias ls='ls --color=auto'
     alias grep='grep --color=auto'
     alias fgrep='fgrep --color=auto'
     alias egrep='egrep --color=auto'
 fi
 
-# Load personal aliases from dedicated file
-if [ -f "$HOME/Personal/.aliases" ]; then
-    . "$HOME/Personal/.aliases"
-fi
+# -----------------------------
+# Personal aliases & scripts
+# -----------------------------
+[[ -f "$HOME/Personal/.alias" ]] && source "$HOME/Personal/.alias"
 
-# Enable programmable completion
+# -----------------------------
+# Bash completion
+# -----------------------------
 if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
+    [[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
+    [[ -f /etc/bash_completion ]] && source /etc/bash_completion
 fi
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# -----------------------------
+# Runtime managers
+# (moved common helpers to ~/Personal/.alias)
+# NVM_DIR is exported from ~/.profile
+# -----------------------------
+
+# -----------------------------
+# Misc helpful options
+# -----------------------------
+shopt -s checkwinsize

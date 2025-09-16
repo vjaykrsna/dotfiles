@@ -54,3 +54,19 @@ myzram() {
 alias hackerui='$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox'
 alias dockerui='lazydocker'
 alias yadmcode='GIT_DIR=~/.local/share/yadm/repo.git code ~'
+
+# ==================================================================
+# RUNTIME MANAGERS (shared)
+# ==================================================================
+# Note: NVM_DIR is exported from ~/.profile. Use fallback if unset.
+nvm() {
+    local nvm_dir="${NVM_DIR:-$HOME/.nvm}"
+    if [ -s "$nvm_dir/nvm.sh" ]; then
+        unset -f nvm 2>/dev/null || true
+        . "$nvm_dir/nvm.sh"
+        nvm "$@"
+    else
+        echo "nvm: nvm.sh not found in $nvm_dir" >&2
+        return 127
+    fi
+}

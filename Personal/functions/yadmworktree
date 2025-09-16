@@ -1,0 +1,87 @@
+#!/usr/bin/env zsh
+#autoload
+# Minimal helper to manage git --skip-worktree on tracked runtime files
+
+yadmworktree() {
+  emulate -L zsh
+  setopt NO_UNSET
+
+  local REPO_ROOT="$HOME"
+  local -a PATHS=(
+    ".var/app/app.zen_browser.zen/**"
+  )
+
+  _info()  { printf "\033[0;34mℹ️  %s\033[0m\n" "$*"; }
+  _ok()    { printf "\033[0;32m✅ %s\033[0m\n" "$*"; }
+  _warn()  { printf "\033[0;33m⚠️  %s\033[0m\n" "$*"; }
+
+  # list tracked files that match PATHS
+  do_ls_files() {
+    # Use NUL separator to safely handle paths with spaces or special chars
+    git -C "$REPO_ROOT" ls-files -z -- "${PATHS[@]}" 2>/dev/null || true
+  }
+
+  case ${1:-} in
+    status)
+      _info "skip-worktree status for: ${PATHS[*]}"
+      git -C "$REPO_ROOT" ls-files -v -- "${PATHS[@]}" | sed -n '1,200p'
+      ;;
+
+    set)
+      _info "setting skip-worktree for tracked files under: ${PATHS[*]}"
+      # iterate NUL-delimited list to handle spaces/newlines in filenames
+      local failed=0
+      while IFS= read -r -d '' f; do
+        if ! git -C "$REPO_ROOT" update-index --skip-worktree -- "$f"; then
+          _warn "failed to set skip-worktree: $f"
+          failed=1
+        fi
+      done < <(do_ls_files)
+      (( failed == 0 )) && _ok "done" || _warn "completed with failures"
+      ;;
+
+    unset)
+      _info "unsetting skip-worktree for tracked files under: ${PATHS[*]}"
+      local failed=0
+      while IFS= read -r -d '' f; do
+        if ! git -C "$REPO_ROOT" update-index --no-skip-worktree -- "$f"; then
+          _warn "failed to unset skip-worktree: $f"
+          failed=1
+        fi
+      done < <(do_ls_files)
+      (( failed == 0 )) && _ok "done" || _warn "completed with failures"
+      ;;
+
+    pull-safe)
+      _info "pull-safe: unset skip-worktree, pull --rebase origin master, then re-set skip-worktree"
+      # unset
+      while IFS= read -r -d '' f; do
+        git -C "$REPO_ROOT" update-index --no-skip-worktree -- "$f" || _warn "could not unset: $f"
+      done < <(do_ls_files)
+      # pull (rebase)
+      git -C "$REPO_ROOT" pull --rebase origin master
+      # re-set
+      while IFS= read -r -d '' f; do
+        git -C "$REPO_ROOT" update-index --skip-worktree -- "$f" || _warn "could not set: $f"
+      done < <(do_ls_files)
+      _ok "done"
+      ;;
+
+    help|--help|-h|"")
+      cat <<'USAGE'
+Usage: yadmworktree <command>
+Commands:
+  status    Show skip-worktree status for configured paths
+  set       Set skip-worktree on tracked files under configured configurations
+  unset     Unset skip-worktree for those files
+  pull-safe Temporarily unset skip-worktree, pull --rebase origin master, then re-set
+  help      Show this help
+USAGE
+      ;;
+
+    *)
+      _warn "unknown command: $1"
+      return 2
+      ;;
+  esac
+}

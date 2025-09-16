@@ -1,200 +1,151 @@
 # 🗂️ Dotfiles Management with `yadm`
 
-This repository is managed using **`yadm` (Yet Another Dotfiles Manager)**.
-It uses a **whitelist-based `.gitignore` strategy** and integrates **encryption for secrets**, ensuring reproducibility across machines without leaking private data.
-
-This document is a **master guide** for managing this repo—written so even an AI assistant (or a new human contributor) with zero prior knowledge can confidently handle the setup.
+This repository is managed with `yadm` and keeps the home directory as the worktree. This document records the exact configuration and workflows used here: what is tracked, which paths are encrypted, how `.gitignore` maps to the encrypt list, and how Git LFS and submodules are handled. Facts marked "(verified)" come from reading local files; anything else is noted as such.
 
 ---
 
-## 🚀 Overview of Setup
+## Overview & goals
 
-* **Strategy**:
-
-  * Ignore everything (`*`) by default.
-  * Explicitly whitelist files and directories to track.
-  * Explicitly blacklist caches, temp files, and noisy configs.
-  * Encrypt sensitive files with `yadm-crypt`.
-
-* **What gets tracked**:
-
-  * Core shell dotfiles (`.bashrc`, `.zshrc`, `.profile`, `.gitconfig`, etc.)
-  * Personal scripts and projects under `~/Personal/`
-  * Select configuration files in `~/.config/` (portable ones like `starship`, `input-remapper`, `micro`, etc.)
-  * Autostart entries and wallpapers for reproducible desktop setup
-  * User directories (`.config/user-dirs.dirs`) for consistent \$HOME structure
-
-* **What gets excluded**:
-
-  * Caches (`*/cache/`), logs, browser configs, noisy editors like VSCode’s `workspaceStorage/`
-  * Browser/session data (`BraveSoftware/`, `Code/`, `chromium/`, etc.)
-  * System/runtime files (pulse runtime, ibus socket, ssh agent locks)
-  * Shell history files
-
-* **What gets encrypted**:
-
-  * SSH keys (`~/.ssh/`)
-  * `.gnupg/` directory (for GPG keys, if you choose to use them)
-  * `.env` files
-  * Git credentials (`.git-credentials`)
-  * GSConnect certs (`certificate.pem`, `private.pem`)
+- Purpose: keep a single-source-of-truth for dotfiles that is portable, auditable, and safe for secrets.
+- Strategy: whitelist-first `.gitignore` (ignore `*`, then `!` rules), track small trusted config files, and encrypt secrets into the `yadm` archive.
 
 ---
 
-## 🔑 Key Files
+## Top-level facts (verified)
 
-### `.gitignore`
-
-* Implements the **whitelist approach**.
-* Ensures parent directories are un-ignored before child files.
-* Sections:
-
-  * Whitelisted dotfiles
-  * Whitelisted configs
-  * Common ignores (caches, logs, browser profiles, temp)
-  * Explicit ignores (history, runtime sockets, junk)
-
-### `.config/yadm/encrypt`
-
-* **Master list of encrypted paths.**
-* This file contains a simple list of files and directories that should be encrypted.
-* When you run `yadm encrypt`, `yadm` bundles these files into a single encrypted archive located at `~/.local/share/yadm/archive`.
-* This archive is what gets committed to the repository, keeping your source secrets safe.
-* Examples in the current setup include `.ssh/id_*`, `.env`, and `gsconnect` keys.
-
-### `.gitmodules`
-
-* Declares Git submodules.
-* Current setup:
-
-  * `Personal/myGithub/vscode-settings`
+- Worktree: `/home/vijay` (verified via `~/.local/share/yadm/repo.git/config`)
+- `yadm` managed: yes (verified)
+- Encrypt list file: `~/.config/yadm/encrypt` (verified)
+- Encrypted archive path: `~/.local/share/yadm/archive` (expected and referenced) (verified)
+- `.gitignore` uses a whitelist-first strategy (verified: `/home/vijay/.gitignore` contains `*` then `!` rules)
+- Git LFS: present in repo config (`[lfs]` section present in `~/.local/share/yadm/repo.git/config`) — indicates LFS is configured for the repository (verified)
 
 ---
 
-## 📦 Daily Workflow
+## Exact encrypt list (from `~/.config/yadm/encrypt`) (verified)
 
-### 1. Check status
-
-```bash
-yadm status        # tracked files only  
-yadm status -u     # include untracked  
+```
+.ssh/id_*
+.gnupg/
+.env
+.git-credentials
+.config/gsconnect/private.pem
+.config/gsconnect/certificate.pem
+**/.env
+.var/app/app.zen_browser.zen/.zen/*/key4.db
+.var/app/app.zen_browser.zen/.zen/*/logins.json
+.var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
 ```
 
-### 2. Add changes
+Notes:
+- Private SSH keys (`.ssh/id_*`) are encrypted; public keys are tracked separately via `.gitignore` exceptions.
+- Patterns include both explicit files and globs (e.g., `**/.env`) to catch env files under subdirectories.
+
+---
+
+## `.gitignore` mapping and intent (verified)
+
+Highlights from `/home/vijay/.gitignore` (strategy and key rules):
+
+- The file begins with `*` (ignore everything), followed by explicit `!` whitelist entries for files and directories that should be tracked.
+- Whitelisted core files: `/.bashrc`, `/.zshrc`, `/.profile`, `/.gitconfig`, `/.gitmodules`, `/.gitattributes`.
+- Personal directories are whitelisted: `/Personal/` and its contents.
+- `/.local/share/yadm/` and `/.local/share/yadm/archive` are whitelisted so the encrypted archive and yadm metadata can be tracked.
+- Encrypted sources are re-ignored (final override) to avoid committing plaintext: e.g. `/.ssh/id_*`, `/.gnupg/`, `/.env`, `/.git-credentials`, and the browser/profile db paths under `.var/app/...` — these mirror entries in `~/.config/yadm/encrypt` (verified mapping).
+
+Practical effect:
+- Plaintext secret files are not committed directly. Their patterns are in `~/.config/yadm/encrypt`; instead the encrypted archive (`~/.local/share/yadm/archive`) is tracked.
+
+---
+
+## Quick workflows (concise)
+
+These are straightforward, intentionally concise steps (no basic git hand-holding):
+
+- Add a tracked config: ensure parent dir is whitelisted, `yadm add <path>`, commit, push.
+- Add an encrypted secret: add the path to `~/.config/yadm/encrypt`, run `yadm encrypt`, then `yadm add ~/.local/share/yadm/archive`, commit, push.
+- Bootstrapping a new machine: clone with `yadm clone` and run `yadm decrypt` if archive exists.
+
+---
+
+## Git LFS (verified presence + configuration)
+
+- The repo's bare config (`~/.local/share/yadm/repo.git/config`) contains a `[lfs]` section — Git LFS is configured for the repository (verified).
+- You already have a top-level `.gitattributes` at `~/.gitattributes` with comprehensive patterns for images, fonts, archives, video/audio and more (verified). Do not duplicate patterns in `Personal/` unless you specifically want repo-scoped attributes.
+
+Recommended checks and commands (only run these locally when needed):
 
 ```bash
-yadm add .         # add all whitelisted changes  
-yadm add <file>    # add specific files if needed  
+# Ensure git-lfs is installed and configured for your user
+git lfs install --local
+
+# If you need to track a new pattern (adds to .gitattributes)
+git lfs track "*.webp" # or use `yadm lfs track` if you prefer the yadm wrapper
+
+# Show tracked LFS patterns
+git lfs track
 ```
 
-### 3. Commit & push
-
-```bash
-yadm commit -m "Update <something>"  
-yadm push  
-```
+Notes:
+- `yadm` wraps `git`, so `yadm lfs track` is equivalent to `git lfs track` when used in the yadm worktree, but `git lfs install` is typically a per-user action and should be run where LFS is used.
+- Since `~/.gitattributes` already exists and contains the patterns you want, you generally only need to run `git lfs install` and ensure contributors have LFS installed.
 
 ---
 
-## 🔐 Handling Secrets (Symmetric Encryption)
+## Submodules
 
-This setup uses **`openssl` symmetric encryption**, which is simpler and more robust than the GPG default.
-
-*   **How it works**: Your files are encrypted directly with a key derived from your passphrase.
-*   **Disaster Recovery**: The **only thing you need to remember is your passphrase**. There is no separate GPG key to back up.
-
-### Encrypting a New File
-
-1.  **Whitelist the file**: Add a `!` rule for the file in your `.gitignore` so `git` can track it.
-2.  **Add path to encrypt list**: Add the file's path to `.config/yadm/encrypt`.
-3.  **Run `yadm encrypt`**: This will encrypt the new file along with all others.
-4.  **Commit changes**: `yadm add .` and `yadm commit`. `yadm` handles the encrypted archive automatically.
-
-### Decrypting on a New Machine
-
-```bash
-yadm decrypt
-```
-This will prompt for your passphrase and restore all your secrets.
+- `.gitmodules` is whitelisted in `.gitignore` (verified). If you use submodules (e.g., `Personal/myGithub/vscode-settings`), they will appear in `.gitmodules` at repo root.
+- If you manage submodules, prefer cloning with `--recurse-submodules` or running `git submodule update --init --recursive` after clone.
 
 ---
 
-## 🖥️ Restoring Environment with the Master Script
+## yadm hooks and backend detection (verified steps)
 
-On a new machine, after cloning and decrypting, the master setup script automates the entire environment restoration.
+- I inspected `~/.local/share/yadm/repo.git/config` and did not see a `yadm-crypt` hook reference (verified). That suggests the default `yadm` encrypt behavior is used (commonly `openssl`) or a custom `YADM_ENCRYPT_CMD` is configured elsewhere.
 
-```bash
-# For a fully automated, non-interactive setup:
-~/Personal/scripts/setup.sh all
-
-# For an interactive menu:
-~/Personal/scripts/setup.sh
-```
-
-This script handles:
-*   **System Packages**: Installs all `apt`, `flatpak`, `pipx`, `npm`, and `cargo` packages.
-*   **GNOME Desktop**: Restores your complete desktop environment—themes, keybindings, fonts, and settings—using `gnome-settings.sh`.
-*   **GNOME Extensions**: Reinstalls all your enabled GNOME extensions using `gnome-extensions.sh`.
-*   **Shell Environment**: Sets up Zinit and Starship.
-*   **System-Level Configs**: The `system-sync.sh` script helps you safely diff and restore configs like `crontab` and `/etc/fstab`.
+Please confirm if you use a custom encrypt backend (e.g., `yadm-crypt`) or a `YADM_ENCRYPT_CMD`; if so I will record the exact command string in `yadm.md`.
 
 ---
 
-## 🛠️ Customization
+## yadmworktree helper (verified)
 
-### Add a new tracked config
-
-1. Ensure parent directory is whitelisted.
-2. Add exact path to `.gitignore` with `!`.
-3. Run `yadm add <file>`.
-
-### Add a new encrypted config
-
-Follow the "Encrypt new files" workflow.
-
-### Ignore noisy files
-
-If a config starts creating random junk, add an ignore rule under *Explicitly Ignored*.
+- `~/Personal/functions/yadmworktree` exists and is autoloaded from your shell (`~/.zshrc`) (verified). It provides `status`, `set`, `unset`, and `pull-safe` to manage `git update-index --skip-worktree` for runtime files.
 
 ---
 
-## ✅ Quick Command Reference
+## Encryption / decrypt steps (concise & accurate)
 
-* **Status**: `yadm status -u`
-* **Add all**: `yadm add .`
-* **Commit**: `yadm commit -m "message"`
-* **Push**: `yadm push`
-* **Encrypt secrets**: `yadm encrypt && yadm add ~/.local/share/yadm/archive`
-* **Decrypt secrets**: `yadm decrypt`
+1. Add the secret path to `~/.config/yadm/encrypt` (relative to `$HOME`).
+2. Run `yadm encrypt` to update `~/.local/share/yadm/archive`.
+3. Stage and commit the archive: `yadm add ~/.local/share/yadm/archive && yadm commit -m "Update encrypted archive"`.
+4. On other machines: `yadm decrypt` to restore plaintext files (you will need the passphrase).
 
----
-
-## 📌 Notes on Current Setup
-
-* **Whitelist-first strategy** → keeps repo minimal, reproducible, and portable.
-* **GNOME dconf tracking enabled** → Restores desktop/session data for a consistent environment.
-* **Browser/editor states excluded** → prevents bloat.
-* **Personal scripts fully tracked** → ensures your custom tooling is portable.
+Notes:
+- Do not commit plaintext secret files; your `.gitignore` already mirrors the encrypt list (verified).
+- If you use a custom encrypt command, document `YADM_ENCRYPT_CMD` in `yadm.md` so other machines behave the same.
 
 ---
 
-## 🖼️ Handling Large Files with `git lfs`
+## Helpful commands and references (selective)
 
-This repository uses `git lfs` (Large File Storage) to manage large binary files, such as wallpapers. `git lfs` stores the large files on a separate server, and keeps lightweight pointers in the `git` repository.
-
-### Current `git lfs` Configuration
-
-*   **Tracked files**:
-    *   **Wallpapers**: `*.png` and `*.jpg` files in the `Personal/Wallpaper/` directory.
-    *   **Fonts**: Font files (`.ttf`, `.otf`, `.woff`, `.woff2`) in the `.local/share/fonts/` directory.
-    *   **General Media**: All common image, video, and audio formats (`.jpeg`, `.gif`, `.svg`, `.mp4`, `.mp3`, etc.).
-    *   **Documents & Archives**: Large documents and archives like `.pdf`, `.zip`, `.rar`, and `.iso`.
-
-### Workflow for Large Files
-
-1.  **Add the file**: Place the large file in the appropriate directory (e.g., `Personal/Wallpaper/` or `.local/share/fonts/`).
-2.  **Track the file type**: If it's a new file type, run `yadm lfs track "*.new_extension"`.
-3.  **Add the file to git**: Run `yadm add <path_to_file>`.
-4.  **Commit and push**: Commit and push your changes as usual.
+- Inspect yadm config: `yadm config --list` (look for `YADM_ENCRYPT_CMD` or hooks).
+- List hooks: `ls -la ~/.config/yadm/hooks || true` and `ls -la ~/.local/share/yadm/hooks || true`.
+- Show encrypt file: `cat ~/.config/yadm/encrypt`.
 
 ---
+
+## Open items & next steps
+
+- Verified: exact `~/.config/yadm/encrypt` contents, presence of `~/.local/share/yadm/repo.git/config` with `yadm` and `lfs` sections, `.gitignore` whitelist-first strategy, `yadmworktree` helper present, and `~/.gitattributes` exists at the top level (verified).
+- Needs verification from you (or by running the commands above): the exact `YADM_ENCRYPT_CMD` (if any). I did not find an explicit `yadm-crypt` setting in the repo git config; please confirm if you use a custom backend.
+
+If you want, I can:
+- Add or update `~/.gitattributes` with additional patterns (I will not duplicate entries if you prefer to keep a single top-level file).
+- Capture `YADM_ENCRYPT_CMD` by running `yadm config --list` locally and update `yadm.md` with the exact command string.
+- Reintroduce any other paragraphs from the previous version (e.g., the longer restore/script explanation).
+
+---
+
+## Notes
+
+This document is the repository's source of truth for how `yadm` is configured here. If you want me to stage and commit this file (and optionally update `~/.gitattributes`), tell me to "commit" and provide a commit message. If you prefer additional sections restored from prior versions, tell me which ones and I will update accordingly.

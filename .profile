@@ -1,27 +1,40 @@
-# ~/.profile: executed by the command interpreter for login shells.
-# This file is not read by bash(1), if ~/.bash_profile or ~/.bash_login
-# exists.
-# see /usr/share/doc/bash/examples/startup-files for examples.
-# the files are located in the bash-doc package.
+# ~/.profile: executed by login shells
 
-# the default umask is set in /etc/profile; for setting the umask
-# for ssh logins, install and configure the libpam-umask package.
-#umask 022
+# Mark that ~/.profile is being sourced so ~/.bashrc can avoid re-sourcing it
+export PROFILE_SOURCED=1
 
-# if running bash
-if [ -n "$BASH_VERSION" ]; then
-    # include .bashrc if it exists
-    if [ -f "$HOME/.bashrc" ]; then
-	. "$HOME/.bashrc"
-    fi
+# Include .bashrc for interactive shells
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
 fi
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
+# -----------------------------
+# PATH setup
+# -----------------------------
+# Deduplicated paths for login shells
+prepend_path() {
+    for p in "$@"; do
+        [[ -d "$p" && ":$PATH:" != *":$p:"* ]] && PATH="$p:$PATH"
+    done
+}
 
-# set PATH so it includes user's private bin if it exists
-if [ -d "$HOME/.local/bin" ] ; then
-    PATH="$HOME/.local/bin:$PATH"
-fi
+prepend_path \
+    "$HOME/bin" \
+    "$HOME/.local/bin" \
+    "$HOME/.bun/bin" \
+    "$HOME/.cargo/bin" \
+    "$HOME/go/bin" \
+    "$HOME/.pyenv/bin"
+
+export PATH
+
+# Editor defaults for all shells
+export EDITOR="micro"
+export VISUAL="code"
+export PYENV_ROOT="${PYENV_ROOT:-$HOME/.pyenv}"
+export NVM_DIR="${XDG_CONFIG_HOME:-$HOME/.nvm}"
+
+# -----------------------------
+# Cargo environment (if exists)
+# -----------------------------
+[ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
