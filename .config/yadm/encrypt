@@ -11,3 +11,7 @@
 .var/app/app.zen_browser.zen/.zen/*/key4.db
 .var/app/app.zen_browser.zen/.zen/*/logins.json
 .var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
+# Browser DBs (bookmarks/history, extension storage)
+.var/app/app.zen_browser.zen/.zen/*/places.sqlite
+.var/app/app.zen_browser.zen/.zen/*/places.sqlite-wal
+.var/app/app.zen_browser.zen/.zen/*/storage.sqlite
