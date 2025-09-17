@@ -18,7 +18,7 @@ alias reloadzsh="source $HOME/.zshrc"
 # Git aliases
 commit() { git commit -m "$*"; }
 alias lgit='lazygit'
-gitlog() { git log --oneline --graph --decorate --all -n "${1:-5}"; }
+gl() { git log --oneline --graph --decorate --all -n "${1:-5}"; }
 
 # System & Monitoring
 alias mem='free -h'
@@ -54,6 +54,7 @@ myzram() {
 alias hackerui='$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox'
 alias dockerui='lazydocker'
 alias yadmcode='GIT_DIR=~/.local/share/yadm/repo.git code ~'
+alias zinitcompile='zinit self-update && zinit compile --all'
 
 # ==================================================================
 # RUNTIME MANAGERS (shared)

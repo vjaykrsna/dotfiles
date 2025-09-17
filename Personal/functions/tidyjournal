@@ -1,0 +1,31 @@
+#autoload
+tidyjournal() {
+  emulate -L zsh
+  setopt err_return no_unset
+
+  local DRY_RUN="${JOURNALTIDY_DRY_RUN:-false}"
+  local RETENTION="${JOURNALTIDY_RETENTION:-1s}"  # default aggressive: remove almost everything
+
+  if ! command -v journalctl >/dev/null 2>&1; then
+    print "❌ journalctl not found"
+    return 1
+  fi
+
+  print "🔧 rotating systemd journal..."
+  [[ "$DRY_RUN" == "true" ]] && print "(dry) would run: sudo journalctl --rotate" || \
+    sudo journalctl --rotate >/dev/null 2>&1
+
+  print "🧹 vacuuming systemd journal (retention: $RETENTION)..."
+  if [[ "$DRY_RUN" == "true" ]]; then
+    print "(dry) would run: sudo journalctl --vacuum-time=\"$RETENTION\""
+    return 0
+  fi
+
+  if sudo journalctl --vacuum-time="$RETENTION" >/dev/null 2>&1; then
+    print "✅ journal cleanup complete"
+  else
+    print "⚠️ vacuum-time failed, trying fallback size 500M"
+    sudo journalctl --vacuum-size=500M >/dev/null 2>&1 && print "✅ journal vacuumed by size" || \
+      print "⚠️ journal cleanup failed"
+  fi
+}

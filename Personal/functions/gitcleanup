@@ -1,0 +1,35 @@
+#autoload
+gitcleanup() {
+  emulate -L zsh
+  setopt err_return no_unset
+
+  local DRY_RUN=false
+  local AGGRESSIVE=true
+
+  for arg in "$@"; do
+    case "$arg" in
+      --dry-run) DRY_RUN=true ;;
+      --no-aggressive) AGGRESSIVE=false ;;
+    esac
+  done
+
+  if ! command -v git >/dev/null 2>&1; then
+    print "❌ git not found"
+    return 1
+  fi
+
+  local repo
+  if ! repo=$(git rev-parse --show-toplevel 2>/dev/null); then
+    print "⚠️ Not in a git repo"
+    return 1
+  fi
+
+  local cmd=(git -C "$repo" gc --prune=now)
+  $AGGRESSIVE && cmd+=(--aggressive)
+
+  if $DRY_RUN; then
+    print "(dry) would run: ${cmd[*]}"
+  else
+    "${cmd[@]}" >/dev/null 2>&1 && print "✅ git cleanup done in $repo" || print "⚠️ git cleanup failed"
+  fi
+}

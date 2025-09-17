@@ -51,9 +51,7 @@
 !/.config/gnome-shell/
 !/.config/gnome-shell/extensions.txt
 !/.config/input-remapper-2/
-!/.config/input-remapper-2/config.json
-!/.config/input-remapper-2/presets/
-!/.config/input-remapper-2/xmodmap.json
+!/.config/input-remapper-2/**
 !/.config/micro/
 !/.config/micro/bindings.json
 !/.config/Rygel/
@@ -68,7 +66,7 @@
 !/.config/yadm/
 !/.config/yadm/encrypt
 !/.config/cleanup/
-!/.config/cleanup/paths.conf
+!/.config/cleanup/**
 !/.config/dockerctl/
 !/.config/dockerctl/config
 
