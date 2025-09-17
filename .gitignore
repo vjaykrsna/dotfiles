@@ -17,6 +17,8 @@
 # Core Shell & Git Configuration
 !/.bashrc
 !/.zshrc
+!/.bash_logout
+!/.zlogout
 !/.profile
 !/.gitconfig
 !/.gitmodules
