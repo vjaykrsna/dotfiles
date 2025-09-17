@@ -39,24 +39,24 @@
 !/.local/share/
 !/.local/share/fonts/
 !/.local/share/fonts/**
-!/.local/share/gnome-shell/
 
 # Application Configurations (~/.config/)
 !/.config/
 !/.config/autostart/
+!/.config/autostart/**
 !/.config/autostart/guake.desktop
 !/.config/background
 !/.config/dconf/
 !/.config/dconf/gnome_settings.ini
 !/.config/gnome-shell/
-!/.config/gnome-shell/extensions.txt
+!/.config/gnome-shell/**
 !/.config/input-remapper-2/
 !/.config/input-remapper-2/**
 !/.config/micro/
+!/.config/micro/**
 !/.config/micro/bindings.json
 !/.config/Rygel/
-!/.config/Rygel/MediaExport*.xml
-!/.config/rygel.conf
+!/.config/Rygel/**
 !/.config/starship.toml
 !/.config/systemd/
 !/.config/systemd/user/
@@ -68,7 +68,7 @@
 !/.config/cleanup/
 !/.config/cleanup/**
 !/.config/dockerctl/
-!/.config/dockerctl/config
+!/.config/dockerctl/**
 
 # Browser Sync Configurations
 !/.var/
@@ -97,11 +97,6 @@
 # yadm Archive
 !/.local/share/yadm/
 !/.local/share/yadm/archive
-
-# SSH Configuration (Public keys are safe)
-!/.ssh/
-!/.ssh/config
-!/.ssh/authorized_keys
 
 # 3. BLACKLIST - Caches, Runtime Files, and Secrets
 # ==============================================================================
@@ -158,27 +153,21 @@ AGENTS.md
 .config/pulse/cookie
 .config/vscode-sqltools/runningInfo.json
 
-# GnuPG Runtime Files
-.gnupg/S.*
-.gnupg/*.lock
-
 # ---
 # Final Override for Encrypted Files
 # ---
 # NOTE: The patterns in this section should mirror those in the
 # ~/.config/yadm/encrypt file. This ensures the unencrypted source
 # files are ignored by Git, while the encrypted archive is tracked.
-/.ssh/id_*
-!/.ssh/id_*.pub # Public keys are safe and should be tracked
+/.ssh/
 /.gnupg/
-/.env
 /.git-credentials
-/.config/gsconnect/private.pem
-/.config/gsconnect/certificate.pem
+/.config/gsconnect/*.pem
 **/.env
-/.var/app/app.zen_browser.zen/.zen/*/key4.db
-/.var/app/app.zen_browser.zen/.zen/*/logins.json
-/.var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
-/.var/app/app.zen_browser.zen/.zen/*/places.sqlite
-/.var/app/app.zen_browser.zen/.zen/*/places.sqlite-wal
-/.var/app/app.zen_browser.zen/.zen/*/storage.sqlite
+/.var/app/app.zen_browser.zen/.zen/**/*.jsonlz4
+/.var/app/app.zen_browser.zen/.zen/**/*.sqlite*
+/.var/app/app.zen_browser.zen/.zen/**/*.db*
+/.var/app/app.zen_browser.zen/.zen/**/*.bak
+/.var/app/app.zen_browser.zen/.zen/**/*.bin
+/.var/app/app.zen_browser.zen/.zen/**/*.json
+/.var/app/app.zen_browser.zen/.zen/**/*.cert*
