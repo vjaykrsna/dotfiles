@@ -35,14 +35,14 @@ cleanup() {
     # Log cleanup activity
     _log_cleanup() {
         local log_file="$HOME/.cache/cleanup.log"
-        local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-        mkdir -p "$(dirname "$log_file")"
-        echo "[$timestamp] $*" >> "$log_file"
+        local timestamp=$(/bin/date '+%Y-%m-%d %H:%M:%S')
+        /bin/mkdir -p "$(/usr/bin/dirname "$log_file")"
+        /usr/bin/echo "[$timestamp] $*" >> "$log_file"
     }
 
     # --- Logging helpers ---
     log() {
-        echo -e "$1$2$NC"
+        /usr/bin/echo -e "$1$2$NC"
         _log_cleanup "$2"
     }
     info()  { log "$BLUE" "ℹ️  $*"; }
@@ -72,7 +72,6 @@ cleanup() {
 
         local -a files=()
         if [[ "$path" == *"*"* ]]; then
-            # Use localoptions to scope globbing changes to this function
             setopt localoptions nullglob globdots extendedglob
             files=($~path)
         elif [[ -e "$path" ]]; then
@@ -82,7 +81,7 @@ cleanup() {
 
         for f in "${files[@]}"; do
             [[ ! -e "$f" ]] && continue
-            local size=$(du -sb -- "$f" 2>/dev/null | awk '{print $1}')
+            local size=$(/usr/bin/du -sb -- "$f" 2>/dev/null | /usr/bin/awk '{print $1}')
             total=$((total + size))
 
             if $DRY_RUN; then
@@ -93,9 +92,9 @@ cleanup() {
                         warn "sudo command not found, cannot delete: $f"
                         continue
                     fi
-                    sudo rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
+                    /usr/bin/sudo /bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
                 else
-                    rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
+                    /bin/rm -rf -- "$f" 2>/dev/null || warn "Failed: $f"
                 fi
             fi
         done
@@ -114,9 +113,9 @@ cleanup() {
 
         if [[ -d "$monitor" ]]; then
             if [[ "$monitor" == "/var/"* ]]; then
-                before=$(sudo du -sb -- "$monitor" 2>/dev/null | awk '{print $1}')
+                before=$(/usr/bin/sudo /usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
             else
-                before=$(du -sb -- "$monitor" 2>/dev/null | awk '{print $1}')
+                before=$(/usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
             fi
         fi
 
@@ -129,9 +128,9 @@ cleanup() {
 
         if [[ -d "$monitor" ]]; then
             if [[ "$monitor" == "/var/"* ]]; then
-                after=$(sudo du -sb -- "$monitor" 2>/dev/null | awk '{print $1}')
+                after=$(/usr/bin/sudo /usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
             else
-                after=$(du -sb -- "$monitor" 2>/dev/null | awk '{print $1}')
+                after=$(/usr/bin/du -sb -- "$monitor" 2>/dev/null | /usr/bin/awk '{print $1}')
             fi
         fi
         local freed=$((before - after))
@@ -151,13 +150,13 @@ cleanup() {
             return
         fi
 
-    info "Running: $desc"
-    local output=$("$@" 2>&1)
+        info "Running: $desc"
+        local output=$("$@" 2>&1)
         local total=0
 
         while read -r freed_h; do
             [[ -z "$freed_h" ]] && continue
-            local b=$(echo "$freed_h" | numfmt --from=iec --suffix=B 2>/dev/null)
+            local b=$(echo "$freed_h" | /usr/bin/numfmt --from=iec --suffix=B 2>/dev/null)
             (( $? == 0 )) && total=$((total + b))
         done <<< "$(/usr/bin/echo "$output" | /usr/bin/grep -oP "$regex")"
 
@@ -225,7 +224,7 @@ cleanup() {
 
         info "Removing $count broken symlinks..."
         for link in "${broken_links[@]}"; do
-            rm -- "$link" 2>/dev/null
+            /bin/rm -- "$link" 2>/dev/null
         done
         ok "Removed $count broken symlinks."
         freed_space["$desc"]=$(( ${freed_space["$desc"]:-0} + count ))
@@ -332,14 +331,14 @@ cleanup() {
         info "--- Cleanup Report ---"
         local total=0
         for k in "${(@k)freed_space}"; do total=$((total + freed_space[$k])); done
-        echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B $total || echo '0B')"
+    /usr/bin/echo -e "${GREEN}Total freed:${NC} $([[ $total -gt 0 ]] && /usr/bin/numfmt --to=iec-i --suffix=B $total || echo '0B')"
 
         (( total == 0 )) && warn "Nothing left to clean!" && return
 
         info "--- Top Freed ---"
-        for line in "${(@f)$(for k in "${(@k)freed_space}"; do echo "${freed_space[$k]}|$k"; done | /usr/bin/sort -rn | /usr/bin/head -n5)}"; do
+        for line in "${(@f)$(for k in "${(@k)freed_space}"; do /usr/bin/echo "${freed_space[$k]}|$k"; done | /usr/bin/sort -rn | /usr/bin/head -n5)}"; do
             local size="${line%%|*}" desc="${line##*|}"
-            echo "  - $desc ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
+            /usr/bin/echo "  - $desc ($(/usr/bin/numfmt --to=iec-i --suffix=B $size))"
         done
     }
 
