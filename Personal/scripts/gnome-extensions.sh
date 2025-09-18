@@ -12,15 +12,13 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+# --- Sourcing Dependencies (only when running standalone) ---
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+fi
+
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"
-
-# --- UTILITY FUNCTIONS ---
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
-ok() { echo -e "${GREEN}✅ $*${NC}"; }
 
 # --- SAVE FUNCTION ---
 save_extensions() {

@@ -9,11 +9,6 @@ fi
 
 run_snap_removal_interactive() {
     warn "🚨 Make sure you have backups! This will remove snap and its packages."
-    read -rp "Continue? [y/N]: " ans
-    if [[ ! "$ans" =~ ^[Yy]$ ]]; then
-        error "Aborted."
-        return
-    fi
 
     info "Installed snaps:"
     snap list
