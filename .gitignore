@@ -72,30 +72,6 @@
 !/.config/dockerctl/
 !/.config/dockerctl/**
 
-# Browser Sync Configurations
-!/.var/
-!/.var/app/
-!/.var/app/app.zen_browser.zen/
-!/.var/app/app.zen_browser.zen/.zen/
-!/.var/app/app.zen_browser.zen/.zen/**
-# Re-ignore machine-specific files and caches
-/.var/app/app.zen_browser.zen/.zen/**/.parentlock
-/.var/app/app.zen_browser.zen/.zen/**/lock
-/.var/app/app.zen_browser.zen/.zen/**/*.sqlite-wal
-/.var/app/app.zen_browser.zen/.zen/**/*.sqlite-shm
-/.var/app/app.zen_browser.zen/.zen/**/*.db-wal
-/.var/app/app.zen_browser.zen/.zen/**/*.db-shm
-/.var/app/app.zen_browser.zen/.zen/**/*-journal
-/.var/app/app.zen_browser.zen/.zen/**/datareporting/
-/.var/app/app.zen_browser.zen/.zen/**/weave/logs/
-# Keep important user data, only exclude temporary/cache storage
-/.var/app/app.zen_browser.zen/.zen/**/storage/temporary/
-/.var/app/app.zen_browser.zen/.zen/**/storage/cache/
-/.var/app/app.zen_browser.zen/.zen/**/gmp-*/
-/.var/app/app.zen_browser.zen/.zen/**/storage/default/
-/.var/app/app.zen_browser.zen/.zen/**/storage/permanent/
-/.var/app/app.zen_browser.zen/.zen/**/weave/
-
 # yadm Archive
 !/.local/share/yadm/
 !/.local/share/yadm/archive
@@ -166,10 +142,3 @@ AGENTS.md
 /.git-credentials
 /.config/gsconnect/*.pem
 **/.env
-/.var/app/app.zen_browser.zen/.zen/**/*.jsonlz4
-/.var/app/app.zen_browser.zen/.zen/**/*.sqlite*
-/.var/app/app.zen_browser.zen/.zen/**/*.db*
-/.var/app/app.zen_browser.zen/.zen/**/*.bak
-/.var/app/app.zen_browser.zen/.zen/**/*.bin
-/.var/app/app.zen_browser.zen/.zen/**/*.json
-/.var/app/app.zen_browser.zen/.zen/**/*.cert*
