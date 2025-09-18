@@ -71,10 +71,20 @@
 !/.config/cleanup/**
 !/.config/dockerctl/
 !/.config/dockerctl/**
+!.qwen/
+!.qwen/settings.json
+!.gemini/
+!.gemini/settings.json
 
 # yadm Archive
 !/.local/share/yadm/
 !/.local/share/yadm/archive
+
+# Zen Browser (Has seperate .gitignore)
+!.var/
+!.var/app/
+!.var/app/app.zen_browser.zen/
+!.var/app/app.zen_browser.zen/**
 
 # 3. BLACKLIST - Caches, Runtime Files, and Secrets
 # ==============================================================================
@@ -89,8 +99,6 @@
 .dotnet/
 .mozilla/
 .pki/
-.qwen/
-.gemini/
 .roo/
 
 # Common Junk Files
@@ -142,3 +150,5 @@ AGENTS.md
 /.git-credentials
 /.config/gsconnect/*.pem
 **/.env
+# Zen Browser sensitive files ignored in
+# .var/app/app.zen_browser.zen/.gitignore itself
