@@ -1,0 +1,14 @@
+{
+    "colorscheme": "monokai",
+    "syntax": true,
+    "tabsize": 4,
+    "softwrap": true,
+    "savecursor": true,
+    "saveundo": true,
+    "autosu": true,
+    "diffgutter": true,
+    "statusline": true,
+    "scrollbar": true,
+    "pluginchannels": [ "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json" ],
+    "pluginrepos": [ "https://github.com/micro-editor/filemanager", "https://github.com/micro-editor/editorconfig" ]
+}

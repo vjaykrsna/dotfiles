@@ -1,4 +1,20 @@
 {
     "Alt-/": "lua:comment.comment",
-    "CtrlUnderscore": "lua:comment.comment"
+    "Ctrl-a": "SelectAll",
+    "Ctrl-c": "Copy",
+    "Ctrl-f": "Find",
+    "Ctrl-n": "AddTab",
+    "Ctrl-o": "OpenFile",
+    "Ctrl-q": "Quit",
+    "Ctrl-r": "command-edit:replace ",
+    "Ctrl-s": "Save",
+    "Ctrl-t": "lua:fzf.fzf",
+    "Ctrl-v": "Paste",
+    "Ctrl-w": "Unsplit",
+    "Ctrl-x": "Cut",
+    "Ctrl-y": "Redo",
+    "Ctrl-z": "Undo",
+    "CtrlUnderscore": "lua:comment.comment",
+    "Ctrl-Alt-w": "lua:wc.wordCount",
+    "Ctrl-Alt-m": "lua:misspell.check"
 }
