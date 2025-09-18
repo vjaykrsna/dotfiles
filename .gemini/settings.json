@@ -1,0 +1,60 @@
+{
+  "security": {
+    "auth": {
+      "selectedType": "oauth-personal"
+    }
+  },
+  "output": {
+    "format": "json"
+  },
+  "ui": {
+    "footer": {
+      "hideSandboxStatus": true
+    },
+    "showMemoryUsage": true,
+    "showLineNumbers": false,
+    "showCitations": true,
+    "accessibility": {
+      "screenReader": false
+    }
+  },
+  "context": {
+    "loadMemoryFromIncludeDirectories": true
+  },
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "alwaysAllow": [
+        "resolve-library-id",
+        "get-library-docs"
+      ]
+    },
+    "firecrawl-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
+    }
+  },
+  "tools": {
+    "shell": {
+      "showColor": true
+    },
+    "usePty": true,
+    "enableToolOutputTruncation": true
+  },
+  "general": {
+    "enablePromptCompletion": true
+  },
+  "ide": {
+    "enabled": true
+  }
+}
