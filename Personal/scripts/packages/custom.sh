@@ -1,16 +1,21 @@
 #!/bin/bash
 set -euo pipefail
+IFS=$'\n\t'
+
+# --- Sourcing Dependencies (only when running standalone) ---
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    source "$(dirname "$0")/../installer.sh" # For logging and utility functions
+fi
 
 # Ensure running as root
 if [[ $EUID -ne 0 ]]; then
-	echo "❌ Please run as root or with sudo"
-	exit 1
+	error "Please run as root or with sudo"
 fi
 
-echo "› Running custom installations..."
+info "Running custom installations..."
 
 # Setup system dependencies first
-echo "  - Installing base dependencies..."
+info "Installing base dependencies..."
 apt update --quiet
 apt install -y --no-install-recommends \
 	ca-certificates \
@@ -25,7 +30,7 @@ install -m 0755 -d /etc/apt/keyrings
 
 # --- Google Chrome ---
 if ! command -v google-chrome &>/dev/null; then
-	echo "  - Setting up Google Chrome..."
+	info "Setting up Google Chrome..."
 	curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg
 	echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" |
 		tee /etc/apt/sources.list.d/google-chrome.list >/dev/null
@@ -34,7 +39,7 @@ fi
 
 # --- Docker ---
 if ! command -v docker &>/dev/null; then
-	echo "  - Installing Docker..."
+	info "Installing Docker..."
 	apt install -y ca-certificates curl
 	curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 	chmod a+r /etc/apt/keyrings/docker.asc
@@ -44,14 +49,14 @@ if ! command -v docker &>/dev/null; then
 
 	# Add user to docker group if running with sudo
 	if [ -n "${SUDO_USER:-}" ]; then
-		echo "  - Adding $SUDO_USER to docker group..."
+		info "Adding $SUDO_USER to docker group..."
 		usermod -aG docker "$SUDO_USER"
 	fi
 fi
 
 # --- VS Code ---
 if ! command -v code &>/dev/null; then
-	echo "  - Setting up VS Code..."
+	info "Setting up VS Code..."
 	curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
 	echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
 		tee /etc/apt/sources.list.d/vscode.list >/dev/null
@@ -60,13 +65,13 @@ fi
 
 # Adjust ownership of /usr/share/code for theming
 if [ -n "$SUDO_USER" ]; then
-    echo "  - Adjusting ownership of /usr/share/code..."
+    info "Adjusting ownership of /usr/share/code..."
     chown -R "$SUDO_USER:$SUDO_USER" /usr/share/code 2>/dev/null || true
 fi
 
 # --- OnlyOffice ---
 if ! dpkg -s onlyoffice-desktopeditors &>/dev/null; then
-	echo "  - Installing OnlyOffice Desktop Editors..."
+	info "Installing OnlyOffice Desktop Editors..."
 	wget -qO /tmp/onlyoffice.deb https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb
 	DEBIAN_FRONTEND=noninteractive apt install -y /tmp/onlyoffice.deb
 	rm -f /tmp/onlyoffice.deb
@@ -74,15 +79,15 @@ fi
 
 # --- auto-cpufreq ---
 if ! command -v auto-cpufreq &>/dev/null; then
-	echo "  - Installing auto-cpufreq..."
+	info "Installing auto-cpufreq..."
 	git clone --depth=1 https://github.com/AdnanHodzic/auto-cpufreq.git /tmp/auto-cpufreq
 	(cd /tmp/auto-cpufreq && ./auto-cpufreq-installer --install)
 
 	# Enable auto-cpufreq as a daemon service
-	echo "  - Enabling auto-cpufreq daemon..."
+	info "Enabling auto-cpufreq daemon..."
 	auto-cpufreq --install
 
 	rm -rf /tmp/auto-cpufreq
 fi
 
-echo "› Custom installations complete."
+ok "Custom installations complete."
