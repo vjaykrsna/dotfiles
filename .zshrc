@@ -40,6 +40,11 @@ if [[ -s "$HOME/.local/share/zinit/zinit.git/zinit.zsh" ]]; then
   zinit light zsh-users/zsh-completions
   zinit ice lucid wait'0' silent
   zinit light zsh-users/zsh-autosuggestions
+  zinit ice lucid wait'0' silent
+  zinit light zsh-users/zsh-history-substring-search
+  # keybindings for substring search (↑/↓ overwrite)
+  bindkey '^[[A' history-substring-search-up
+  bindkey '^[[B' history-substring-search-down
   zinit ice lucid turbo wait'0' silent
   zinit light junegunn/fzf
 fi
