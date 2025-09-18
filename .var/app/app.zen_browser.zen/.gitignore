@@ -1,0 +1,75 @@
+# -----------------------------------------------------------------
+# Zen Browser: Noise-free tracking (non-sensitive files)
+# -----------------------------------------------------------------
+
+# Track entire profile by default (unignore everything in this directory)
+!*
+
+# Ignore all browser storage (IndexedDB, localStorage, caches, etc.)
+.zen/*/storage/
+.zen/*/storage/**
+
+# Ignore browser thumbnails, startupCache, and sessionstore-backups
+.zen/*/thumbnails/
+.zen/*/startupCache/
+.zen/*/sessionstore-backups/
+
+# Ignore browser lock and backup files
+.zen/*/.parentlock
+.zen/*/lock
+.zen/*/cookies.sqlite.bak
+
+# Ignore WAL/SHM SQLite temp files
+.zen/*/*.sqlite-wal
+.zen/*/*.sqlite-shm
+
+# Ignore browser runtime DBs and ephemeral files
+.zen/*/synced-tabs.db*
+.zen/*/weave/changes/
+.zen/*/weave/failed/
+.zen/*/weave/logs/
+.zen/*/webappsstore.sqlite
+.zen/*/storage-sync-v2.sqlite
+.zen/*/storage.sqlite
+.zen/*/safebrowsing/
+.zen/*/notificationstore.json
+.zen/*/favicons.sqlite
+.zen/*/formhistory.sqlite
+.zen/*/content-prefs.sqlite
+.zen/*/domain_to_categories.sqlite*
+.zen/*/sessionCheckpoints.json
+.zen/*/settings/data.safe.bin
+.zen/*/security_state/data.safe.bin
+
+# Ignore caches and temporary files
+cache/
+cache/**
+.zen/*/cache2/**
+
+# Ignore extension runtime caches
+.zen/*/extensions/*/storage/
+.zen/*/extensions/*/cache/
+
+# Ignore local state
+.local/state/
+
+# Ignore finalization artifacts
+**/*.final
+.zen/**/*.final
+.zen/*/weave/logs/
+
+# Ignore sensitive files (handled by yadm encryption)
+.zen/*/logins.json
+.zen/*/key4.db
+.zen/*/formhistory.sqlite
+.zen/*/permissions.sqlite
+.zen/*/cert9.db
+.zen/*/cookies.sqlite
+.zen/*/autofill-profiles.json
+.zen/*/logins-backup.json
+.zen/*/weave/**
+config/pulse/cookie
+.zen/*/signedInUser.json
+.zen/*/places.sqlite
+.zen/*/extension-preferences.json
+.zen/*/extension-settings.json
