@@ -44,7 +44,6 @@
 !/.config/
 !/.config/autostart/
 !/.config/autostart/**
-!/.config/autostart/guake.desktop
 !/.config/background
 !/.config/dconf/
 !/.config/dconf/gnome_settings.ini
@@ -68,10 +67,10 @@
 !/.config/cleanup/**
 !/.config/dockerctl/
 !/.config/dockerctl/**
-!.qwen/
-!.qwen/settings.json
-!.gemini/
-!.gemini/settings.json
+!/.qwen/
+!/.qwen/settings.json
+!/.gemini/
+!/.gemini/settings.json
 
 # yadm Archive
 !/.local/share/yadm/
@@ -87,7 +86,7 @@
 # ==============================================================================
 
 # General Caches & Temporary Directories
-.cache/
+/.cache/
 .npm/
 .nvm/
 .vscode/
@@ -113,27 +112,27 @@ AGENTS.md
 .wget-hsts
 
 # Noisy Application Configs & Caches
-.config/**/[cC]ache/
-.config/**/*.tmp
-.config/**/*.temp
-.config/**/{history,log,logs}
-.config/BraveSoftware/
-.config/Code/
-.config/Code/User/workspaceStorage/
-.config/chromium/
-.config/configstore/update-notifier-*
-.config/enchant/en_US.*
-.config/evolution/sources/system-proxy.source
-.config/gnome-initial-setup-done
-.config/google-chrome/
-.config/google-chrome-for-testing/
-.config/ibus/bus/*
-.config/input-remapper-2/runtime/
-.config/microsoft-edge-beta/
-.config/microsoft-edge-dev/
-.config/pulse/*-runtime
-.config/pulse/cookie
-.config/vscode-sqltools/runningInfo.json
+/.config/**/[cC]ache/
+/.config/**/*.tmp
+/.config/**/*.temp
+/.config/**/{history,log,logs}
+/.config/BraveSoftware/
+/.config/Code/
+/.config/Code/User/workspaceStorage/
+/.config/chromium/
+/.config/configstore/update-notifier-*
+/.config/enchant/en_US.*
+/.config/evolution/sources/system-proxy.source
+/.config/gnome-initial-setup-done
+/.config/google-chrome/
+/.config/google-chrome-for-testing/
+/.config/ibus/bus/*
+/.config/input-remapper-2/runtime/
+/.config/microsoft-edge-beta/
+/.config/microsoft-edge-dev/
+/.config/pulse/*-runtime
+/.config/pulse/cookie
+/.config/vscode-sqltools/runningInfo.json
 
 # ---
 # Final Override for Encrypted Files
@@ -148,3 +147,16 @@ AGENTS.md
 **/.env
 # Zen Browser sensitive files ignored in
 # .var/app/app.zen_browser.zen/.gitignore itself
+
+# ------------------------------------------------------------------------------
+# Explicit VS Code override: un-ignore parent directories and the single
+# `mcp_settings.json` file. This must appear after the `.config/Code/` blacklist
+# above so the re-include takes effect.
+# ------------------------------------------------------------------------------
+!/.config/
+!/.config/Code/
+!/.config/Code/User/
+!/.config/Code/User/globalStorage/
+!/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/
+!/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/
+!/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json
