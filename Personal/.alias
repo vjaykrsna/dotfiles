@@ -10,6 +10,8 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias -- -='cd -'
 alias bat='batcat'
+alias fd='fdfind'
+alias search='fdfind'
 
 # Zsh editing
 alias editzsh="micro $HOME/.zshrc"

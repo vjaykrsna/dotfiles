@@ -39,8 +39,6 @@
 !/.icons/**
 !/.local/
 !/.local/share/
-!/.local/share/fonts/
-!/.local/share/fonts/**
 
 # Application Configurations (~/.config/)
 !/.config/
@@ -55,8 +53,7 @@
 !/.config/input-remapper-2/
 !/.config/input-remapper-2/**
 !/.config/micro/
-!/.config/micro/**
-!/.config/micro/bindings.json
+!/.config/micro/*.json
 !/.config/Rygel/
 !/.config/Rygel/**
 !/.config/starship.toml
@@ -132,7 +129,6 @@ AGENTS.md
 .config/google-chrome-for-testing/
 .config/ibus/bus/*
 .config/input-remapper-2/runtime/
-.config/micro/buffers/history
 .config/microsoft-edge-beta/
 .config/microsoft-edge-dev/
 .config/pulse/*-runtime

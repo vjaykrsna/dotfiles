@@ -83,6 +83,16 @@ symbol = "🦀 "
 style = "bold red"
 format = "[$symbol$version]($style) "
 
+[php]
+symbol = "🐘 "
+style = "bold purple"
+format = "[$symbol$version]($style) "
+
+[lua]
+symbol = "🌙 "
+style = "bold blue"
+format = "[$symbol$version]($style) "
+
 # ==============================
 # Cloud & Containers
 # ==============================
