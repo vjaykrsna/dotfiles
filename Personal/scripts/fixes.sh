@@ -50,35 +50,6 @@ fix_input_remapper() {
     ok "input-remapper configuration is up to date."
 }
 
-# --- FIX: Dock extension conflicts ---
-fix_extensions() {
-    info "Cleaning up dock extensions..."
-    local EXTENSIONS=(
-        "ubuntu-dock@ubuntu.com"
-        "dash-to-dock@micxgx.gmail.com"
-        "azizapp@azizapp"
-        "vertical-overview@RensAlthuis.github.com"
-    )
-    for ext in "${EXTENSIONS[@]}"; do
-        gnome-extensions disable "$ext" 2> /dev/null || true
-    done
-    ok "Dock extensions cleaned"
-}
-
-# --- FIX: Cron environment (optional) ---
-fix_cron() {
-    info "Ensuring cron EXTRA_OPTS is defined..."
-    if ! grep -q "EXTRA_OPTS" /etc/environment; then
-        echo 'EXTRA_OPTS=""' | run_privileged tee -a /etc/environment > /dev/null
-        ok "Added EXTRA_OPTS to /etc/environment"
-        # Try both cron and crond reload
-        run_privileged systemctl reload cron 2> /dev/null \
-            || run_privileged systemctl reload crond 2> /dev/null || true
-    else
-        info "EXTRA_OPTS already present"
-    fi
-}
-
 # --- FIX: Udev rules ---
 fix_udev() {
     info "Refreshing udev rules..."
@@ -106,37 +77,21 @@ check_groups() {
     done
 }
 
-check_extensions() {
-    info "Checking dock extensions..."
-    local count
-    count=$(gnome-extensions list --enabled | grep -c dock || true)
-    if [ "$count" -gt 1 ]; then
-        err "Multiple dock extensions enabled!"
-    else
-        ok "Dock extensions OK"
-    fi
-}
-
 # --- CLI ---
 case "${1:-all}" in
 input) fix_input_remapper ;;
-extensions) fix_extensions ;;
-cron) fix_cron ;;
 udev) fix_udev ;;
 sssd) disable_sssd ;;
 check)
     check_groups
-    check_extensions
     ;;
 all | "")
     fix_input_remapper
-    fix_extensions
-    fix_cron
     fix_udev
     disable_sssd
     ;;
 *)
-    echo "Usage: $0 {all|input|extensions|cron|udev|sssd|check} [username]"
+    echo "Usage: $0 {all|input|udev|sssd|check} [username]"
     exit 1
     ;;
 esac
