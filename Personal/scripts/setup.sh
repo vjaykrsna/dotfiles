@@ -5,6 +5,11 @@ IFS=$'\n\t'
 # --- CONFIG & UTILITY ---
 start_dir=$(pwd)
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
 
 # --- SCRIPT CONTEXT ---
 # Ensures that scripts are run from the dotfiles root directory
