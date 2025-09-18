@@ -58,6 +58,12 @@ if ! command -v code &>/dev/null; then
 	apt update && apt install -y code
 fi
 
+# Adjust ownership of /usr/share/code for theming
+if [ -n "$SUDO_USER" ]; then
+    echo "  - Adjusting ownership of /usr/share/code..."
+    chown -R "$SUDO_USER:$SUDO_USER" /usr/share/code 2>/dev/null || true
+fi
+
 # --- OnlyOffice ---
 if ! dpkg -s onlyoffice-desktopeditors &>/dev/null; then
 	echo "  - Installing OnlyOffice Desktop Editors..."
