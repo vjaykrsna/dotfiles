@@ -25,21 +25,19 @@ This repository is managed with `yadm` and keeps the home directory as the workt
 ## Exact encrypt list (from `~/.config/yadm/encrypt`) (verified)
 
 ```
-.ssh/id_*
-.gnupg/
-.env
-.git-credentials
-.config/gsconnect/private.pem
-.config/gsconnect/certificate.pem
+.ssh/**
+.gnupg/**
+.config/gsconnect/*.pem
 **/.env
-.var/app/app.zen_browser.zen/.zen/*/key4.db
-.var/app/app.zen_browser.zen/.zen/*/logins.json
-.var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
+.git-credentials
+.env
+Zen Browser sensitive files*
 ```
 
 Notes:
-- Private SSH keys (`.ssh/id_*`) are encrypted; public keys are tracked separately via `.gitignore` exceptions.
+- SSH and GPG directories are fully encrypted.
 - Patterns include both explicit files and globs (e.g., `**/.env`) to catch env files under subdirectories.
+- Zen Browser sensitive data is encrypted to prevent leaks.
 
 ---
 

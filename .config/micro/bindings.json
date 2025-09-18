@@ -1,5 +1,7 @@
 {
     "Alt-/": "lua:comment.comment",
+    "Ctrl-Alt-m": "lua:misspell.check",
+    "Ctrl-Alt-w": "lua:wc.wordCount",
     "Ctrl-a": "SelectAll",
     "Ctrl-c": "Copy",
     "Ctrl-f": "Find",
@@ -15,6 +17,5 @@
     "Ctrl-y": "Redo",
     "Ctrl-z": "Undo",
     "CtrlUnderscore": "lua:comment.comment",
-    "Ctrl-Alt-w": "lua:wc.wordCount",
-    "Ctrl-Alt-m": "lua:misspell.check"
+    "F5": "lua:wc.wordCount"
 }

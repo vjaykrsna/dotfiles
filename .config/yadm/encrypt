@@ -5,6 +5,8 @@
 .gnupg/**
 .config/gsconnect/*.pem
 **/.env
+.git-credentials
+.env
 
 # Zen Browser sensitive data
 .var/app/app.zen_browser.zen/.zen/*/logins.json
