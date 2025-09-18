@@ -37,5 +37,13 @@ fi
 (cd /tmp/Adwaita-colors && run_privileged bash ./setup -i)
 rm -rf /tmp/Adwaita-colors
 
+info "› Installing Micro editor plugins..."
+micro -plugin install fzf
+micro -plugin install wc
+micro -plugin install misspell
+micro -plugin install autofmt
+micro -plugin install detectindent
+micro -plugin install editorconfig
+
 ok "Post-install configuration complete!"
 info "💡 You may want to run 'setup.sh' to check system health."

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Nerd Font Installation Script with Storage Optimization (FINAL)
+# Nerd Font Installation Script with Storage Optimization
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -9,105 +9,86 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     source "$(dirname "$0")/installer.sh" # For logging and utility functions
 fi
 
-# Function to clean up unused fonts and reduce storage usage
+# --- Pre-check commands ---
+for cmd in curl tar fc-cache; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        error "Required command '$cmd' is missing. Install it and retry."
+        exit 1
+    fi
+done
+
+# Cleanup unused Nerd Fonts
 cleanup_unused_fonts() {
     local FONT_DIR="$HOME/.local/share/fonts"
 
     info "Current font directory size:"
-    du -sh "$FONT_DIR"
+    du -sh "$FONT_DIR" || true
 
     info "Whitelisting essential font weights (Regular, Italic, Medium, Bold + Italics)..."
 
     find "$FONT_DIR" -type f -name "*NerdFont*" \
-        -not -regex ".*NerdFont-\(Regular\|Italic\|RegularItalic\|Medium\|MediumItalic\|Bold\|BoldItalic\)\.\(ttf\|otf\)" \
-        -delete 2> /dev/null || true
+        ! -regex ".*NerdFont-\(Regular\|Italic\|RegularItalic\|Medium\|MediumItalic\|Bold\|BoldItalic\)\.\(ttf\|otf\)" \
+        -delete 2>/dev/null || true
 
     info "Font cleanup completed."
     info "New font directory size:"
-    du -sh "$FONT_DIR"
+    du -sh "$FONT_DIR" || true
 
     info "Fonts kept:"
     ls -1 "$FONT_DIR" | grep "NerdFont" | sort || true
 }
 
-# Selective font installation (JetBrains Mono only)
-install_selective_fonts() {
-    info "--- Installing Selective Nerd Fonts (Storage Optimized) ---"
-    local FONT_DIR="$HOME/.local/share/fonts"
-    local TMP_DIR="/tmp"
-    mkdir -p "$FONT_DIR"
-
-    if [[ -f "$FONT_DIR/JetBrainsMonoNerdFont-Regular.ttf" ]] || [[ -f "$FONT_DIR/JetBrainsMonoNerdFont-Regular.otf" ]]; then
-        info "› JetBrains Mono already installed, skipping download."
-    else
-        info "› Downloading JetBrains Mono Nerd Font..."
-        cd "$TMP_DIR"
-        if curl -sOL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz; then
-            info "› Installing JetBrains Mono Nerd Font..."
-            tar -xJf JetBrainsMono.tar.xz -C "$FONT_DIR/"
-            rm JetBrainsMono.tar.xz
-            ok "JetBrains Mono Nerd Font installed."
-        else
-            error "Failed to download JetBrains Mono Nerd Font"
-        fi
-    fi
-
-    cleanup_unused_fonts
-
+# Rebuild font cache
+rebuild_font_cache() {
+    local FONT_DIR="$1"
     info "› Rebuilding font cache..."
-    fc-cache -v "$FONT_DIR"
-
-    ok "--- Selective Nerd Fonts Installation Complete ---"
+    fc-cache -v "$FONT_DIR" || warn "fc-cache failed"
 }
 
-# Full font installation (JetBrains, FiraCode, GeistMono)
-install_all_fonts() {
-    info "--- Installing All Nerd Fonts ---"
+# Generic font installer
+install_font() {
+    local FONT_NAME="$1"
     local FONT_DIR="$HOME/.local/share/fonts"
-    local TMP_DIR="/tmp"
+    local TMP_DIR
+    TMP_DIR=$(mktemp -d)
+
     mkdir -p "$FONT_DIR"
 
-    declare -A FONTS=(
-        ["JetBrainsMono"]="JetBrainsMono"
-        ["FiraCode"]="FiraCode"
-        ["GeistMono"]="GeistMono"
-    )
+    if compgen -G "$FONT_DIR/${FONT_NAME}NerdFont-Regular.*" >/dev/null; then
+        info "› $FONT_NAME already installed, skipping."
+        return
+    fi
 
-    for FONT in "${!FONTS[@]}"; do
-        if [[ -f "$FONT_DIR/${FONT}NerdFont-Regular.ttf" ]] || [[ -f "$FONT_DIR/${FONT}NerdFont-Regular.otf" ]]; then
-            info "› $FONT already installed, skipping download."
-        else
-            info "› Downloading $FONT Nerd Font..."
-            cd "$TMP_DIR"
-            if curl -sOL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONTS[$FONT]}.tar.xz"; then
-                info "› Installing $FONT Nerd Font..."
-                tar -xJf "${FONTS[$FONT]}.tar.xz" -C "$FONT_DIR/"
-                rm "${FONTS[$FONT]}.tar.xz"
-                ok "$FONT Nerd Font installed."
-            else
-                warn "Failed to download $FONT Nerd Font"
-            fi
-        fi
+    info "› Downloading $FONT_NAME Nerd Font..."
+    if curl -sL -o "$TMP_DIR/${FONT_NAME}.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.tar.xz"; then
+        info "› Installing $FONT_NAME Nerd Font..."
+        tar -xJf "$TMP_DIR/${FONT_NAME}.tar.xz" -C "$FONT_DIR/"
+        ok "$FONT_NAME Nerd Font installed."
+    else
+        warn "Failed to download $FONT_NAME Nerd Font"
+    fi
+
+    rm -rf "$TMP_DIR"
+}
+
+# Full font installation
+install_all_fonts() {
+    info "--- Installing All Nerd Fonts ---"
+    local FONTS=( "JetBrainsMono" "FiraCode" "GeistMono" )
+    for f in "${FONTS[@]}"; do
+        install_font "$f"
     done
-
     cleanup_unused_fonts
-
-    info "› Rebuilding font cache..."
-    fc-cache -v "$FONT_DIR"
-
+    rebuild_font_cache "$HOME/.local/share/fonts"
     ok "--- All Nerd Fonts Installation Complete ---"
 }
 
-# Main function
+# Main entry
 install_nerd_fonts() {
-    if [[ "${1:-}" == "all" ]]; then
-        install_all_fonts
-    else
-        install_selective_fonts
-    fi
+    install_all_fonts
 }
 
-# Allow running standalone or sourced
+# Standalone execution
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     install_nerd_fonts "$@"
 fi
