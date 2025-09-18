@@ -6,12 +6,3 @@
 .git-credentials
 .config/gsconnect/*.pem
 **/.env
-
-# Additional browser data (encrypted, not tracked in plaintext)
-.var/app/app.zen_browser.zen/.zen/**/*.jsonlz4
-.var/app/app.zen_browser.zen/.zen/**/*.sqlite*
-.var/app/app.zen_browser.zen/.zen/**/*.db*
-.var/app/app.zen_browser.zen/.zen/**/*.bak
-.var/app/app.zen_browser.zen/.zen/**/*.bin
-.var/app/app.zen_browser.zen/.zen/**/*.json
-.var/app/app.zen_browser.zen/.zen/**/*.cert*
