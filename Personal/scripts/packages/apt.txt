@@ -15,8 +15,6 @@ eza
 fastboot
 fd-find
 flatpak
-fonts-firacode
-fonts-jetbrains-mono
 fzf
 gdb
 gdebi
