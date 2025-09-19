@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+dest_dir=""
+
+# Parse optional destination
+if [[ "${1:-}" == "-d" || "${1:-}" == "--dir" ]]; then
+    dest_dir="$2"
+    mkdir -p "$dest_dir"
+    shift 2
+fi
+
+if [[ $# -lt 1 ]]; then
+    echo "Usage: extract [-d DEST_DIR] file1 [file2 ...]"
+    exit 1
+fi
+
+for f in "$@"; do
+    if [[ ! -f "$f" ]]; then
+        echo "❌ '$f' is not a valid file!"
+        continue
+    fi
+
+    target_dir="${dest_dir:-.}"
+
+    case "$f" in
+        *.tar.bz2)  tar xjf "$f" -C "$target_dir" ;;
+        *.tar.gz)   tar xzf "$f" -C "$target_dir" ;;
+        *.tar.xz)   tar xf "$f" -C "$target_dir" ;;
+        *.tbz2)     tar xjf "$f" -C "$target_dir" ;;
+        *.tgz)      tar xzf "$f" -C "$target_dir" ;;
+        *.tar)      tar xf "$f" -C "$target_dir" ;;
+        *.zip)      unzip -q "$f" -d "$target_dir" ;;
+        *.rar)      unrar x -o+ "$f" "$target_dir/" ;;
+        *.7z)       7z x "$f" -o"$target_dir" ;;
+        *.gz)       gunzip -c "$f" > "$target_dir/${f%.gz}" ;;
+        *.bz2)      bunzip2 -c "$f" > "$target_dir/${f%.bz2}" ;;
+        *.xz)       unxz -c "$f" > "$target_dir/${f%.xz}" ;;
+        *.Z)        uncompress -c "$f" > "$target_dir/${f%.Z}" ;;
+        *)          echo "❌ Don't know how to extract '$f'..." ;;
+    esac
+done

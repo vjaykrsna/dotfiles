@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Options ---
+DRY_RUN=false
+AUTO=false
+
+# --- Parse args ---
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --dry-run) DRY_RUN=true; shift ;;
+        --auto) AUTO=true; shift ;;
+        -h|--help)
+            echo "Usage: addsubmodule [--dry-run] [--auto]"
+            exit 0
+            ;;
+        *) break ;;
+    esac
+done
+
+# --- Colors ---
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+_info()  { echo -e "${BLUE}ℹ️  $*${NC}"; }
+_warn()  { echo -e "${YELLOW}⚠️  $*${NC}"; }
+_ok()    { echo -e "${GREEN}✅ $*${NC}"; }
+_error() { echo -e "${RED}❌ $*${NC}"; }
+
+search_dir="$PWD"
+_info "Scanning recursively from: $search_dir"
+
+# --- Find nested repos ---
+nested_repos=()
+while IFS= read -r git_dir; do
+    repo_path=$(dirname "$git_dir")
+    [[ "$repo_path" == "$search_dir" ]] && continue
+
+    # Skip if already a submodule
+    if ! git -C "$search_dir" config --file .gitmodules --get-regexp "^submodule\..*\.path$" 2>/dev/null | grep -qx "$repo_path"; then
+        nested_repos+=("$repo_path")
+    fi
+done < <(find "$search_dir" -type d -name ".git")
+
+if (( ${#nested_repos[@]} == 0 )); then
+    _info "No nested repositories found."
+    exit 0
+fi
+
+# --- Process each nested repo ---
+for repo in "${nested_repos[@]}"; do
+    remote_url=$(git -C "$repo" config --get remote.origin.url || true)
+
+    if [[ -z "$remote_url" ]]; then
+        _warn "Skipping $repo — no remote URL found."
+        continue
+    fi
+
+    relative_path=${repo#"$search_dir"/}
+    _info "Nested repo: $relative_path"
+    _info "Remote URL: $remote_url"
+
+    if [[ "$DRY_RUN" == true ]]; then
+        _info "[Dry-run] Would add $relative_path as a submodule"
+        continue
+    fi
+
+    if [[ "$AUTO" != true ]]; then
+        read -p "Add this as a submodule? (y/N): " confirm
+        [[ ! "$confirm" =~ ^[Yy]$ ]] && { _info "Skipped $relative_path"; continue; }
+    fi
+
+    # --- Remove from index, keep disk files ---
+    git -C "$search_dir" rm --cached "$relative_path" >/dev/null 2>&1 || _warn "Could not remove $relative_path from index"
+
+    # --- Add submodule ---
+    if git -C "$search_dir" submodule add "$remote_url" "$relative_path"; then
+        _ok "Added $relative_path as a submodule."
+    else
+        _error "Failed to add $relative_path."
+    fi
+done
+
+_info "Done. Remember to commit: git add . && git commit -m 'Added nested repos as submodules'"

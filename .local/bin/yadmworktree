@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# Minimal helper to manage git --skip-worktree on tracked runtime files
+
+set -euo pipefail
+
+REPO_ROOT="$HOME"
+PATHS=(
+  ".var/app/app.zen_browser.zen/**"
+)
+
+_info()  { printf "\033[0;34mℹ️  %s\033[0m\n" "$*"; }
+_ok()    { printf "\033[0;32m✅ %s\033[0m\n" "$*"; }
+_warn()  { printf "\033[0;33m⚠️  %s\033[0m\n" "$*"; }
+
+do_ls_files() {
+    git -C "$REPO_ROOT" ls-files -z -- "${PATHS[@]}" 2>/dev/null || true
+}
+
+case "${1:-}" in
+    status)
+        _info "skip-worktree status for: ${PATHS[*]}"
+        git -C "$REPO_ROOT" ls-files -v -- "${PATHS[@]}" | head -n 200
+        ;;
+
+    set)
+        _info "setting skip-worktree for tracked files under: ${PATHS[*]}"
+        failed=0
+        while IFS= read -r -d '' f; do
+            if ! git -C "$REPO_ROOT" update-index --skip-worktree -- "$f"; then
+                _warn "failed to set skip-worktree: $f"
+                failed=1
+            fi
+        done < <(do_ls_files)
+        (( failed == 0 )) && _ok "done" || _warn "completed with failures"
+        ;;
+
+    unset)
+        _info "unsetting skip-worktree for tracked files under: ${PATHS[*]}"
+        failed=0
+        while IFS= read -r -d '' f; do
+            if ! git -C "$REPO_ROOT" update-index --no-skip-worktree -- "$f"; then
+                _warn "failed to unset skip-worktree: $f"
+                failed=1
+            fi
+        done < <(do_ls_files)
+        (( failed == 0 )) && _ok "done" || _warn "completed with failures"
+        ;;
+
+    help|--help|-h|"")
+        cat <<'USAGE'
+Usage: yadmworktree <command>
+  Commands:
+  status    Show skip-worktree status for configured paths
+  set       Set skip-worktree on tracked files under configured configurations
+  unset     Unset skip-worktree for those files
+  help      Show this help
+USAGE
+        ;;
+
+    *)
+        _warn "unknown command: $1"
+        exit 2
+        ;;
+esac

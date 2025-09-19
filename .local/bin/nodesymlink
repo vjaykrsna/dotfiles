@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CONFIG_FILE="$HOME/.config/nodesymlink/config"
+[[ -f "$CONFIG_FILE" ]] && source "$CONFIG_FILE"
+
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+TARGET_DIR="${NODESYMLINK_TARGET_DIR:-$HOME/.local/bin}"
+
+# Get current Node.js version via nvm
+if command -v nvm >/dev/null 2>&1; then
+    current_version=$(nvm current 2>/dev/null | sed 's/v//')
+fi
+
+# Fallback if nvm fails
+if [[ -z "${current_version:-}" ]]; then
+    current_version=$(ls -1d "$NVM_DIR/versions/node/"*/ 2>/dev/null | xargs -n 1 basename | sort -V | tail -1 | sed 's/v//')
+fi
+
+if [[ -z "$current_version" ]]; then
+    echo "❌ No Node.js version found in NVM"
+    exit 1
+fi
+
+NODE_CURRENT="$NVM_DIR/versions/node/v$current_version/bin"
+
+# Default list of node-related executables
+bins=(${NODESYMLINK_BINS[@]:-node npm npx yarn pnpm corepack bun})
+[[ $# -gt 0 ]] && bins=("$@")
+
+mkdir -p "$TARGET_DIR"
+
+echo "🔗 Creating symlinks for Node.js v$current_version"
+
+for bin in "${bins[@]}"; do
+    if [[ -x "$NODE_CURRENT/$bin" ]]; then
+        ln -sf "$NODE_CURRENT/$bin" "$TARGET_DIR/$bin" && \
+            echo "✅ Linked $bin -> $NODE_CURRENT/$bin" || \
+            echo "⚠️ Failed to link $bin"
+    else
+        echo "⚠️ $bin not found in $NODE_CURRENT (skipping)"
+    fi
+done
+
+echo "✅ Node.js symlinks updated successfully"
