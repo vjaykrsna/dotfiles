@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Check device connection
+if ! adb get-state >/dev/null 2>&1; then
+    echo "❌ No device connected via ADB." >&2
+    exit 1
+fi
+
+# Verify Termux package exists
+if ! adb shell pm path com.termux >/dev/null 2>&1; then
+    echo "❌ com.termux package not found on device." >&2
+    exit 1
+fi
+
+# Ensure Termux is debuggable
+if ! adb shell run-as com.termux true >/dev/null 2>&1; then
+    echo "❌ Termux is not debuggable. Install the debug build from GitHub." >&2
+    exit 1
+fi
+
+# Determine shell
+termux_shell="/data/data/com.termux/files/usr/bin/bash"
+if adb shell run-as com.termux test -x /data/data/com.termux/files/usr/bin/zsh; then
+    termux_shell="/data/data/com.termux/files/usr/bin/zsh"
+fi
+
+# Build command
+if [[ $# -gt 0 ]]; then
+    command_to_run=("$termux_shell" -c "$*")
+else
+    command_to_run=("$termux_shell")
+fi
+
+# Launch Termux shell / command via adb
+adb shell -t run-as com.termux env \
+    PATH="/data/data/com.termux/files/usr/bin:\$PATH" \
+    LD_LIBRARY_PATH="/data/data/com.termux/files/usr/lib" \
+    HOME="/data/data/com.termux/files/home" \
+    TMPDIR="/data/data/com.termux/files/usr/tmp" \
+    SHELL="$termux_shell" \
+    TERM="$TERM" \
+    "${command_to_run[@]}"

@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------
+# .local/bin: Track everything except symlinks
+# -----------------------------------------------------------------
+
+# Ignore everything by default (unignore everything in this directory)
+*
+
+!.gitignore
+!cleanvscode
+!cleanjournal
+!appimage
+!nodesymlink
+!yadmworktree
+!cleangit
+!cleanup
+!addsubmodule
+!termux
+!dockerctl
+!extract

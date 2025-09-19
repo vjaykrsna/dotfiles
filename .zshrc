@@ -74,8 +74,6 @@ eval "$(thefuck --alias)"
 # PERSONAL
 # ==================================================================
 [[ -f "$HOME/Personal/.alias" ]] && source "$HOME/Personal/.alias"
-fpath=($HOME/Personal/functions $fpath)
-autoload -Uz extract dockerctl nodesymlink termux yadmworktree cleanup install_appimage addsubmodule tidyjournal gitcleanup
 
 if [[ -s "$HOME/.bun/_bun" ]]; then
   source "$HOME/.bun/_bun"

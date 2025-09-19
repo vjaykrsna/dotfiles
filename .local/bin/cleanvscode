@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DRY_RUN=true
+FREED_SIZE=0
+
+# Parse args
+for arg in "$@"; do
+  case "$arg" in
+    --force) DRY_RUN=false ;;
+    --dry-run) DRY_RUN=true ;;
+    -h|--help)
+      echo "Usage: cleanvscode [--dry-run|--force]"
+      exit 0
+      ;;
+    *)
+      echo "Unknown argument: $arg"
+      echo "Usage: cleanvscode [--dry-run|--force]"
+      exit 2
+      ;;
+  esac
+done
+
+CONFIG_DIR="$HOME/.config/Code"
+EXT_DIR="$HOME/.vscode/extensions"
+
+CACHE_DIRS=(
+  "$CONFIG_DIR/Cache"
+  "$CONFIG_DIR/Code Cache"
+  "$CONFIG_DIR/GPUCache"
+  "$CONFIG_DIR/CachedData"
+  "$CONFIG_DIR/CachedExtensions"
+)
+
+bytes_of() {
+  local path="$1"
+  [[ -e "$path" ]] || return 0
+  du -sb -- "$path" 2>/dev/null | awk '{print $1}'
+}
+
+delete_path() {
+  local path="$1"
+  if [[ -e "$path" ]]; then
+    local sz
+    sz=$(bytes_of "$path")
+    FREED_SIZE=$((FREED_SIZE + sz))
+    if $DRY_RUN; then
+      echo "[DRY-RUN] Would remove: $path ($((sz/1024/1024)) MB)"
+    else
+      echo "Removing: $path ($((sz/1024/1024)) MB)"
+      rm -rf -- "$path"
+    fi
+  fi
+}
+
+echo "=== Cleaning caches ==="
+for dir in "${CACHE_DIRS[@]}"; do
+  delete_path "$dir"
+done
+
+echo "=== Cleaning old extension versions ==="
+if command -v code >/dev/null 2>&1; then
+  declare -A keep
+  while IFS= read -r line; do
+    extid=${line%@*}
+    ver=${line##*@}
+    keep["$extid@$ver"]=1
+  done < <(code --list-extensions --show-versions)
+
+  if [[ -d "$EXT_DIR" ]]; then
+    for dir in "$EXT_DIR"/*; do
+      [[ -d "$dir" ]] || continue
+      base="$(basename -- "$dir")"
+      if [[ "$base" =~ ^([^.]+\.[^.]+)-(.+)$ ]]; then
+        extid="${BASH_REMATCH[1]}"
+        ver="${BASH_REMATCH[2]}"
+        if [[ -z "${keep["$extid@$ver"]+x}" ]]; then
+          delete_path "$dir"
+        fi
+      fi
+    done
+  fi
+else
+  echo "VS Code CLI 'code' not found, skipping extension cleanup."
+fi
+
+MB=$((FREED_SIZE/1024/1024))
+if $DRY_RUN; then
+  echo "=== [DRY-RUN] Would free approx: ${MB} MB 🎉 ==="
+else
+  echo "=== Freed approx: ${MB} MB 🎉 ==="
+fi

@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DRY_RUN=false
+AGGRESSIVE=true
+
+# --- Parse arguments ---
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run) DRY_RUN=true ;;
+        --no-aggressive) AGGRESSIVE=false ;;
+        -h|--help)
+            echo "Usage: cleangit [--dry-run] [--no-aggressive]"
+            exit 0
+            ;;
+        *)
+            echo "Unknown argument: $arg"
+            exit 2
+            ;;
+    esac
+done
+
+# --- Check git ---
+if ! command -v git >/dev/null 2>&1; then
+    echo "❌ git not found"
+    exit 1
+fi
+
+# --- Detect repository root ---
+if ! repo=$(git rev-parse --show-toplevel 2>/dev/null); then
+    echo "⚠️ Not in a git repository"
+    exit 1
+fi
+
+# --- Prepare command ---
+cmd=(git -C "$repo" gc --prune=now)
+$AGGRESSIVE && cmd+=(--aggressive)
+
+# --- Execute ---
+if $DRY_RUN; then
+    echo "(dry) would run: ${cmd[*]}"
+else
+    if "${cmd[@]}" >/dev/null 2>&1; then
+        echo "✅ git cleanup done in $repo"
+    else
+        echo "⚠️ git cleanup failed in $repo"
+        exit 1
+    fi
+fi

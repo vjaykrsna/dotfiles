@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# --- Configurable options via environment ---
+DRY_RUN="${JOURNALTIDY_DRY_RUN:-false}"
+RETENTION="${JOURNALTIDY_RETENTION:-1s}"  # default aggressive: remove almost everything
+
+# --- Check journalctl ---
+if ! command -v journalctl >/dev/null 2>&1; then
+    echo "❌ journalctl not found"
+    exit 1
+fi
+
+echo "🔧 rotating systemd journal..."
+if [[ "$DRY_RUN" == "true" ]]; then
+    echo "(dry) would run: sudo journalctl --rotate"
+else
+    sudo journalctl --rotate >/dev/null 2>&1
+fi
+
+echo "🧹 vacuuming systemd journal (retention: $RETENTION)..."
+if [[ "$DRY_RUN" == "true" ]]; then
+    echo "(dry) would run: sudo journalctl --vacuum-time=\"$RETENTION\""
+    exit 0
+fi
+
+if sudo journalctl --vacuum-time="$RETENTION" >/dev/null 2>&1; then
+    echo "✅ journal cleanup complete"
+else
+    echo "⚠️ vacuum-time failed, trying fallback size 500M"
+    if sudo journalctl --vacuum-size=500M >/dev/null 2>&1; then
+        echo "✅ journal vacuumed by size"
+    else
+        echo "⚠️ journal cleanup failed"
+        exit 1
+    fi
+fi
