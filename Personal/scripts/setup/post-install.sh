@@ -5,10 +5,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../core/installer.sh" # For logging and utility functions
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$SCRIPT_DIR/../core/installer.sh"
 
 info "🚀 Running Post-Install Configuration"
 
@@ -18,24 +17,20 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 info "› Modernizing APT sources..."
 run_privileged apt modernize-sources
 
-if command -v fc-cache &> /dev/null; then
-    info "› Rebuilding font cache..."
-    fc-cache -fv
-fi
-
 info "› Installing Sekiro GRUB theme..."
-if [ ! -d "/tmp/sekiro_grub_theme" ]; then
-    git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
-fi
+rm -rf /tmp/sekiro_grub_theme
+git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
 (cd /tmp/sekiro_grub_theme && run_privileged bash install.sh) || error "Failed to install Sekiro theme"
 rm -rf /tmp/sekiro_grub_theme
 
 info "› Installing Adwaita Colors theme..."
-if [ ! -d "/tmp/Adwaita-colors" ]; then
-    git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"
-fi
+rm -rf /tmp/Adwaita-colors
+git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"
 (cd /tmp/Adwaita-colors && run_privileged bash ./setup -i) || error "Failed to install Adwaita theme"
 rm -rf /tmp/Adwaita-colors
+
+info "› Rebuilding font cache..."
+fc-cache -fv 2>/dev/null || true
 
 info "› Installing Micro editor plugins..."
 micro -plugin install fzf

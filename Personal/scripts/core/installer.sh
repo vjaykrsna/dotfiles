@@ -2,10 +2,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 trap 'rm -rf /tmp/setup-* 2>/dev/null || true' EXIT
 
 # Source logging
-source "utils/logging.sh"
+source "$SCRIPT_DIR/utils/logging.sh"
 
 # --- UTILITY FUNCTIONS ---
 ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
@@ -41,13 +43,13 @@ install_packages_from_file() {
 install_system_packages() {
     info "--- System Package Installation ---"
 
-    [[ -f scripts/packages/custom.sh ]] && run_privileged bash scripts/packages/custom.sh
+    [[ -f "$SCRIPT_DIR/../tools/packages/custom.sh" ]] && run_privileged bash "$SCRIPT_DIR/../tools/packages/custom.sh"
 
     warn "Updating package lists..."
     run_privileged apt-get update
 
-    install_packages_from_file scripts/packages/apt.txt "run_privileged apt-get install -y"
-    install_packages_from_file scripts/packages/flatpak.txt "flatpak install -y"
+    install_packages_from_file "$SCRIPT_DIR/../tools/packages/apt.txt" "run_privileged apt-get install -y"
+    install_packages_from_file "$SCRIPT_DIR/../tools/packages/flatpak.txt" "flatpak install -y"
 }
 
 # --- LANGUAGE ENVIRONMENT ---
@@ -111,7 +113,7 @@ install_language_packages() {
 	       [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\"
 	       $(typeset -f load_language_env); load_language_env
 
-	       cd \"$PWD\"
+	       cd \"$SCRIPT_DIR\"
 
 	       $(typeset -f ensure_file_nonempty)
 	       $(typeset -f install_packages_from_file)
@@ -119,10 +121,10 @@ install_language_packages() {
 	       $(typeset -f log)
 	       log \"Installing npm global packages...\"
 
-	       install_packages_from_file scripts/packages/npm-globals.txt 'npm install -g'
-	       install_packages_from_file scripts/packages/cargo-crates.txt 'cargo install'
-	       install_packages_from_file scripts/packages/bun-globals.txt 'bun install -g'
-	       install_packages_from_file scripts/packages/pipx.txt 'pipx install'
+	       install_packages_from_file '$SCRIPT_DIR/../tools/packages/npm-globals.txt' 'npm install -g'
+	       install_packages_from_file '$SCRIPT_DIR/../tools/packages/cargo-crates.txt' 'cargo install'
+	       install_packages_from_file '$SCRIPT_DIR/../tools/packages/bun-globals.txt' 'bun install -g'
+	       install_packages_from_file '$SCRIPT_DIR/../tools/packages/pipx.txt' 'pipx install'
 	   "
     log "--- Language Package Installation Complete ---"
 }
@@ -130,35 +132,35 @@ install_language_packages() {
 # --- SYSTEM FIXES ---
 run_system_fixes() {
     info "--- Running System Fixes ---"
-    bash scripts/fixes.sh all
+    bash "$SCRIPT_DIR/../maintenance/fixes.sh" all
     log "--- System Fixes Complete ---"
 }
 
 # --- CLI INSTALLER ---
 run_cli_installer() {
     info "--- Running CLI Tools Installer ---"
-    source scripts/cli.sh && run_cli_installer_interactive
+    source "$SCRIPT_DIR/../tools/cli.sh" && run_cli_installer_interactive
     ok "--- CLI Tools Installation Complete ---"
 }
 
 # --- PRE-INSTALL ---
 run_preinstall() {
     info "--- Running Pre-Install Setup ---"
-    run_privileged bash scripts/pre-install.sh
+    run_privileged bash "$SCRIPT_DIR/../setup/pre-install.sh"
     log "--- Pre-Install Setup Complete ---"
 }
 
 # --- SNAP REMOVAL ---
 run_snap_removal() {
     info "--- Running Snap Removal ---"
-    source scripts/snap-removal.sh && run_snap_removal_interactive
+    source "$SCRIPT_DIR/../maintenance/snap-removal.sh" && run_snap_removal_interactive
     ok "--- Snap Removal Complete ---"
 }
 
 # --- POST-INSTALL ---
 run_post_install() {
     info "--- Running Post-Install ---"
-    run_privileged bash scripts/post-install.sh
+    run_privileged bash "$SCRIPT_DIR/../setup/post-install.sh"
     ok "--- Post-Install Complete ---"
 }
 
@@ -170,14 +172,14 @@ setup_shell_environment() {
 # --- NVIDIA GPU SETUP ---
 run_nvidia_setup() {
     info "--- Setting Up NVIDIA GPU ---"
-    bash scripts/nvidia.sh
+    bash "$SCRIPT_DIR/../maintenance/nvidia.sh"
     log "--- NVIDIA GPU Setup Complete ---"
 }
 
 # --- SYSTEM CONFIGURATION ---
 configure_system() {
     info "--- Configuring System (RAM + Power) ---"
-    bash scripts/myconfig.sh
+    bash "$SCRIPT_DIR/../maintenance/myconfig.sh"
     log "--- System Configuration Complete ---"
 }
 
@@ -209,6 +211,6 @@ setup_zinit_starship() {
 # --- NERD FONTS ---
 run_nerd_fonts_installer() {
     info "--- Running Nerd Fonts Installer ---"
-    source scripts/nerd-fonts.sh && install_nerd_fonts
+    source "$SCRIPT_DIR/../tools/nerd-fonts.sh" && install_nerd_fonts
     ok "--- Nerd Fonts Installation Complete ---"
 }

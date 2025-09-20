@@ -4,10 +4,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../core/installer.sh" # For logging and utility functions
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$SCRIPT_DIR/../core/installer.sh"
 
 # --- Pre-check commands ---
 for cmd in curl tar fc-cache; do

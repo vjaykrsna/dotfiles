@@ -5,12 +5,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Sourcing Dependencies (only when running standalone) ---
-# Note: This script is intended to be run standalone with sudo,
-# but we source this to get logging functions.
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../core/installer.sh"
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$SCRIPT_DIR/../core/installer.sh"
 
 info "🔧 Pre-Install System Preparation"
 warn "This script requires sudo access for system updates"
