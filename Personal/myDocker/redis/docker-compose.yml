@@ -17,11 +17,11 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - redis_network
+      - litellm_network
 
 volumes:
   redis_data:
 
 networks:
-  redis_network:
-    driver: bridge
+  litellm_network:
+    external: true

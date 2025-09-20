@@ -33,7 +33,7 @@ else
 fi
 
 # Add dependencies if starting
-if [[ "$action" == "start" && -n "${DOCKERCTL_DEPS-}" ]]; then
+if [[ "$action" == "start" && ${#DOCKERCTL_DEPS[@]} -gt 0 ]]; then
     resolved_services=()
     for service in "${services[@]}"; do
         if [[ -n "${DOCKERCTL_DEPS[$service]-}" ]]; then
