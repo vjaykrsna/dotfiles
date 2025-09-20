@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 run_snap_removal_interactive() {

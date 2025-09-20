@@ -6,7 +6,7 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 # --- Pre-check commands ---
@@ -60,12 +60,12 @@ install_font() {
     fi
 
     info "› Downloading $FONT_NAME Nerd Font..."
-    if curl -sL -o "$TMP_DIR/${FONT_NAME}.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.tar.xz"; then
+    if curl -sL -o "$TMP_DIR/${FONT_NAME}.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.tar.xz" || error "Failed to download $FONT_NAME Nerd Font"; then
         info "› Installing $FONT_NAME Nerd Font..."
-        tar -xJf "$TMP_DIR/${FONT_NAME}.tar.xz" -C "$FONT_DIR/"
+        tar -xJf "$TMP_DIR/${FONT_NAME}.tar.xz" -C "$FONT_DIR/" || error "Failed to extract $FONT_NAME"
         ok "$FONT_NAME Nerd Font installed."
     else
-        warn "Failed to download $FONT_NAME Nerd Font"
+        error "Failed to download $FONT_NAME Nerd Font"
     fi
 
     rm -rf "$TMP_DIR"
@@ -74,7 +74,7 @@ install_font() {
 # Full font installation
 install_all_fonts() {
     info "--- Installing All Nerd Fonts ---"
-    local FONTS=( "JetBrainsMono" "FiraCode" "GeistMono" )
+    local FONTS=( "JetBrainsMono" "FiraCode" "Hack" )
     for f in "${FONTS[@]}"; do
         install_font "$f"
     done

@@ -2,21 +2,12 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- UTILITY FUNCTIONS ---
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m'
-info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
-log() { echo -e "${BLUE}ℹ️  $*${NC}"; }
-ok() { echo -e "${GREEN}✅ $*${NC}"; }
-warn() { echo -e "${YELLOW}⚠️  $*${NC}"; }
-error() {
-    echo -e "${RED}❌ $*${NC}"
-    exit 1
-} # Exit on error
+trap 'rm -rf /tmp/setup-* 2>/dev/null || true' EXIT
 
+# Source logging
+source "utils/logging.sh"
+
+# --- UTILITY FUNCTIONS ---
 ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
 run_privileged() { [ "$(id -u)" -eq 0 ] && "$@" || sudo "$@"; }
 run_as_user() { [ "$EUID" -eq 0 ] && (ensure_user_context && "$@") || "$@"; }
@@ -39,6 +30,9 @@ install_packages_from_file() {
     local file="$1" cmd="$2"
     if ensure_file_nonempty "$file"; then
         log "Installing from $file..."
+        if [[ "$cmd" == *"apt-get install"* ]]; then
+            cmd="${cmd} --no-install-recommends"
+        fi
         xargs -a "$file" -r --no-run-if-empty bash -c "$(typeset -f run_privileged); $cmd \"\$@\"" _
     fi
 }
@@ -62,7 +56,7 @@ setup_nvm() {
     if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
         log "NVM already installed."
     else
-        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash || error "NVM install failed"
     fi
 
     export NVM_DIR="$HOME/.nvm"
@@ -79,7 +73,7 @@ setup_nvm() {
 setup_rust() {
     command -v cargo > /dev/null || {
         warn "Installing Rust..."
-        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || error "Rust install failed"
         load_language_env
     }
 }
@@ -87,7 +81,7 @@ setup_rust() {
 setup_bun() {
     command -v bun > /dev/null || {
         warn "Installing Bun..."
-        curl -fsSL https://bun.sh/install | bash
+        curl -fsSL https://bun.sh/install | bash || error "Bun install failed"
         load_language_env
     }
 }

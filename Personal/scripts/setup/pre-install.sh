@@ -9,7 +9,7 @@ IFS=$'\n\t'
 # Note: This script is intended to be run standalone with sudo,
 # but we source this to get logging functions.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh"
+    source "../core/installer.sh"
 fi
 
 info "🔧 Pre-Install System Preparation"

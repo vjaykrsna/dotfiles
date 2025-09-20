@@ -7,7 +7,7 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 info "🚀 Running Post-Install Configuration"
@@ -25,16 +25,16 @@ fi
 
 info "› Installing Sekiro GRUB theme..."
 if [ ! -d "/tmp/sekiro_grub_theme" ]; then
-    git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme
+    git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
 fi
-(cd /tmp/sekiro_grub_theme && run_privileged bash install.sh)
+(cd /tmp/sekiro_grub_theme && run_privileged bash install.sh) || error "Failed to install Sekiro theme"
 rm -rf /tmp/sekiro_grub_theme
 
 info "› Installing Adwaita Colors theme..."
 if [ ! -d "/tmp/Adwaita-colors" ]; then
-    git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors
+    git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"
 fi
-(cd /tmp/Adwaita-colors && run_privileged bash ./setup -i)
+(cd /tmp/Adwaita-colors && run_privileged bash ./setup -i) || error "Failed to install Adwaita theme"
 rm -rf /tmp/Adwaita-colors
 
 info "› Installing Micro editor plugins..."

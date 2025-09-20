@@ -3,29 +3,30 @@ set -euo pipefail
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 # --- RAM CONFIGURATION ---
 ZRAM_PERCENT=200   # % of RAM
-DISK_SWAP_SIZE=12G # disk swap size
+RAM_GB=$(free -g | awk 'NR==2{print $2}')
+DISK_SWAP_SIZE=$((RAM_GB * 3 / 2))G # 1.5x RAM
 SWAP_FILE=/swap.img
 
 info "💾 Configuring ZRAM to ${ZRAM_PERCENT}% of RAM..."
-run_privileged sed -i "s/^PERCENT=.*/PERCENT=${ZRAM_PERCENT}/" /etc/default/zramswap
-run_privileged systemctl restart zramswap.service
+run_privileged sed -i "s/^PERCENT=.*/PERCENT=${ZRAM_PERCENT}/" /etc/default/zramswap || error "Failed to update zram config"
+run_privileged systemctl restart zramswap.service || error "Failed to restart zramswap"
 
 info "🗑️ Removing old disk swap if it exists..."
 if swapon --show=NAME | grep -q "$SWAP_FILE"; then
-    run_privileged swapoff "$SWAP_FILE"
+    run_privileged swapoff "$SWAP_FILE" || warn "Failed to swapoff"
 fi
-[ -f "$SWAP_FILE" ] && run_privileged rm "$SWAP_FILE"
+[ -f "$SWAP_FILE" ] && run_privileged rm "$SWAP_FILE" || true
 
 info "💽 Creating new ${DISK_SWAP_SIZE} swapfile..."
-run_privileged fallocate -l $DISK_SWAP_SIZE "$SWAP_FILE"
+run_privileged fallocate -l $DISK_SWAP_SIZE "$SWAP_FILE" || error "Failed to allocate swapfile"
 run_privileged chmod 600 "$SWAP_FILE"
-run_privileged mkswap "$SWAP_FILE"
-run_privileged swapon "$SWAP_FILE"
+run_privileged mkswap "$SWAP_FILE" || error "Failed to mkswap"
+run_privileged swapon "$SWAP_FILE" || error "Failed to swapon"
 
 # --- POWERTOP CONFIGURATION ---
 SERVICE_NAME="powertop-autotune.service"
@@ -53,15 +54,16 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 EOF
 
-    run_privileged mv "$TMP_FILE" "$SERVICE_PATH"
+    run_privileged mv "$TMP_FILE" "$SERVICE_PATH" || error "Failed to create service file"
+
     ok "Service file created at $SERVICE_PATH"
 
     run_privileged systemctl daemon-reload
-    run_privileged systemctl enable "$SERVICE_NAME"
+    run_privileged systemctl enable "$SERVICE_NAME" || error "Failed to enable $SERVICE_NAME"
     ok "$SERVICE_NAME enabled for auto-start"
 
     read -rp "Start powertop autotune now? [y/N]: " ans
-    [[ "$ans" =~ ^[Yy]$ ]] && run_privileged systemctl start "$SERVICE_NAME" && ok "Service started now"
+    [[ "$ans" =~ ^[Yy]$ ]] && run_privileged systemctl start "$SERVICE_NAME" && ok "Service started now" || error "Failed to start $SERVICE_NAME"
 
     ok "Done! Powertop will auto-tune 30s after every boot."
 else

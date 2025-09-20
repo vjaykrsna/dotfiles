@@ -20,7 +20,7 @@ with_dotfiles_root() {
 }
 
 # Source the installer functions which contain the core logic
-source "$(dirname "$0")/installer.sh"
+source "../core/installer.sh"
 
 # --- DEPENDENCY CHECKS ---
 check_basic_dependencies() {
@@ -57,15 +57,16 @@ run_all_setup() {
 
     # Additional tools and cleanup
     info "--- Installing CLI Tools ---"
-    echo -e "123\nq" | with_dotfiles_root run_cli_installer # Install all tools (1,2,3), then quit
+    with_dotfiles_root run_cli_installer --all || warn "CLI install partial"
+
     info "--- Removing Snap Packages ---"
-    echo "y" | with_dotfiles_root run_snap_removal # Auto-confirm snap removal
+    with_dotfiles_root run_snap_removal || warn "Snap removal skipped"
 
     # Restore configurations (for target machine setup)
     info "--- Restoring GNOME Settings ---"
-    echo "2" | "$SCRIPT_DIR/gnome-settings.sh" # Auto-select restore mode
+    "../sync/gnome-settings.sh" load || warn "GNOME settings load skipped"
     info "--- Installing GNOME Extensions ---"
-    echo "2" | "$SCRIPT_DIR/gnome-extensions.sh" # Auto-select install mode
+    "../sync/gnome-extensions.sh" install || warn "Extensions install skipped"
 
     ok "--- ✅ Automated Full System Setup Complete ---"
 }
@@ -73,22 +74,22 @@ run_all_setup() {
 # --- WRAPPER FUNCTIONS for scripts ---
 run_update_pkgs() {
     info "--- Updating package lists ---"
-    "$SCRIPT_DIR/package-sync.sh"
+    "../sync/package-sync.sh"
 }
 
 run_gnome_settings() {
     info "--- GNOME Settings Management ---"
-    "$SCRIPT_DIR/gnome-settings.sh" interactive
+    "../sync/gnome-settings.sh" interactive
 }
 
 run_gnome_extensions() {
     info "--- GNOME Extensions Management ---"
-    "$SCRIPT_DIR/gnome-extensions.sh" interactive
+    "../sync/gnome-extensions.sh" interactive
 }
 
 run_system_sync() {
     info "--- System Configuration Management ---"
-    "$SCRIPT_DIR/system-sync.sh" interactive
+    "../sync/system-sync.sh" interactive
 }
 
 # --- INTERACTIVE MENU ---
