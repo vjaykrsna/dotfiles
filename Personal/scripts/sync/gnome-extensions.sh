@@ -12,10 +12,9 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../core/installer.sh" # For logging and utility functions
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
 
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"
@@ -32,31 +31,21 @@ save_extensions() {
 
 # --- INSTALL FUNCTION ---
 install_extensions() {
-    if [ ! -s "$EXTENSIONS_FILE" ]; then # Check if file is non-empty
+    if [ ! -s "$EXTENSIONS_FILE" ]; then
         info "No extension list found or list is empty. Skipping installation."
         return
     fi
 
-    if ! command -v gext &> /dev/null; then
-        echo "Error: 'gext' (from gnome-extensions-cli) is not installed."
-        echo "Please ensure it is installed via pipx."
-        exit 1
-    fi
-
     info "Installing GNOME extensions from $EXTENSIONS_FILE..."
-    # Pass all extensions from the file to a single install command.
-    # xargs removes newlines and passes them as separate arguments.
-    xargs -a "$EXTENSIONS_FILE" gext install
+    xargs -a "$EXTENSIONS_FILE" gext install || error "Failed to install extensions (gext missing?)"
+
     ok "All extensions installed."
 
     # Compile schemas for newly installed extensions
     info "Compiling GNOME extension schemas..."
     for ext_uuid in $(cat "$EXTENSIONS_FILE"); do
         ext_path="$HOME/.local/share/gnome-shell/extensions/$ext_uuid"
-        if [ -d "$ext_path/schemas" ]; then
-            info "Compiling schemas for $ext_uuid..."
-            glib-compile-schemas "$ext_path/schemas"
-        fi
+        glib-compile-schemas "$ext_path/schemas" 2>/dev/null || true
     done
     ok "Schema compilation completed."
 }
