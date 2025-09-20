@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 # --- CONFIGURATION ---
@@ -55,7 +55,7 @@ save_pipx() {
 save_cargo() {
     if command -v cargo &> /dev/null; then
         info "Updating Cargo crate list..."
-        cargo install --list | awk '$1 ~ /^[a-zA-Z0-9_-]+$/ {print $1}' > "$SAVE_DIR/cargo-crates.txt"
+        cargo install --list | awk '$1 ~ /^[a-zA-Z0-9_.-]+$/ {print $1}' > "$SAVE_DIR/cargo-crates.txt"
         ok "Cargo list updated."
     fi
 }

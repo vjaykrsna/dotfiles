@@ -15,7 +15,7 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
 
 # The file where settings will be stored, tracked by yadm
@@ -28,7 +28,7 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 # Dumps all dconf settings to the text file
 dump_settings() {
     info "Dumping GNOME settings to $SETTINGS_FILE..."
-    dconf dump / > "$SETTINGS_FILE"
+    dconf dump /org/gnome/ > "$SETTINGS_FILE" || error "Failed to dump settings"
     ok "Done. You can now commit the changes with yadm."
 }
 
@@ -41,9 +41,19 @@ load_settings() {
         exit 1
     fi
     info "Loading GNOME settings from $SETTINGS_FILE..."
-    dconf load / < "$SETTINGS_FILE"
+    dconf load /org/gnome/ < "$SETTINGS_FILE" || error "Failed to load settings"
     ok "Done. Your GNOME settings have been restored."
     echo "   You may need to log out and back in for all changes to apply."
+}
+
+# Add DIFF FUNCTION
+diff_settings() {
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        error "Settings file not found at $SETTINGS_FILE."
+        exit 1
+    fi
+    info "Diffing current vs saved GNOME settings..."
+    diff -u <(dconf dump /org/gnome/) "$SETTINGS_FILE" || true
 }
 
 # --- INTERACTIVE MODE ---
@@ -51,7 +61,8 @@ interactive_mode() {
     info "GNOME Settings Management:"
     echo "1. Save (dump) current GNOME settings"
     echo "2. Load (restore) GNOME settings"
-    echo -n "Choose an option (1-2): "
+    echo "3. Diff current vs saved"
+    echo -n "Choose an option (1-3): "
     read -r choice
 
     case "$choice" in
@@ -60,6 +71,9 @@ interactive_mode() {
         ;;
     2)
         load_settings
+        ;;
+    3)
+        diff_settings
         ;;
     *)
         error "Invalid option. Exiting."
@@ -76,11 +90,14 @@ dump)
 load)
     load_settings
     ;;
+diff)
+    diff_settings
+    ;;
 interactive | "")
     interactive_mode
     ;;
 *)
-    error "Usage: $0 {dump|load|interactive}"
+    error "Usage: $0 {dump|load|diff|interactive}"
     echo "If no argument provided, runs in interactive mode."
     exit 1
     ;;

@@ -4,8 +4,18 @@ IFS=$'\n\t'
 
 # --- Source dependencies only when running standalone ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
 fi
+
+run_cli_installer() {
+    if [[ "${1:-}" == "--all" ]]; then
+        info "Installing all CLI tools..."
+        parse_and_execute "123"
+        ok "All CLI tools installed."
+        return
+    fi
+    run_cli_installer_interactive
+}
 
 run_cli_installer_interactive() {
     # --- Tools and npm packages ---
@@ -78,4 +88,4 @@ run_cli_installer_interactive() {
 }
 
 # --- Run standalone ---
-[[ "${BASH_SOURCE[0]}" == "${0}" ]] && run_cli_installer_interactive
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && run_cli_installer "$1"

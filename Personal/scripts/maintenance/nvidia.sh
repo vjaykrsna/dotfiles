@@ -4,7 +4,16 @@ IFS=$'\n\t'
 
 # --- Sourcing Dependencies (only when running standalone) ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$(dirname "$0")/installer.sh" # For logging and utility functions
+    source "../core/installer.sh" # For logging and utility functions
+fi
+
+# Revert flag
+if [[ "$1" == "revert" ]]; then
+    info "Reverting to full NVIDIA..."
+    run_privileged envycontrol --reset || error "Envycontrol reset failed"
+    run_privileged prime-select nvidia || error "Prime-select nvidia failed"
+    ok "NVIDIA reverted to full mode."
+    exit 0
 fi
 
 command -v prime-select > /dev/null || {

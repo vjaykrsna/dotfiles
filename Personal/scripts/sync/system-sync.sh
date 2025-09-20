@@ -16,6 +16,11 @@ IFS=$'\n\t'
 CONFIG_DIR="$HOME/.config/system-config"
 mkdir -p "$CONFIG_DIR"
 
+# --- Sourcing Dependencies (only when running standalone) ---
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    source "../core/installer.sh" # For logging and utility functions
+fi
+
 # --- UTILITY FUNCTIONS ---
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
