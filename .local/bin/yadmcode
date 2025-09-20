@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+local git_dir="$HOME/.local/share/yadm/repo.git"
+local paths=()
+if [ $# -eq 0 ]; then
+    paths=("$HOME")
+else
+    for arg in "$@"; do
+        paths+=("$HOME/$arg")
+    done
+fi
+GIT_DIR="$git_dir" code "${paths[@]}"
