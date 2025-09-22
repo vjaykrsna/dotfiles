@@ -20,7 +20,7 @@ with_dotfiles_root() {
 }
 
 # Source the installer functions which contain the core logic
-source "../core/installer.sh"
+source "$SCRIPT_DIR/../core/installer.sh"
 
 # --- DEPENDENCY CHECKS ---
 check_basic_dependencies() {

@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # --- Source dependencies only when running standalone ---
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../core/installer.sh" # For logging and utility functions
+    source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
 fi
 
 run_cli_installer() {
