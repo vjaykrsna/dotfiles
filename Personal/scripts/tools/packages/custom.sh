@@ -1,29 +1,33 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
-# --- Basic logging (fallback if installer.sh missing) ---
-info()  { echo "[INFO] $*"; }
-ok()    { echo "[ OK ] $*"; }
-error() { echo "[ERR ] $*" >&2; }
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "../../core/installer.sh" # For logging and utility functions
-fi
+# Source logging and utility functions
+source "$SCRIPT_DIR/../../utils/logging.sh"
+source "$SCRIPT_DIR/../../utils/utils.sh"
 
-# Ensure running as root
-if [[ $EUID -ne 0 ]]; then
-    error "Please run as root or with sudo"
-    exit 1
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+
+# Ensure we have the privileges we need; auto-elevate when possible
+if [[ "$EUID" -ne 0 ]]; then
+    warn "Custom package install requires elevation; re-running with sudo..."
+    if command -v sudo >/dev/null 2>&1; then
+        exec sudo -E -- "$0" "$@"
+    fi
+    error "Unable to obtain root privileges (sudo not available)."
 fi
 
 info "Running custom installations..."
 
 # Setup system dependencies first
 info "Installing base dependencies..."
-apt update -qq
-apt install -y --no-install-recommends \
+# Use noninteractive apt-get for scripted installs
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -q
+apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     gnupg \
@@ -36,32 +40,36 @@ apt install -y --no-install-recommends \
 install -m 0755 -d /etc/apt/keyrings
 
 # --- Google Chrome ---
-if ! command -v google-chrome &>/dev/null; then
+if ! command -v google-chrome &>/dev/null && ! command -v google-chrome-stable &>/dev/null; then
     info "Setting up Google Chrome..."
     curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
-        -o /etc/apt/keyrings/google-chrome.gpg || {
+        | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg || {
         error "Failed to download Google key"; }
+    chmod a+r /etc/apt/keyrings/google-chrome.gpg
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
         | tee /etc/apt/sources.list.d/google-chrome.list >/dev/null
-    apt update -qq
-    apt install -y google-chrome-stable || error "Failed to install Google Chrome"
+    apt-get update -q
+    apt-get install -y google-chrome-stable || warn "Failed to install Google Chrome"
 fi
 
 # --- Docker ---
 if ! command -v docker &>/dev/null; then
     info "Installing Docker..."
-    apt install -y ca-certificates curl || error "Failed to install ca-certificates/curl"
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-        -o /etc/apt/keyrings/docker.asc || error "Failed to download Docker key"
-    chmod a+r /etc/apt/keyrings/docker.asc
+        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg || error "Failed to download Docker key"
+    chmod a+r /etc/apt/keyrings/docker.gpg
+    
     CODENAME=$(lsb_release -cs)
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $CODENAME stable" \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
         | tee /etc/apt/sources.list.d/docker.list >/dev/null || error "Failed to add Docker repo"
-    apt update && apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || error "Failed to install Docker"
+        
+    apt-get update -q
+    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || warn "Failed to install Docker"
 
     if [[ -n "${SUDO_USER:-}" ]]; then
         info "Adding $SUDO_USER to docker group..."
         usermod -aG docker "$SUDO_USER"
+        warn "User $SUDO_USER was added to group 'docker'. Please log out and log back in (or run 'newgrp docker') for this to take effect."
     fi
 fi
 
@@ -69,33 +77,38 @@ fi
 if ! command -v code &>/dev/null; then
     info "Setting up VS Code..."
     curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
-        -o /etc/apt/keyrings/packages.microsoft.gpg || {
+        | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg || {
         error "Failed to fetch Microsoft key"; }
+    chmod a+r /etc/apt/keyrings/packages.microsoft.gpg
     echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" \
         | tee /etc/apt/sources.list.d/vscode.list >/dev/null
-    apt update -qq
-    apt install -y code || error "Failed to install VS Code"
+    apt-get update -q
+    apt-get install -y code || warn "Failed to install VS Code"
 fi
 
 # --- OnlyOffice ---
 if ! dpkg -s onlyoffice-desktopeditors &>/dev/null; then
     info "Installing OnlyOffice Desktop Editors..."
-    tmpdeb=/tmp/onlyoffice.deb
-    wget -qO "$tmpdeb" https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb || {
-        error "Failed to fetch OnlyOffice"; }
-    DEBIAN_FRONTEND=noninteractive apt install -y "$tmpdeb" || error "Failed to install OnlyOffice"
-    rm -f "$tmpdeb"
+    wget -O /tmp/onlyoffice.deb https://github.com/ONLYOFFICE/DesktopEditors/releases/latest/download/onlyoffice-desktopeditors_amd64.deb || error "Failed to download OnlyOffice DEB"
+    apt-get install -y fonts-dejavu fonts-crosextra-carlito || warn "Failed to install OnlyOffice dependencies"
+    # Use apt to handle dependencies when installing local deb
+    if ! apt-get install -y /tmp/onlyoffice.deb; then
+        warn "apt installation of OnlyOffice failed, attempting dpkg and fix..."
+        dpkg -i /tmp/onlyoffice.deb || warn "dpkg install failed for OnlyOffice"
+        apt-get -f install -y || warn "Failed to fix unmet dependencies for OnlyOffice"
+    fi
+    rm -f /tmp/onlyoffice.deb
 fi
 
 # --- auto-cpufreq ---
 if ! command -v auto-cpufreq &>/dev/null; then
     info "Installing auto-cpufreq..."
-    git clone --depth=1 https://github.com/AdnanHodzic/auto-cpufreq.git /tmp/auto-cpufreq || {
-        error "Failed to clone auto-cpufreq repo"; }
-    (cd /tmp/auto-cpufreq && ./auto-cpufreq-installer --install) || {
-        error "auto-cpufreq installation failed"; }
+    tmpdir=$(mktemp -d)
+    git clone --depth=1 https://github.com/AdnanHodzic/auto-cpufreq.git "$tmpdir" || warn "Failed to clone auto-cpufreq repo, skipping"
+    (cd "$tmpdir" && ./auto-cpufreq-installer --install) || warn "auto-cpufreq installation failed, skipping"
+    systemctl daemon-reload
     systemctl enable --now auto-cpufreq || true
-    rm -rf /tmp/auto-cpufreq
+    rm -rf "$tmpdir"
 fi
 
 ok "Custom installations complete."

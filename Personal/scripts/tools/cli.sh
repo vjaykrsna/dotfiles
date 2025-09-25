@@ -1,13 +1,18 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# cli.sh - Interactive CLI tools installer helper
+# Usage: source cli.sh && run_cli_installer_interactive
+# Example: ./cli.sh
 set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# --- Source dependencies only when running standalone ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
-fi
+# Source logging and utility functions
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 run_cli_installer() {
     if [[ "${1:-}" == "--all" ]]; then
@@ -45,7 +50,7 @@ run_cli_installer_interactive() {
         # Get old version if installed
         local old_version=""
         if command -v "$bin" &> /dev/null; then
-            old_version=$("$bin" --version 2>&1)
+            old_version=$("$bin" --version 2>/dev/null || echo "unknown")
         fi
 
         info "🔧 Installing/updating $name..."
@@ -59,7 +64,7 @@ run_cli_installer_interactive() {
         # Get new version
         local new_version=""
         if command -v "$bin" &> /dev/null; then
-            new_version=$("$bin" --version 2>&1)
+            new_version=$("$bin" --version 2>/dev/null || echo "unknown")
         fi
 
         # Print version change

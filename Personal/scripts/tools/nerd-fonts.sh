@@ -1,12 +1,17 @@
-#!/bin/bash
-# Nerd Font Installation Script with Storage Optimization
-
+#!/usr/bin/env bash
+# nerd-fonts.sh - Install/cleanup Nerd Fonts
+# Usage: source nerd-fonts.sh && install_nerd_fonts
+# Example: ./nerd-fonts.sh
 set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh"
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- Pre-check commands ---
 for cmd in curl tar fc-cache; do
@@ -34,7 +39,7 @@ cleanup_unused_fonts() {
     du -sh "$FONT_DIR" || true
 
     info "Fonts kept:"
-    ls -1 "$FONT_DIR" | grep "NerdFont" | sort || true
+    for f in "$FONT_DIR"/*NerdFont*; do [ -e "$f" ] || continue; echo "$f"; done | sort || true
 }
 
 # Rebuild font cache
@@ -59,12 +64,12 @@ install_font() {
     fi
 
     info "› Downloading $FONT_NAME Nerd Font..."
-    if curl -sL -o "$TMP_DIR/${FONT_NAME}.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.tar.xz" || error "Failed to download $FONT_NAME Nerd Font"; then
+    if curl -sL -o "$TMP_DIR/${FONT_NAME}.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.tar.xz"; then
         info "› Installing $FONT_NAME Nerd Font..."
-        tar -xJf "$TMP_DIR/${FONT_NAME}.tar.xz" -C "$FONT_DIR/" || error "Failed to extract $FONT_NAME"
+        tar -xJf "$TMP_DIR/${FONT_NAME}.tar.xz" -C "$FONT_DIR/" || warn "Failed to extract $FONT_NAME, skipping"
         ok "$FONT_NAME Nerd Font installed."
     else
-        error "Failed to download $FONT_NAME Nerd Font"
+        warn "Failed to download $FONT_NAME Nerd Font, skipping"
     fi
 
     rm -rf "$TMP_DIR"

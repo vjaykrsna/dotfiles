@@ -1,14 +1,7 @@
-#!/bin/bash
-# ==============================================================================
-# System Configuration Sync Script
-#
-# This script manages the syncing of system-level configuration files like
-# crontab, fstab, and the hosts file.
-#
-# Usage:
-#   ./system-sync.sh save   # Saves the current system configurations
-#   ./system-sync.sh diff   # Compares the stored configs with the live ones
-# ==============================================================================
+#!/usr/bin/env bash
+# system-sync.sh - Save or diff system-level configurations
+# Usage: ./system-sync.sh {save|diff|interactive}
+# Example: ./system-sync.sh save
 set -euo pipefail
 IFS=$'\n\t'
 
@@ -16,31 +9,27 @@ IFS=$'\n\t'
 CONFIG_DIR="$HOME/.config/system-config"
 mkdir -p "$CONFIG_DIR"
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-    source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
-fi
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# --- UTILITY FUNCTIONS ---
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-info() { echo -e "${BLUE}ℹ️  $*${NC}"; }
-ok() { echo -e "${GREEN}✅ $*${NC}"; }
+# Source logging and utility functions
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- SAVE FUNCTION ---
 save_configs() {
     info "Saving system configurations..."
 
     # Save crontab
-    crontab -l > "$CONFIG_DIR/crontab.txt"
+    crontab -l > "$CONFIG_DIR/crontab.txt" || error "Failed to save crontab"
 
     # Save fstab
-    cp /etc/fstab "$CONFIG_DIR/fstab"
+    cp /etc/fstab "$CONFIG_DIR/fstab" || error "Failed to copy fstab"
 
     # Save hosts file
-    cp /etc/hosts "$CONFIG_DIR/hosts"
+    cp /etc/hosts "$CONFIG_DIR/hosts" || error "Failed to copy hosts"
 
     ok "System configurations saved to $CONFIG_DIR."
 }

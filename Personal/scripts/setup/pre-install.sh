@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Pre-Install System Preparation Script
 # Update system and prepare for installation
 
@@ -7,13 +7,16 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh"
+source "$SCRIPT_DIR/../utils/logging.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 info "🔧 Pre-Install System Preparation"
 warn "This script requires sudo access for system updates"
 
 # Check if running with sudo
-if [[ $EUID -ne 0 ]]; then
+if [[ "$EUID" -ne 0 ]]; then
     error "Please run with sudo: sudo $0"
 fi
 

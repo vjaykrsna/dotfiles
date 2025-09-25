@@ -1,14 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# package-sync.sh - Update saved package lists (apt, flatpak, snap, npm, pipx, cargo, bun)
+# Usage: ./package-sync.sh
+# Example: ./package-sync.sh
 set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh"
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- CONFIGURATION ---
-# The directory where package lists are stored.
-SAVE_DIR="$(dirname "$0")/packages"
+# Configuration: central tools/packages directory for package lists
+SAVE_DIR="$SCRIPT_DIR/../tools/packages"
 mkdir -p "$SAVE_DIR"
 
 # --- PACKAGE LIST GENERATORS ---

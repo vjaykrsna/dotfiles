@@ -1,15 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 IFS=$'\n\t'
 
 # --- CONFIG & UTILITY ---
 start_dir=$(pwd)
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-BLUE='\033[0;34m'
-RED='\033[0;31m'
-NC='\033[0m'
 
 # --- SCRIPT CONTEXT ---
 # Ensures that scripts are run from the dotfiles root directory
@@ -20,40 +15,41 @@ with_dotfiles_root() {
 }
 
 # Source the installer functions which contain the core logic
-source "$SCRIPT_DIR/../core/installer.sh"
+source "$SCRIPT_DIR/../utils/installer.sh"
 
-# --- DEPENDENCY CHECKS ---
-check_basic_dependencies() {
-    info "Checking basic dependencies..."
-    local deps=(git curl jq git-lfs)
-    local missing=()
-    for dep in "${deps[@]}"; do
-        ! command -v "$dep" &> /dev/null && missing+=("$dep")
-    done
-    if [ ${#missing[@]} -gt 0 ]; then
-        error "Missing dependencies: ${missing[*]}"
-        error "Please install: sudo apt install ${missing[*]}"
-        exit 1
-    fi
-    ok "Basic dependencies satisfied."
-}
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- AUTOMATED FULL SETUP ---
 run_all_setup() {
     info "--- 🚀 Starting Automated Full System Setup ---"
     check_basic_dependencies
+    ensure_runtime_tmpdir
+    ensure_sudo
+
+    local steps=(
+        "run_preinstall:Pre-install system setup"
+        "install_system_packages:System package installation"
+        "setup_language_environment:Language environment setup"
+        "install_language_packages:Language package installation"
+        "setup_shell_environment:Shell environment setup"
+        "run_nvidia_setup:NVIDIA GPU setup"
+        "run_system_fixes:System fixes application"
+        "configure_system:System configuration"
+        "run_post_install:Post-install configuration"
+        "run_nerd_fonts_installer:Nerd fonts installation"
+    )
+    local total_steps=${#steps[@]} current_step=0
 
     # Core system installation
-    with_dotfiles_root run_preinstall
-    with_dotfiles_root install_system_packages
-    with_dotfiles_root setup_language_environment
-    with_dotfiles_root install_language_packages
-    with_dotfiles_root setup_shell_environment
-    with_dotfiles_root run_nvidia_setup || warn "NVIDIA setup skipped or failed."
-    with_dotfiles_root run_system_fixes
-    with_dotfiles_root configure_system
-    with_dotfiles_root run_post_install
-    with_dotfiles_root run_nerd_fonts_installer
+    for step in "${steps[@]}"; do
+        ((++current_step))
+        local func=${step%%:*} desc=${step#*:}
+        show_progress $((current_step-1)) "$total_steps" "Setup"
+        info "--- $desc ---"
+        with_dotfiles_root "$func" || warn "$desc failed"
+    done
+    show_progress "$total_steps" "$total_steps" "Setup"
 
     # Additional tools and cleanup
     info "--- Installing CLI Tools ---"
@@ -64,9 +60,9 @@ run_all_setup() {
 
     # Restore configurations (for target machine setup)
     info "--- Restoring GNOME Settings ---"
-    "../sync/gnome-settings.sh" load || warn "GNOME settings load skipped"
+    bash "$SCRIPT_DIR/../sync/gnome-settings.sh" load || warn "GNOME settings load skipped"
     info "--- Installing GNOME Extensions ---"
-    "../sync/gnome-extensions.sh" install || warn "Extensions install skipped"
+    bash "$SCRIPT_DIR/../sync/gnome-extensions.sh" install || warn "Extensions install skipped"
 
     ok "--- ✅ Automated Full System Setup Complete ---"
 }
@@ -74,22 +70,22 @@ run_all_setup() {
 # --- WRAPPER FUNCTIONS for scripts ---
 run_update_pkgs() {
     info "--- Updating package lists ---"
-    "../sync/package-sync.sh"
+    bash "$SCRIPT_DIR/../sync/package-sync.sh" || error "Package sync failed"
 }
 
 run_gnome_settings() {
     info "--- GNOME Settings Management ---"
-    "../sync/gnome-settings.sh" interactive
+    bash "$SCRIPT_DIR/../sync/gnome-settings.sh" interactive || warn "GNOME settings management failed"
 }
 
 run_gnome_extensions() {
     info "--- GNOME Extensions Management ---"
-    "../sync/gnome-extensions.sh" interactive
+    bash "$SCRIPT_DIR/../sync/gnome-extensions.sh" interactive || warn "GNOME extensions management failed"
 }
 
 run_system_sync() {
     info "--- System Configuration Management ---"
-    "../sync/system-sync.sh" interactive
+    bash "$SCRIPT_DIR/../sync/system-sync.sh" interactive || warn "System sync management failed"
 }
 
 # --- INTERACTIVE MENU ---
@@ -154,6 +150,7 @@ declare -A actions=(
 # --- MAIN LOGIC ---
 main_interactive() {
     check_basic_dependencies
+    ensure_runtime_tmpdir
     local show_full_menu=true
     while true; do
         if [[ "$show_full_menu" == true ]]; then

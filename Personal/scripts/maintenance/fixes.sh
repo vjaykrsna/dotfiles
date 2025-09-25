@@ -1,12 +1,17 @@
-#!/bin/bash
-# fixes.sh - Post-Installation Common Fixes
-
+#!/usr/bin/env bash
+# fixes.sh - Run common post-installation fixes
+# Usage: ./fixes.sh [all|input|udev|sssd|check] [username]
+# Example: sudo ./fixes.sh input myuser
 set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
+source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
+source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- USER HANDLING ---
 USERNAME="${2:-${SUDO_USER:-$USER}}"
@@ -25,7 +30,7 @@ fix_input_remapper() {
             updated=true
         fi
     done
-    if [ "$updated" = true ]; then
+    if [[ "$updated" == true ]]; then
         warn "User must log out and back in for group changes to take full effect"
     fi
 

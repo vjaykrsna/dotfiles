@@ -1,20 +1,17 @@
-#!/bin/bash
-# ==============================================================================
-# GNOME Shell Extension Management Script
-#
-# This script manages GNOME Shell extensions by saving a list of installed
-# extensions and reinstalling them from the official GNOME Extensions website.
-#
-# Usage:
-#   ./gnome-extensions.sh save   # Saves the list of installed extensions
-#   ./gnome-extensions.sh install # Installs extensions from the list
-# ==============================================================================
+#!/usr/bin/env bash
+# gnome-extensions.sh - Save and reinstall GNOME Shell extensions
+# Usage: ./gnome-extensions.sh {save|install|interactive}
+# Example: ./gnome-extensions.sh save
 set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
+source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
+source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"
@@ -25,7 +22,7 @@ save_extensions() {
     mkdir -p "$(dirname "$EXTENSIONS_FILE")"
     # Use the built-in tool to reliably get the list of *enabled* extensions.
     # gext does not have a simple flag for this.
-    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE"
+    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || error "Failed to save extension list"
     ok "Extension list saved."
 }
 
@@ -43,10 +40,10 @@ install_extensions() {
 
     # Compile schemas for newly installed extensions
     info "Compiling GNOME extension schemas..."
-    for ext_uuid in $(cat "$EXTENSIONS_FILE"); do
+    while IFS= read -r ext_uuid; do
         ext_path="$HOME/.local/share/gnome-shell/extensions/$ext_uuid"
         glib-compile-schemas "$ext_path/schemas" 2>/dev/null || true
-    done
+    done < "$EXTENSIONS_FILE"
     ok "Schema compilation completed."
 }
 

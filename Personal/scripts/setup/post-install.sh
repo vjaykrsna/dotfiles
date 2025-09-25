@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Post-Install Configuration Script
 # Final system tweaks and additional repositories
 
@@ -7,7 +7,11 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../core/installer.sh"
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 info "🚀 Running Post-Install Configuration"
 
@@ -33,12 +37,12 @@ info "› Rebuilding font cache..."
 fc-cache -fv 2>/dev/null || true
 
 info "› Installing Micro editor plugins..."
-micro -plugin install fzf
-micro -plugin install wc
-micro -plugin install misspell
-micro -plugin install autofmt
-micro -plugin install detectindent
-micro -plugin install editorconfig
+micro -plugin install fzf || warn "Failed to install micro plugin fzf, skipping"
+micro -plugin install wc || warn "Failed to install micro plugin wc, skipping"
+micro -plugin install misspell || warn "Failed to install micro plugin misspell, skipping"
+micro -plugin install autofmt || warn "Failed to install micro plugin autofmt, skipping"
+micro -plugin install detectindent || warn "Failed to install micro plugin detectindent, skipping"
+micro -plugin install editorconfig || warn "Failed to install micro plugin editorconfig, skipping"
 
 ok "Post-install configuration complete!"
 info "💡 You may want to run 'setup.sh' to check system health."

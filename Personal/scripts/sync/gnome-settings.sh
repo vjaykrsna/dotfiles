@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
 # GNOME/dconf Settings Sync Script for yadm
 #
@@ -15,10 +15,12 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# --- Sourcing Dependencies (only when running standalone) ---
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    source "$SCRIPT_DIR/../core/installer.sh" # For logging and utility functions
-fi
+# Source logging and utility functions
+source "$SCRIPT_DIR/../utils/logging.sh"
+source "$SCRIPT_DIR/../utils/utils.sh"
+
+# Trap errors to log them
+trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # The file where settings will be stored, tracked by yadm
 SETTINGS_FILE="$HOME/.config/dconf/gnome_settings.ini"
@@ -37,7 +39,7 @@ dump_settings() {
 # --- LOAD FUNCTION ---
 # Loads settings from the text file into dconf
 load_settings() {
-    if [ ! -f "$SETTINGS_FILE" ]; then
+    if [[ ! -f "$SETTINGS_FILE" ]]; then
         error "Settings file not found at $SETTINGS_FILE."
         echo "Please run './gnome-settings.sh dump' on your source machine first."
         exit 1
@@ -50,7 +52,7 @@ load_settings() {
 
 # Add DIFF FUNCTION
 diff_settings() {
-    if [ ! -f "$SETTINGS_FILE" ]; then
+    if [[ ! -f "$SETTINGS_FILE" ]]; then
         error "Settings file not found at $SETTINGS_FILE."
         exit 1
     fi

@@ -37,7 +37,7 @@ lsd
 lxappearance
 megatools
 micro
-neofetch
+fastfetch
 numix-icon-theme
 openjdk-21-jdk
 papirus-icon-theme
