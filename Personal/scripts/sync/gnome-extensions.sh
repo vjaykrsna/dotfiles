@@ -10,8 +10,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
 source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"
@@ -22,7 +22,7 @@ save_extensions() {
     mkdir -p "$(dirname "$EXTENSIONS_FILE")"
     # Use the built-in tool to reliably get the list of *enabled* extensions.
     # gext does not have a simple flag for this.
-    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || error "Failed to save extension list"
+    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || warn "Failed to save extension list"
     ok "Extension list saved."
 }
 
@@ -34,7 +34,7 @@ install_extensions() {
     fi
 
     info "Installing GNOME extensions from $EXTENSIONS_FILE..."
-    xargs -a "$EXTENSIONS_FILE" gext install || error "Failed to install extensions (gext missing?)"
+    xargs -a "$EXTENSIONS_FILE" gext install || warn "Failed to install extensions (gext missing?)"
 
     ok "All extensions installed."
 

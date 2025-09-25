@@ -9,42 +9,42 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$SCRIPT_DIR/../utils/logging.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 info "🔧 Pre-Install System Preparation"
-warn "This script requires sudo access for system updates"
+info "This script requires sudo access for system updates"
 
 # Check if running with sudo
 if [[ "$EUID" -ne 0 ]]; then
-    error "Please run with sudo: sudo $0"
+    fatal "Please run with sudo: sudo $0"
 fi
 
 # Update package lists
-warn "› Updating package lists..."
+info "› Updating package lists..."
 apt update
 
 # Upgrade system packages
-warn "› Upgrading system packages..."
+info "› Upgrading system packages..."
 apt upgrade -y
 
 # Install essential tools
-warn "› Installing essential build tools..."
+info "› Installing essential build tools..."
 apt install -y build-essential curl wget git software-properties-common
 
 # Install Flatpak if not present
 if ! command -v flatpak &> /dev/null; then
-    warn "› Installing Flatpak..."
+    info "› Installing Flatpak..."
     apt install -y flatpak gnome-software-plugin-flatpak
 fi
 
 # Clean up
-warn "› Cleaning up..."
+info "› Cleaning up..."
 apt autoremove -y
 apt autoclean
 
 # Enable Flathub (basic setup)
-warn "› Adding Flathub remote..."
+info "› Adding Flathub remote..."
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 ok "Pre-install preparation complete!"

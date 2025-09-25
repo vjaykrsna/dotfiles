@@ -9,8 +9,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 run_snap_removal_interactive() {
     warn "🚨 Make sure you have backups! This will remove snap and its packages."
@@ -41,7 +41,7 @@ run_snap_removal_interactive() {
     fi
 
     info "Purging snapd package..."
-    run_privileged apt purge snapd -y
+    run_privileged apt purge snapd -y || warn "Failed to purge snapd (you may need to remove manually)"
 
     info "Cleaning leftover snap directories..."
     rm -rf ~/snap

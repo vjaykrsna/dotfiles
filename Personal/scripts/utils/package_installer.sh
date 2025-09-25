@@ -62,12 +62,10 @@ install_system_packages() {
 
     warn "Updating package lists..."
     if command -v apt-get >/dev/null 2>&1; then
-        # Pre-warm sudo so backgrounded privileged installs don't prompt later.
-        # Use non-interactive sudo first; fall back to interactive if needed.
         if [ "$(id -u)" -ne 0 ]; then
             sudo -n true 2>/dev/null || sudo true
         fi
-        run_privileged apt-get update 
+        run_privileged apt-get update || fatal "apt-get update failed"
     else
         warn "apt-get not found; skipping apt update"
     fi

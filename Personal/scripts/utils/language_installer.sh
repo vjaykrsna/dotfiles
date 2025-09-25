@@ -18,7 +18,7 @@ setup_nvm() {
     else
         local nvm_url="https://raw.githubusercontent.com/nvm-sh/nvm/v${CONFIG[NVM_VERSION]}/install.sh"
         local nvm_inst
-        nvm_inst=$(mktemp "$SETUP_TMPDIR/install-nvm.XXXXXX")
+        nvm_inst=$(mktemp "$SETUP_TMPDIR/install-nvm.XXXXXX") || fatal "Failed to create temp file for NVM installer"
         if curl -fsSL "$nvm_url" -o "$nvm_inst"; then
             if bash "$nvm_inst"; then
                 info "NVM installed"
@@ -46,7 +46,7 @@ setup_rust() {
     command -v cargo > /dev/null || {
         warn "Installing Rust..."
         local rust_inst
-        rust_inst=$(mktemp "$SETUP_TMPDIR/install-rust.XXXXXX")
+        rust_inst=$(mktemp "$SETUP_TMPDIR/install-rust.XXXXXX") || fatal "Failed to create temp file for Rust installer"
         if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$rust_inst"; then
             if sh "$rust_inst" -s -- -y; then
                 info "Rust installed"
@@ -65,7 +65,7 @@ setup_bun() {
     command -v bun > /dev/null || {
         warn "Installing Bun..."
         local bun_inst
-        bun_inst=$(mktemp "$SETUP_TMPDIR/install-bun.XXXXXX")
+        bun_inst=$(mktemp "$SETUP_TMPDIR/install-bun.XXXXXX") || fatal "Failed to create temp file for Bun installer"
         if curl -fsSL https://bun.sh/install -o "$bun_inst"; then
             if bash "$bun_inst"; then
                 info "Bun installed"

@@ -10,14 +10,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- Pre-check commands ---
 for cmd in curl tar fc-cache; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
-        error "Required command '$cmd' is missing. Install it and retry."
-        exit 1
+        fatal "Required command '$cmd' is missing. Install it and retry."
     fi
 done
 

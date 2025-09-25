@@ -10,8 +10,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
 source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- USER HANDLING ---
 USERNAME="${2:-${SUDO_USER:-$USER}}"
@@ -95,7 +95,6 @@ all | "")
     disable_sssd
     ;;
 *)
-    echo "Usage: $0 {all|input|udev|sssd|check} [username]"
-    exit 1
+    fatal "Usage: $0 {all|input|udev|sssd|check} [username]"
     ;;
 esac

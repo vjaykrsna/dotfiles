@@ -17,8 +17,8 @@ with_dotfiles_root() {
 # Source the installer functions which contain the core logic
 source "$SCRIPT_DIR/../utils/installer.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # --- AUTOMATED FULL SETUP ---
 run_all_setup() {
@@ -70,7 +70,7 @@ run_all_setup() {
 # --- WRAPPER FUNCTIONS for scripts ---
 run_update_pkgs() {
     info "--- Updating package lists ---"
-    bash "$SCRIPT_DIR/../sync/package-sync.sh" || error "Package sync failed"
+    bash "$SCRIPT_DIR/../sync/package-sync.sh" || fatal "Package sync failed"
 }
 
 run_gnome_settings() {

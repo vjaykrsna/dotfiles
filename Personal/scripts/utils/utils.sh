@@ -43,9 +43,9 @@ ensure_sudo() {
         return 0
     fi
     if ! command -v sudo >/dev/null 2>&1; then
-        error "sudo command not found. Please run as root."
+        fatal "sudo command not found. Please run as root."
     fi
-    sudo -v || error "Unable to obtain sudo privileges."
+    sudo -v || fatal "Unable to obtain sudo privileges."
 }
 
 ensure_file_nonempty() { [[ -f "$1" && -s "$1" ]]; }
@@ -77,7 +77,7 @@ check_basic_dependencies() {
     if [[ "${#missing[@]}" -gt 0 ]]; then
         error "Missing dependencies: ${missing[*]}"
         error "Please install: sudo apt install ${missing[*]}"
-        exit 1
+        fatal "Required dependencies are missing"
     fi
     ok "Basic dependencies satisfied."
 }

@@ -19,8 +19,8 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # The file where settings will be stored, tracked by yadm
 SETTINGS_FILE="$HOME/.config/dconf/gnome_settings.ini"
@@ -32,7 +32,7 @@ mkdir -p "$(dirname "$SETTINGS_FILE")"
 # Dumps all dconf settings to the text file
 dump_settings() {
     info "Dumping GNOME settings to $SETTINGS_FILE..."
-    dconf dump /org/gnome/ > "$SETTINGS_FILE" || error "Failed to dump settings"
+    dconf dump /org/gnome/ > "$SETTINGS_FILE" || fatal "Failed to dump settings"
     ok "Done. You can now commit the changes with yadm."
 }
 
@@ -40,12 +40,10 @@ dump_settings() {
 # Loads settings from the text file into dconf
 load_settings() {
     if [[ ! -f "$SETTINGS_FILE" ]]; then
-        error "Settings file not found at $SETTINGS_FILE."
-        echo "Please run './gnome-settings.sh dump' on your source machine first."
-        exit 1
+        fatal "Settings file not found at $SETTINGS_FILE. Please run './gnome-settings.sh dump' on your source machine first."
     fi
     info "Loading GNOME settings from $SETTINGS_FILE..."
-    dconf load /org/gnome/ < "$SETTINGS_FILE" || error "Failed to load settings"
+    dconf load /org/gnome/ < "$SETTINGS_FILE" || fatal "Failed to load settings"
     ok "Done. Your GNOME settings have been restored."
     echo "   You may need to log out and back in for all changes to apply."
 }
@@ -53,8 +51,7 @@ load_settings() {
 # Add DIFF FUNCTION
 diff_settings() {
     if [[ ! -f "$SETTINGS_FILE" ]]; then
-        error "Settings file not found at $SETTINGS_FILE."
-        exit 1
+        fatal "Settings file not found at $SETTINGS_FILE. Please run './gnome-settings.sh dump' on your source machine first."
     fi
     info "Diffing current vs saved GNOME settings..."
     diff -u <(dconf dump /org/gnome/) "$SETTINGS_FILE" || true
@@ -80,8 +77,7 @@ interactive_mode() {
         diff_settings
         ;;
     *)
-        error "Invalid option. Exiting."
-        exit 1
+        fatal "Invalid option."
         ;;
     esac
 }
@@ -101,8 +97,6 @@ interactive | "")
     interactive_mode
     ;;
 *)
-    error "Usage: $0 {dump|load|diff|interactive}"
-    echo "If no argument provided, runs in interactive mode."
-    exit 1
+    fatal "Usage: $0 {dump|load|diff|interactive}. If no argument provided, runs in interactive mode."
     ;;
 esac

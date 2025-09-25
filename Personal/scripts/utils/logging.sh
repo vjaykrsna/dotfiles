@@ -38,11 +38,15 @@ warn() {
 }
 
 error() {
-    # Print to stderr for immediate visibility
+    # Log an error message but do NOT exit — use fatal() when you want to stop execution.
     echo -e "${RED}❌ $*${NC}" >&2
-    # Attempt to write to the log but ignore failures to avoid recursion
     echo "ERROR: $*" >> "$LOG_FILE" 2>/dev/null || true
-    # Exit the script with non-zero status
+}
+
+# Fatal logs and exit: use when you want to stop the script immediately.
+fatal() {
+    echo -e "${RED}❌ FATAL: $*${NC}" >&2
+    echo "FATAL: $*" >> "$LOG_FILE" 2>/dev/null || true
     exit 1
 }
 
@@ -66,5 +70,7 @@ show_progress() {
 # Function to enable robust error handling
 set_robust_error_handling() {
     set -euo pipefail
-    trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+    # On unexpected errors, call fatal() to log and exit. Use error() in code paths
+    # where you want to record the problem but continue execution.
+    trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 }

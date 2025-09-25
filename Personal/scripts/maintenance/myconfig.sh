@@ -12,8 +12,8 @@ source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 source "$SCRIPT_DIR/../utils/config.sh"
 
-# Trap errors to log them
-trap 'error "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+# Trap errors to log them and exit via fatal()
+trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
 
 # Provide safe defaults if CONFIG is not set
 : "${CONFIG[ZRAM_PERCENT]:=200}"
@@ -32,11 +32,11 @@ create_swap_file() {
     info "Creating swapfile of size ${DISK_SWAP_SIZE}..."
     if ! run_privileged fallocate -l "$DISK_SWAP_SIZE" "$SWAP_FILE" 2>/dev/null; then
         # Fallback to dd with integer count in MB
-        run_privileged dd if=/dev/zero of="$SWAP_FILE" bs=1M count="$DISK_SWAP_SIZE_MB" status=progress || error "Failed to create swapfile"
+        run_privileged dd if=/dev/zero of="$SWAP_FILE" bs=1M count="$DISK_SWAP_SIZE_MB" status=progress || fatal "Failed to create swapfile"
     fi
     run_privileged chmod 600 "$SWAP_FILE"
-    run_privileged mkswap "$SWAP_FILE" || error "Failed to mkswap"
-    run_privileged swapon "$SWAP_FILE" || error "Failed to swapon"
+    run_privileged mkswap "$SWAP_FILE" || fatal "Failed to mkswap"
+    run_privileged swapon "$SWAP_FILE" || fatal "Failed to swapon"
 }
 
 info "💾 Configuring ZRAM to ${ZRAM_PERCENT}% of RAM..."
@@ -56,7 +56,7 @@ if [[ -f "$SWAP_FILE" ]]; then
             info "✅ Swap file already active"
         else
             info "🔄 Activating existing swap file..."
-            run_privileged swapon "$SWAP_FILE" || error "Failed to swapon existing file"
+            run_privileged swapon "$SWAP_FILE" || fatal "Failed to swapon existing file"
         fi
     else
         warn "Swap file exists but wrong size (current: $((current_size/1024/1024))MB, expected: ${DISK_SWAP_SIZE}). Recreating..."

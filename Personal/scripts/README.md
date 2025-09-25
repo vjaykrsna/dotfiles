@@ -55,4 +55,16 @@ For full automated: `./setup/setup.sh all` (after pre-install).
 - **Errors**: Scripts exit on failure; check journalctl -xe.
 - **Updates**: Run package-sync.sh on source, commit to yadm.
 
+## Logging contract (short)
+
+- `info "..."` — Informational messages about progress.
+- `ok "..."` — Success messages for completed steps.
+- `warn "..."` — Non-fatal warnings; script continues.
+- `error "..."` — Non-fatal error logging; reports the issue but does NOT exit.
+- `fatal "..."` — Logs the error and exits immediately (use when the rest of the script cannot proceed).
+
+Notes on traps: scripts use `set -euo pipefail` and the global ERR trap calls `fatal()` so unexpected command failures are logged and terminate the script. Use `error()` for recoverable errors where the script should continue.
+
+Recent changes: standardized logging functions (`error` is now non-fatal; `fatal` was added) and updated the scripts to use `fatal` for critical failures and `warn`/`error` for recoverable issues.
+
 For issues, check logs or run sections individually.

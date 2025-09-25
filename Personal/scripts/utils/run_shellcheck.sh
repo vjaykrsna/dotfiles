@@ -22,6 +22,11 @@ if [ ${#files[@]} -eq 0 ]; then
   exit 0
 fi
 
+if ! command -v shellcheck >/dev/null 2>&1; then
+  warn "shellcheck not installed; skipping linting"
+  exit 0
+fi
+
 info "Running shellcheck on ${#files[@]} files..."
 echo "Running: shellcheck -x -e SC1091 ${files[*]}"
 # Exclude SC1091 to avoid noise about user-local sources
