@@ -8,6 +8,19 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/logging.sh"
 source "$SCRIPT_DIR/utils.sh"
 
+ensure_root_runtime_dir() {
+    if [[ "$(id -u)" -ne 0 ]]; then
+        return 0
+    fi
+
+    local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/0}"
+    if [[ ! -d "$runtime_dir" ]]; then
+        mkdir -p "$runtime_dir"
+        chmod 700 "$runtime_dir"
+    fi
+    export XDG_RUNTIME_DIR="$runtime_dir"
+}
+
 install_packages_from_file() {
     # Usage: install_packages_from_file <file> <cmd> [args...]
     # Example: install_packages_from_file "$file" run_privileged apt-get install -y --no-install-recommends
@@ -60,14 +73,14 @@ install_packages_from_file() {
 install_system_packages() {
     info "--- System Package Installation ---"
 
-    warn "Updating package lists..."
+    info "Updating package lists..."
     if command -v apt-get >/dev/null 2>&1; then
         if [ "$(id -u)" -ne 0 ]; then
             sudo -n true 2>/dev/null || sudo true
         fi
         run_privileged apt-get update || fatal "apt-get update failed"
     else
-        warn "apt-get not found; skipping apt update"
+        warn "apt-get not found; skipping apt-get update"
     fi
 
     info "Installing packages in parallel..."
@@ -76,7 +89,13 @@ install_system_packages() {
     install_packages_from_file "$SCRIPT_DIR/../tools/packages/apt.txt" run_privileged apt-get install -y -q --no-install-recommends &
     local apt_pid=$!
 
-    install_packages_from_file "$SCRIPT_DIR/../tools/packages/flatpak.txt" flatpak install -y --noninteractive &
+    local flatpak_cmd=(flatpak install -y --noninteractive)
+    if [[ "$(id -u)" -eq 0 ]]; then
+        ensure_root_runtime_dir
+        flatpak_cmd+=(--system)
+    fi
+
+    install_packages_from_file "$SCRIPT_DIR/../tools/packages/flatpak.txt" "${flatpak_cmd[@]}" &
     local flatpak_pid=$!
 
     # Wait for both to complete

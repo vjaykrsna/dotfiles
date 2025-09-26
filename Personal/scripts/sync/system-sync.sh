@@ -64,8 +64,7 @@ interactive_mode() {
         diff_configs
         ;;
     *)
-        echo "Invalid option. Exiting."
-        exit 1
+        fatal "Invalid option."
         ;;
     esac
 }
@@ -81,9 +80,7 @@ diff)
 interactive | "")
     interactive_mode
     ;;
-*)
-    echo "Usage: $0 {save|diff|interactive}"
-    echo "If no argument provided, runs in interactive mode."
-    exit 1
+    *)
+    fatal "Usage: $0 {save|diff|interactive}. If no argument provided, runs in interactive mode."
     ;;
 esac

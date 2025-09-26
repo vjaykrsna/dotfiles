@@ -22,7 +22,7 @@ fi
 
 # Update package lists
 info "› Updating package lists..."
-apt update
+apt-get update
 
 # Upgrade system packages
 info "› Upgrading system packages..."

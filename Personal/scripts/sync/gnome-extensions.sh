@@ -22,7 +22,7 @@ save_extensions() {
     mkdir -p "$(dirname "$EXTENSIONS_FILE")"
     # Use the built-in tool to reliably get the list of *enabled* extensions.
     # gext does not have a simple flag for this.
-    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || warn "Failed to save extension list"
+    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || fatal "Failed to save extension list"
     ok "Extension list saved."
 }
 
@@ -63,8 +63,7 @@ interactive_mode() {
         install_extensions
         ;;
     *)
-        echo "Invalid option. Exiting."
-        exit 1
+        fatal "Invalid option."
         ;;
     esac
 }
@@ -80,9 +79,7 @@ install)
 interactive | "")
     interactive_mode
     ;;
-*)
-    echo "Usage: $0 {save|install|interactive}"
-    echo "If no argument provided, runs in interactive mode."
-    exit 1
+    *)
+    fatal "Usage: $0 {save|install|interactive}. If no argument provided, runs in interactive mode."
     ;;
 esac
