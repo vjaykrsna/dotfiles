@@ -21,17 +21,25 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 info "› Modernizing APT sources..."
 run_privileged apt modernize-sources
 
-info "› Installing Sekiro GRUB theme..."
-rm -rf /tmp/sekiro_grub_theme
-git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
-(cd /tmp/sekiro_grub_theme && run_privileged bash install.sh) || error "Failed to install Sekiro theme"
-rm -rf /tmp/sekiro_grub_theme
+if [ ! -d "/usr/share/grub/themes/Sekiro" ]; then
+    info "› Installing Sekiro GRUB theme..."
+    rm -rf /tmp/sekiro_grub_theme
+    git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
+    (cd /tmp/sekiro_grub_theme && run_privileged bash install.sh) || error "Failed to install Sekiro theme"
+    rm -rf /tmp/sekiro_grub_theme
+else
+    info "› Sekiro GRUB theme already installed, skipping."
+fi
 
-info "› Installing Adwaita Colors theme..."
-rm -rf /tmp/Adwaita-colors
-git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"
-(cd /tmp/Adwaita-colors && run_privileged bash ./setup -i) || error "Failed to install Adwaita theme"
-rm -rf /tmp/Adwaita-colors
+if [ ! -d "/usr/share/icons/Adwaita-blue" ]; then
+    info "› Installing Adwaita Colors theme..."
+    rm -rf /tmp/Adwaita-colors
+    git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"
+    (cd /tmp/Adwaita-colors && run_privileged bash ./setup -i) || error "Failed to install Adwaita theme"
+    rm -rf /tmp/Adwaita-colors
+else
+    info "› Adwaita Colors theme already installed, skipping."
+fi
 
 info "› Rebuilding font cache..."
 fc-cache -fv 2>/dev/null || true
