@@ -7,11 +7,13 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
-source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+reload_daemons() {
+    run_privileged systemctl daemon-reload || warn "systemctl daemon-reload failed"
+    run_privileged udevadm control --reload-rules || warn "udevadm control --reload-rules failed"
+    run_privileged udevadm trigger || warn "udevadm trigger failed"
+}
 
 # --- USER HANDLING ---
 USERNAME="${2:-${SUDO_USER:-$USER}}"
@@ -44,19 +46,11 @@ fix_input_remapper() {
     local udev_rule_file="/etc/udev/rules.d/70-input-remapper-permissions.rules"
     info "Ensuring correct udev rule for input device permissions..."
         if ensure_udev_rule "$udev_rule_file" 'KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"'; then
-            # Reload daemons only if write succeeded
-            run_privileged systemctl daemon-reload || warn "systemctl daemon-reload failed"
-            run_privileged udevadm control --reload-rules || warn "udevadm control --reload-rules failed"
-            run_privileged udevadm trigger || warn "udevadm trigger failed"
+            reload_daemons
             ok "input-remapper configuration is up to date."
         else
             error "Failed to install udev rule for input-remapper; skipping reloads"
         fi
-
-    # 4. Reload daemons
-    run_privileged systemctl daemon-reload
-    run_privileged udevadm control --reload-rules
-    run_privileged udevadm trigger
 
     ok "input-remapper configuration is up to date."
 }

@@ -7,23 +7,14 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
-source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"
 
 # --- SAVE FUNCTION ---
 save_extensions() {
-    info "Saving list of installed GNOME extensions to $EXTENSIONS_FILE..."
-    mkdir -p "$(dirname "$EXTENSIONS_FILE")"
-    # Use the built-in tool to reliably get the list of *enabled* extensions.
-    # gext does not have a simple flag for this.
-    gnome-extensions list --enabled | cut -d' ' -f1 > "$EXTENSIONS_FILE" || fatal "Failed to save extension list"
-    ok "Extension list saved."
+    save_resource "GNOME extensions" "$EXTENSIONS_FILE" 'gnome-extensions list --enabled | cut -d" " -f1'
 }
 
 # --- INSTALL FUNCTION ---
@@ -33,9 +24,7 @@ install_extensions() {
         return
     fi
 
-    info "Installing GNOME extensions from $EXTENSIONS_FILE..."
-    xargs -a "$EXTENSIONS_FILE" gext install || warn "Failed to install extensions (gext missing?)"
-
+    load_resource "GNOME extensions" "$EXTENSIONS_FILE" "xargs -a \"$EXTENSIONS_FILE\" gext install || warn \"Failed to install extensions (gext missing?)\""
     ok "All extensions installed."
 
     # Compile schemas for newly installed extensions
@@ -47,25 +36,33 @@ install_extensions() {
     ok "Schema compilation completed."
 }
 
+# --- DIFF FUNCTION ---
+diff_extensions() {
+    diff_resource "GNOME extensions" "$EXTENSIONS_FILE" 'gnome-extensions list --enabled | cut -d" " -f1'
+}
+
 # --- INTERACTIVE MODE ---
 interactive_mode() {
     echo "GNOME Extensions Management:"
-    echo "1. Save list of installed extensions"
-    echo "2. Install extensions from saved list"
-    echo -n "Choose an option (1-2): "
-    read -r choice
-
-    case "$choice" in
-    1)
-        save_extensions
-        ;;
-    2)
-        install_extensions
-        ;;
-    *)
-        fatal "Invalid option."
-        ;;
-    esac
+    select choice in "Save list of installed extensions" "Install extensions from saved list" "Diff current vs saved"; do
+        case $REPLY in
+        1)
+            save_extensions
+            break
+            ;;
+        2)
+            install_extensions
+            break
+            ;;
+        3)
+            diff_extensions
+            break
+            ;;
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+        esac
+    done
 }
 
 # --- MAIN LOGIC ---
@@ -73,13 +70,16 @@ case "${1:-}" in
 save)
     save_extensions
     ;;
-install)
+load|install)
     install_extensions
+    ;;
+diff)
+    diff_extensions
     ;;
 interactive | "")
     interactive_mode
     ;;
-    *)
-    fatal "Usage: $0 {save|install|interactive}. If no argument provided, runs in interactive mode."
+*)
+    fatal "Usage: $0 {save|load|diff|interactive}. If no argument provided, runs in interactive mode."
     ;;
 esac

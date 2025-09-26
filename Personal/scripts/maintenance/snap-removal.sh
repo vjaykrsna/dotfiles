@@ -6,11 +6,8 @@ set -euo pipefail
 IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
 
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 run_snap_removal_interactive() {
     warn "🚨 Make sure you have backups! This will remove snap and its packages."

@@ -15,12 +15,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source logging and utility functions
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 # The file where settings will be stored, tracked by yadm
 SETTINGS_FILE="$HOME/.config/dconf/gnome_settings.ini"
@@ -28,64 +23,50 @@ SETTINGS_FILE="$HOME/.config/dconf/gnome_settings.ini"
 # Ensure the directory exists
 mkdir -p "$(dirname "$SETTINGS_FILE")"
 
-# --- DUMP FUNCTION ---
-# Dumps all dconf settings to the text file
-dump_settings() {
-    info "Dumping GNOME settings to $SETTINGS_FILE..."
-    dconf dump /org/gnome/ > "$SETTINGS_FILE" || fatal "Failed to dump settings"
-    ok "Done. You can now commit the changes with yadm."
+# --- SAVE FUNCTION ---
+save_settings() {
+    save_resource "GNOME settings" "$SETTINGS_FILE" 'dconf dump /org/gnome/'
 }
 
 # --- LOAD FUNCTION ---
-# Loads settings from the text file into dconf
 load_settings() {
-    if [[ ! -f "$SETTINGS_FILE" ]]; then
-        fatal "Settings file not found at $SETTINGS_FILE. Please run './gnome-settings.sh dump' on your source machine first."
-    fi
-    info "Loading GNOME settings from $SETTINGS_FILE..."
-    dconf load /org/gnome/ < "$SETTINGS_FILE" || fatal "Failed to load settings"
-    ok "Done. Your GNOME settings have been restored."
+    load_resource "GNOME settings" "$SETTINGS_FILE" 'dconf load /org/gnome/'
     echo "   You may need to log out and back in for all changes to apply."
 }
 
-# Add DIFF FUNCTION
+# --- DIFF FUNCTION ---
 diff_settings() {
-    if [[ ! -f "$SETTINGS_FILE" ]]; then
-        fatal "Settings file not found at $SETTINGS_FILE. Please run './gnome-settings.sh dump' on your source machine first."
-    fi
-    info "Diffing current vs saved GNOME settings..."
-    diff -u <(dconf dump /org/gnome/) "$SETTINGS_FILE" || true
+    diff_resource "GNOME settings" "$SETTINGS_FILE" 'dconf dump /org/gnome/'
 }
 
 # --- INTERACTIVE MODE ---
 interactive_mode() {
     info "GNOME Settings Management:"
-    echo "1. Save (dump) current GNOME settings"
-    echo "2. Load (restore) GNOME settings"
-    echo "3. Diff current vs saved"
-    echo -n "Choose an option (1-3): "
-    read -r choice
-
-    case "$choice" in
-    1)
-        dump_settings
-        ;;
-    2)
-        load_settings
-        ;;
-    3)
-        diff_settings
-        ;;
-    *)
-        fatal "Invalid option."
-        ;;
-    esac
+    select choice in "Save (dump) current GNOME settings" "Load (restore) GNOME settings" "Diff current vs saved"; do
+        case $REPLY in
+        1)
+            save_settings
+            break
+            ;;
+        2)
+            load_settings
+            break
+            ;;
+        3)
+            diff_settings
+            break
+            ;;
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+        esac
+    done
 }
 
 # --- MAIN LOGIC ---
 case "$1" in
-dump)
-    dump_settings
+save)
+    save_settings
     ;;
 load)
     load_settings

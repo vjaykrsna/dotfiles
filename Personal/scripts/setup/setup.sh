@@ -14,11 +14,110 @@ with_dotfiles_root() {
     popd > /dev/null
 }
 
-# Source the installer functions which contain the core logic
-source "$SCRIPT_DIR/../utils/installer.sh"
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
+source "$SCRIPT_DIR/../utils/package_installer.sh"
+source "$SCRIPT_DIR/../utils/language_installer.sh"
 
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+safe_run() {
+    local func="$1"
+    local desc="${2:-$func}"
+    info "--- $desc ---"
+    with_dotfiles_root "$func" || warn "$desc failed"
+}
+
+# --- SYSTEM FIXES ---
+run_system_fixes() {
+    info "--- Running System Fixes ---"
+    bash "$SCRIPT_DIR/../maintenance/fixes.sh" all || fatal "System fixes failed"
+    info "--- System Fixes Complete ---"
+}
+
+# --- CLI INSTALLER ---
+run_cli_installer() {
+    info "--- Running CLI Tools Installer ---"
+    if source "$SCRIPT_DIR/../tools/cli.sh" && run_cli_installer_interactive; then
+        :
+    else
+        warn "CLI installer encountered issues"
+    fi
+    ok "--- CLI Tools Installation Complete ---"
+}
+
+# --- PRE-INSTALL ---
+run_preinstall() {
+    info "--- Running Pre-Install Setup ---"
+    run_privileged bash "$SCRIPT_DIR/../setup/pre-install.sh" || fatal "Pre-install setup failed"
+    info "--- Pre-Install Setup Complete ---"
+}
+
+# --- SNAP REMOVAL ---
+run_snap_removal() {
+    info "--- Running Snap Removal ---"
+    if source "$SCRIPT_DIR/../maintenance/snap-removal.sh" && run_snap_removal_interactive; then
+        :
+    else
+        warn "Snap removal encountered issues"
+    fi
+    ok "--- Snap Removal Complete ---"
+}
+
+# --- POST-INSTALL ---
+run_post_install() {
+    info "--- Running Post-Install ---"
+    run_privileged bash "$SCRIPT_DIR/../setup/post-install.sh" || warn "Post-install encountered issues"
+    ok "--- Post-Install Complete ---"
+}
+
+# --- SHELL ENVIRONMENT ---
+setup_shell_environment() {
+    setup_zinit_starship
+}
+
+# --- NVIDIA GPU SETUP ---
+run_nvidia_setup() {
+    info "--- Setting Up NVIDIA GPU ---"
+    bash "$SCRIPT_DIR/../maintenance/nvidia.sh" || warn "NVIDIA setup encountered issues"
+    info "--- NVIDIA GPU Setup Complete ---"
+}
+
+# --- SYSTEM CONFIGURATION ---
+configure_system() {
+    info "--- Configuring System (RAM + Power) ---"
+    bash "$SCRIPT_DIR/../maintenance/myconfig.sh" || fatal "System configuration failed"
+    info "--- System Configuration Complete ---"
+}
+
+# --- SHELL ENVIRONMENT (ZINIT/STARSHIP) ---
+setup_zinit_starship() {
+    info "--- Setting Up Shell Environment ---"
+    local ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+    if [ ! -d "$ZINIT_HOME" ]; then
+        warn "Installing Zinit..."
+        mkdir -p "$(dirname "$ZINIT_HOME")"
+        git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+    fi
+
+    command -v starship > /dev/null && {
+        warn "Setting up Starship prompt..."
+        mkdir -p "$HOME/.config"
+        info "Starship configuration ready."
+    }
+
+    if command -v fc-cache &> /dev/null; then
+        warn "Rebuilding font cache..."
+        fc-cache -fv
+    else
+        warn "Skipping font cache rebuild: fc-cache not found."
+    fi
+    info "--- Shell Environment Setup Complete ---"
+}
+
+# --- NERD FONTS ---
+run_nerd_fonts_installer() {
+    info "--- Running Nerd Fonts Installer ---"
+    source "$SCRIPT_DIR/../tools/nerd-fonts.sh" && install_nerd_fonts
+    ok "--- Nerd Fonts Installation Complete ---"
+}
 
 # --- AUTOMATED FULL SETUP ---
 run_all_setup() {
@@ -46,8 +145,7 @@ run_all_setup() {
         ((++current_step))
         local func=${step%%:*} desc=${step#*:}
         show_progress $((current_step-1)) "$total_steps" "Setup"
-        info "--- $desc ---"
-        with_dotfiles_root "$func" || warn "$desc failed"
+        safe_run "$func" "$desc"
     done
     show_progress "$total_steps" "$total_steps" "Setup"
 
@@ -88,101 +186,67 @@ run_system_sync() {
     bash "$SCRIPT_DIR/../sync/system-sync.sh" interactive || warn "System sync management failed"
 }
 
-# --- INTERACTIVE MENU ---
-show_menu() {
-    echo -e "
-${BLUE}=====================================${NC}
- ${YELLOW}Dotfiles Management Utility${NC}
-${BLUE}=====================================${NC}
- ${GREEN}🚀 AUTOMATED${NC}
-   a. Run Automated Full Setup
-
- ${GREEN}⚙️  SYSTEM SETUP${NC}
-   1. Pre-Install System Setup
-   2. Install System Packages
-   3. Setup Language Environment
-   4. Install Language Packages
-   5. Setup Shell Environment (zinit + starship)
-
- ${GREEN}🔧 HARDWARE & MAINTENANCE${NC}
-   6. Setup NVIDIA GPU
-   7. Apply System Fixes
-   8. Install CLI Tools (Interactive)
-   9. Configure System (RAM + Power)
-  10. Run Post-Install Configuration
-  11. Install Nerd Fonts
-
- ${GREEN}📦 PACKAGE & SYSTEM SYNC${NC}
-  13. Update Package Lists (source machine)
-  14. GNOME Settings (backup/restore)
-  15. GNOME Extensions (backup/install)
-  16. System Configs (backup/compare)
-
- ${RED}🧹 MAINTENANCE${NC}
-  12. Remove Snap Packages (Interactive)
-
-  ${GREEN}q. Quit${NC}
-${BLUE}=====================================${NC}"
-    echo -n -e "${YELLOW}Enter your choice: ${NC}"
-}
-
-# --- MENU ACTIONS ---
-declare -A actions=(
-    [a]=run_all_setup
-    [1]=run_preinstall
-    [2]=install_system_packages
-    [3]=setup_language_environment
-    [4]=install_language_packages
-    [5]=setup_shell_environment
-    [6]=run_nvidia_setup
-    [7]=run_system_fixes
-    [8]=run_cli_installer
-    [9]=configure_system
-    [10]=run_post_install
-    [11]=run_nerd_fonts_installer
-    [12]=run_snap_removal
-    [13]=run_update_pkgs
-    [14]=run_gnome_settings
-    [15]=run_gnome_extensions
-    [16]=run_system_sync
-)
-
 # --- MAIN LOGIC ---
 main_interactive() {
     check_basic_dependencies
     ensure_runtime_tmpdir
-    local show_full_menu=true
+    local options=(
+        "Run Automated Full Setup"
+        "Pre-Install System Setup"
+        "Install System Packages"
+        "Setup Language Environment"
+        "Install Language Packages"
+        "Setup Shell Environment (zinit + starship)"
+        "Setup NVIDIA GPU"
+        "Apply System Fixes"
+        "Install CLI Tools (Interactive)"
+        "Configure System (RAM + Power)"
+        "Run Post-Install Configuration"
+        "Install Nerd Fonts"
+        "Remove Snap Packages (Interactive)"
+        "Update Package Lists (source machine)"
+        "GNOME Settings (backup/restore)"
+        "GNOME Extensions (backup/install)"
+        "System Configs (backup/compare)"
+        "Quit"
+    )
+    local actions_list=(
+        run_all_setup
+        run_preinstall
+        install_system_packages
+        setup_language_environment
+        install_language_packages
+        setup_shell_environment
+        run_nvidia_setup
+        run_system_fixes
+        run_cli_installer
+        configure_system
+        run_post_install
+        run_nerd_fonts_installer
+        run_snap_removal
+        run_update_pkgs
+        run_gnome_settings
+        run_gnome_extensions
+        run_system_sync
+    )
     while true; do
-        if [[ "$show_full_menu" == true ]]; then
-            show_menu
-            show_full_menu=false
-        else
-            echo -n -e "${YELLOW}Enter your choice (or 'm' for menu): ${NC}"
-        fi
-        read -r choice
-
-        if [[ "$choice" =~ ^[qQ]$ ]]; then
-            info "Exiting."
-            break
-        fi
-
-        if [[ "$choice" =~ ^[mM]$ ]]; then
-            show_full_menu=true
-            continue
-        fi
-
-        if [[ -n "$choice" ]]; then
-            if [[ -n "${actions[$choice]:-}" ]]; then
-                # For 'a', run directly without with_dotfiles_root as it handles it internally
-                if [[ "$choice" == "a" ]]; then
-                    "${actions[$choice]}"
+        echo -e "${YELLOW}Dotfiles Management Utility${NC}"
+        select opt in "${options[@]}"; do
+            if [[ $REPLY == "${#options[@]}" ]]; then
+                info "Exiting."
+                break 2
+            elif [[ $REPLY -ge 1 && $REPLY -le ${#actions_list[@]} ]]; then
+                local func="${actions_list[$((REPLY-1))]}"
+                if [[ $func == "run_all_setup" ]]; then
+                    "$func"
                 else
-                    with_dotfiles_root "${actions[$choice]}" || true
+                    safe_run "$func"
                 fi
+                break
             else
                 error "Invalid option. Try again."
             fi
-        fi
+        done
         echo
     done
 }

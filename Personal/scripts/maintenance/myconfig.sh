@@ -7,13 +7,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source logging and utility functions
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-source "$SCRIPT_DIR/../utils/config.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 # Provide safe defaults if CONFIG is not set
 : "${CONFIG[ZRAM_PERCENT]:=200}"
@@ -89,12 +83,11 @@ if command -v powertop > /dev/null 2>&1; then
     SERVICE_NAME="powertop-autotune.service"
     SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
-    info "⚡ Powertop found, configuring auto-tune service..."
-    [[ -f "$SERVICE_PATH" ]] && warn "$SERVICE_NAME exists. Overwriting..."
+    setup_powertop() {
+        info "⚡ Powertop found, configuring auto-tune service..."
+        [[ -f "$SERVICE_PATH" ]] && warn "$SERVICE_NAME exists. Overwriting..."
 
-    TMP_FILE="/tmp/$SERVICE_NAME"
-    cat > "$TMP_FILE" << EOF
-[Unit]
+        local service_content="[Unit]
 Description=Powertop Auto Tune
 After=multi-user.target
 Wants=multi-user.target
@@ -106,16 +99,18 @@ ExecStart=/usr/sbin/powertop --auto-tune
 RemainAfterExit=yes
 
 [Install]
-WantedBy=multi-user.target
-EOF
+WantedBy=multi-user.target"
 
-    run_privileged mv "$TMP_FILE" "$SERVICE_PATH" || error "Powertop Service file creation failed"
-    ok "Service file created at $SERVICE_PATH"
-
-    run_privileged systemctl daemon-reload
-    run_privileged systemctl enable "$SERVICE_NAME" || warn "Enable failed"
-    run_privileged systemctl start "$SERVICE_NAME" || warn "Start failed (may need reboot)"
-    ok "Done! Powertop will auto-tune 30s after every boot."
+        if ensure_systemd_override "$SERVICE_NAME" "$service_content"; then
+            run_privileged systemctl daemon-reload
+            run_privileged systemctl enable "$SERVICE_NAME" || warn "Enable failed"
+            run_privileged systemctl start "$SERVICE_NAME" || warn "Start failed (may need reboot)"
+            ok "Done! Powertop will auto-tune 30s after every boot."
+        else
+            error "Failed to set up powertop service"
+        fi
+    }
+    setup_powertop
 else
     warn "Powertop not found, skipping power optimization setup."
 fi

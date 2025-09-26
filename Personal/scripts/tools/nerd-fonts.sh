@@ -7,11 +7,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 # --- Pre-check commands ---
 for cmd in curl tar fc-cache; do

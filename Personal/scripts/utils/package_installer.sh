@@ -4,9 +4,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source logging and utilities
-source "$SCRIPT_DIR/logging.sh"
-source "$SCRIPT_DIR/utils.sh"
+source "$SCRIPT_DIR/bootstrap.sh"
 
 ensure_root_runtime_dir() {
     if [[ "$(id -u)" -ne 0 ]]; then
@@ -104,5 +102,16 @@ install_system_packages() {
 
     ok "Package installations completed"
 
-    [[ -f "$SCRIPT_DIR/../tools/packages/custom.sh" ]] && run_privileged bash "$SCRIPT_DIR/../tools/packages/custom.sh"
+    local custom_file="$SCRIPT_DIR/../tools/packages/custom.sh"
+    local last_run_flag="/var/tmp/custom.sh.last_run"
+    if [[ -f "$custom_file" ]]; then
+        mkdir -p "$(dirname "$last_run_flag")" 2>/dev/null || true
+        if [[ ! -f "$last_run_flag" || "$(stat -c %Y "$custom_file" 2>/dev/null || echo 0)" -gt "$(stat -c %Y "$last_run_flag" 2>/dev/null || echo 0)" ]]; then
+            run_privileged bash "$custom_file"
+            touch "$last_run_flag"
+            ok "Custom script executed (changes detected)"
+        else
+            info "Custom script skipped (no changes since last run)"
+        fi
+    fi
 }

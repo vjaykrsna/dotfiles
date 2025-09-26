@@ -4,11 +4,8 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source dependencies
-source "$SCRIPT_DIR/logging.sh"
-source "$SCRIPT_DIR/utils.sh"
+source "$SCRIPT_DIR/bootstrap.sh"
 ensure_runtime_tmpdir
-source "$SCRIPT_DIR/config.sh"
 source "$SCRIPT_DIR/package_installer.sh"  # For install_packages_from_file
 
 setup_nvm() {
@@ -17,18 +14,7 @@ setup_nvm() {
         info "NVM already installed."
     else
         local nvm_url="https://raw.githubusercontent.com/nvm-sh/nvm/v${CONFIG[NVM_VERSION]}/install.sh"
-        local nvm_inst
-        nvm_inst=$(mktemp "$SETUP_TMPDIR/install-nvm.XXXXXX") || fatal "Failed to create temp file for NVM installer"
-        if curl -fsSL "$nvm_url" -o "$nvm_inst"; then
-            if bash "$nvm_inst"; then
-                info "NVM installed"
-            else
-                warn "NVM install script failed"
-            fi
-            rm -f "$nvm_inst"
-        else
-            warn "Failed to download NVM installer"
-        fi
+        download_and_exec "$nvm_url" "nvm" "bash \"\$1\""
     fi
 
     export NVM_DIR="$HOME/.nvm"
@@ -45,18 +31,8 @@ setup_nvm() {
 setup_rust() {
     command -v cargo > /dev/null || {
         warn "Installing Rust..."
-        local rust_inst
-        rust_inst=$(mktemp "$SETUP_TMPDIR/install-rust.XXXXXX") || fatal "Failed to create temp file for Rust installer"
-        if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o "$rust_inst"; then
-            if sh "$rust_inst" -s -- -y; then
-                info "Rust installed"
-            else
-                warn "Rust install script failed"
-            fi
-            rm -f "$rust_inst"
-        else
-            warn "Failed to download Rust installer"
-        fi
+        local rust_url="https://sh.rustup.rs"
+        download_and_exec "$rust_url" "rust" "sh \"\$1\" -s -- -y"
         load_language_env
     }
 }
@@ -64,18 +40,8 @@ setup_rust() {
 setup_bun() {
     command -v bun > /dev/null || {
         warn "Installing Bun..."
-        local bun_inst
-        bun_inst=$(mktemp "$SETUP_TMPDIR/install-bun.XXXXXX") || fatal "Failed to create temp file for Bun installer"
-        if curl -fsSL https://bun.sh/install -o "$bun_inst"; then
-            if bash "$bun_inst"; then
-                info "Bun installed"
-            else
-                warn "Bun install script failed"
-            fi
-            rm -f "$bun_inst"
-        else
-            warn "Failed to download Bun installer"
-        fi
+        local bun_url="https://bun.sh/install"
+        download_and_exec "$bun_url" "bun" "bash \"\$1\""
         load_language_env
     }
 }

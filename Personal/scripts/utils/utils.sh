@@ -12,21 +12,15 @@ fi
 append_trap() {
     local cmd="$1"
     shift || return
-    local sig existing combined
     for sig in "$@"; do
-        existing=$(trap -p "$sig" | awk -F"'" '{print $2}') || existing=""
+        local existing
+        existing=$(trap -p "$sig" 2>/dev/null | sed "s/^'//; s/'$//")
         if [[ -n "$existing" ]]; then
-            combined="${existing}"$'\n'"${cmd}"
+            local new_cmd="$existing; $cmd"
         else
-            combined="$cmd"
+            local new_cmd="$cmd"
         fi
-
-        local esc_combined
-        esc_combined=${combined//"'"/"'""'""'"}
-        # shellcheck disable=SC2064
-        eval "trap '
-${esc_combined}
-' \"$sig\""
+        eval "trap -- '$new_cmd' $sig"
     done
 }
 
@@ -142,4 +136,48 @@ ensure_udev_rule() {
         error "Failed to write udev rule to $file"
         return 3
     fi
+}
+
+download_and_exec() {
+    local url="$1" tmp_name="$2" exec_cmd="$3"
+    local temp_file
+    temp_file=$(mktemp "$SETUP_TMPDIR/install-$tmp_name.XXXXXX") || fatal "Failed to create temp file for $tmp_name installer"
+    if curl -fsSL "$url" -o "$temp_file"; then
+        if eval "$exec_cmd \"$temp_file\""; then
+            info "$tmp_name installed"
+        else
+            warn "$tmp_name install script failed"
+        fi
+        rm -f "$temp_file"
+    else
+        warn "Failed to download $tmp_name installer"
+    fi
+}
+
+# Generic sync helpers
+save_resource() {
+    local resource="$1" file="$2" cmd="$3"
+    info "Saving $resource to $file..."
+    mkdir -p "$(dirname "$file")"
+    eval "$cmd" > "$file" || fatal "Failed to save $resource"
+    ok "$resource saved."
+}
+
+load_resource() {
+    local resource="$1" file="$2" cmd="$3"
+    if [[ ! -f "$file" ]]; then
+        fatal "File not found for $resource"
+    fi
+    info "Loading $resource from $file..."
+    eval "$cmd < \"$file\"" || fatal "Failed to load $resource"
+    ok "$resource loaded."
+}
+
+diff_resource() {
+    local resource="$1" file="$2" cmd="$3"
+    if [[ ! -f "$file" ]]; then
+        fatal "File not found for $resource"
+    fi
+    info "Diffing $resource..."
+    eval "diff -u <($cmd) \"$file\"" || true
 }

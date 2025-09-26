@@ -7,12 +7,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source logging and utility functions
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 setup_integrated_mode() {
     info "Masking GPU manager service..."
@@ -25,8 +20,8 @@ setup_integrated_mode() {
 
     if ! command -v envycontrol &> /dev/null; then
         info "Installing envycontrol..."
-        wget -O /tmp/envycontrol.deb "https://github.com/bayasdev/envycontrol/releases/download/v3.5.1/python3-envycontrol_3.5.1-1_all.deb" || fatal "Failed to download envycontrol"
-        run_privileged dpkg -i /tmp/envycontrol.deb || run_privileged apt-get install -f -y || fatal "Failed to install envycontrol"
+        local envy_url="https://github.com/bayasdev/envycontrol/releases/download/v3.5.1/python3-envycontrol_3.5.1-1_all.deb"
+        download_and_exec "$envy_url" "envycontrol" "run_privileged dpkg -i \"\$1\" || run_privileged apt-get install -f -y"
     fi
 
     info "Setting GPU to integrated mode..."

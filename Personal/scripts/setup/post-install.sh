@@ -7,11 +7,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 info "🚀 Running Post-Install Configuration"
 
@@ -21,7 +17,7 @@ flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flat
 info "› Modernizing APT sources..."
 run_privileged apt modernize-sources
 
-if [ ! -d "/usr/share/grub/themes/Sekiro" ]; then
+if [[ ! -d "/usr/share/grub/themes/Sekiro" ]]; then
     info "› Installing Sekiro GRUB theme..."
     rm -rf /tmp/sekiro_grub_theme
     git clone --depth=1 https://github.com/semimqmo/sekiro_grub_theme /tmp/sekiro_grub_theme || error "Failed to clone Sekiro theme"
@@ -31,7 +27,7 @@ else
     info "› Sekiro GRUB theme already installed, skipping."
 fi
 
-if [ ! -d "/usr/share/icons/Adwaita-blue" ]; then
+if [[ ! -d "/usr/share/icons/Adwaita-blue" ]]; then
     info "› Installing Adwaita Colors theme..."
     rm -rf /tmp/Adwaita-colors
     git clone --depth=1 https://github.com/dpejoh/Adwaita-colors /tmp/Adwaita-colors || error "Failed to clone Adwaita theme"

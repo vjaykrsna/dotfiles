@@ -11,27 +11,47 @@ mkdir -p "$CONFIG_DIR"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Source logging and utility functions
-source "$SCRIPT_DIR/../utils/logging.sh"
-source "$SCRIPT_DIR/../utils/utils.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 # --- SAVE FUNCTION ---
 save_configs() {
     info "Saving system configurations..."
 
     # Save crontab
-    crontab -l > "$CONFIG_DIR/crontab.txt" || error "Failed to save crontab"
+    save_resource "crontab" "$CONFIG_DIR/crontab.txt" 'crontab -l'
 
     # Save fstab
-    cp /etc/fstab "$CONFIG_DIR/fstab" || error "Failed to copy fstab"
+    mkdir -p "$CONFIG_DIR"
+    run_privileged cp /etc/fstab "$CONFIG_DIR/fstab" || error "Failed to copy fstab"
 
     # Save hosts file
-    cp /etc/hosts "$CONFIG_DIR/hosts" || error "Failed to copy hosts"
+    run_privileged cp /etc/hosts "$CONFIG_DIR/hosts" || error "Failed to copy hosts"
 
     ok "System configurations saved to $CONFIG_DIR."
+}
+
+# --- LOAD FUNCTION ---
+load_configs() {
+    warn "Loading system configs - this can be dangerous; ensure backups!"
+    if [[ ! -f "$CONFIG_DIR/crontab.txt" ]]; then
+        fatal "Crontab backup not found"
+    fi
+    crontab "$CONFIG_DIR/crontab.txt" || fatal "Failed to load crontab"
+    ok "Crontab loaded."
+
+    if [[ ! -f "$CONFIG_DIR/fstab" ]]; then
+        fatal "fstab backup not found"
+    fi
+    run_privileged cp /etc/fstab /etc/fstab.bak || true
+    run_privileged cp "$CONFIG_DIR/fstab" /etc/fstab || fatal "Failed to load fstab"
+    ok "fstab loaded (original backed up)."
+
+    if [[ ! -f "$CONFIG_DIR/hosts" ]]; then
+        fatal "hosts backup not found"
+    fi
+    run_privileged cp /etc/hosts /etc/hosts.bak || true
+    run_privileged cp "$CONFIG_DIR/hosts" /etc/hosts || fatal "Failed to load hosts"
+    ok "hosts loaded (original backed up)."
 }
 
 # --- DIFF FUNCTION ---
@@ -51,22 +71,25 @@ diff_configs() {
 # --- INTERACTIVE MODE ---
 interactive_mode() {
     echo "System Configuration Management:"
-    echo "1. Save (backup) current system configs"
-    echo "2. Compare (diff) configs with saved version"
-    echo -n "Choose an option (1-2): "
-    read -r choice
-
-    case "$choice" in
-    1)
-        save_configs
-        ;;
-    2)
-        diff_configs
-        ;;
-    *)
-        fatal "Invalid option."
-        ;;
-    esac
+    select choice in "Save (backup) current system configs" "Load (restore) saved configs" "Compare (diff) configs with saved version"; do
+        case $REPLY in
+        1)
+            save_configs
+            break
+            ;;
+        2)
+            load_configs
+            break
+            ;;
+        3)
+            diff_configs
+            break
+            ;;
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+        esac
+    done
 }
 
 # --- MAIN LOGIC ---
@@ -74,13 +97,16 @@ case "${1:-}" in
 save)
     save_configs
     ;;
+load)
+    load_configs
+    ;;
 diff)
     diff_configs
     ;;
 interactive | "")
     interactive_mode
     ;;
-    *)
-    fatal "Usage: $0 {save|diff|interactive}. If no argument provided, runs in interactive mode."
+*)
+    fatal "Usage: $0 {save|load|diff|interactive}. If no argument provided, runs in interactive mode."
     ;;
 esac

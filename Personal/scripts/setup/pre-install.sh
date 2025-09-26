@@ -7,10 +7,7 @@ IFS=$'\n\t'
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$SCRIPT_DIR/../utils/logging.sh"
-
-# Trap errors to log them and exit via fatal()
-set_robust_error_handling
+source "$SCRIPT_DIR/../utils/bootstrap.sh"
 
 info "🔧 Pre-Install System Preparation"
 info "This script requires sudo access for system updates"
@@ -22,20 +19,20 @@ fi
 
 # Update package lists
 info "› Updating package lists..."
-apt-get update
+run_privileged apt-get update
 
 # Upgrade system packages
 info "› Upgrading system packages..."
-apt upgrade -y
+run_privileged apt upgrade -y
 
 # Install essential tools
 info "› Installing essential build tools..."
-apt install -y build-essential curl wget git software-properties-common
+run_privileged apt install -y build-essential curl wget git software-properties-common
 
 # Install Flatpak if not present
 if ! command -v flatpak &> /dev/null; then
     info "› Installing Flatpak..."
-    apt install -y flatpak gnome-software-plugin-flatpak
+    run_privileged apt install -y flatpak gnome-software-plugin-flatpak
 fi
 
 # Clean up
@@ -45,7 +42,7 @@ apt autoclean
 
 # Enable Flathub (basic setup)
 info "› Adding Flathub remote..."
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+run_privileged flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 ok "Pre-install preparation complete!"
 info "💡 You can now run './scripts/setup.sh' for the main installation"
