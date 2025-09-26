@@ -21,6 +21,13 @@ alias reloadzsh="source $HOME/.zshrc"
 commit() { git commit -m "$*"; }
 alias lgit='lazygit'
 gl() { git log --oneline --graph --decorate --all -n "${1:-5}"; }
+toggleyadm() {
+    if head -1 $HOME/.git | grep -q '^#'; then
+        sed -i '1s/^#//' $HOME/.git
+    else
+        sed -i '1s/^/#/' $HOME/.git
+    fi
+}
 
 # System & Monitoring
 alias mem='free -h'
