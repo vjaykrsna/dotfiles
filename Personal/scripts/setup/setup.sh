@@ -18,7 +18,7 @@ with_dotfiles_root() {
 source "$SCRIPT_DIR/../utils/installer.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 # --- AUTOMATED FULL SETUP ---
 run_all_setup() {

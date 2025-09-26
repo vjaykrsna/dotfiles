@@ -10,7 +10,7 @@ source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 run_snap_removal_interactive() {
     warn "🚨 Make sure you have backups! This will remove snap and its packages."

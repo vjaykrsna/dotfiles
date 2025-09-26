@@ -3,7 +3,7 @@
 # Simple Bash Logging Utility
 
 # Configuration
-LOG_FILE="${LOG_FILE:-$(dirname "$(dirname "$0")")/setup.log}"
+LOG_FILE="${LOG_FILE:-$(dirname "$(dirname "${BASH_SOURCE[0]}")")/setup.log}"
 
 # Color codes (only if terminal supports colors)
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then

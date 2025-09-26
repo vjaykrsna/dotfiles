@@ -11,7 +11,7 @@ source "$SCRIPT_DIR/../utils/logging.sh" # For logging functions
 source "$SCRIPT_DIR/../utils/utils.sh" # For utility functions
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 # --- CONFIGURATION ---
 EXTENSIONS_FILE="$HOME/.config/gnome-shell/extensions.txt"

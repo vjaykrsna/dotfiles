@@ -13,7 +13,7 @@ source "$SCRIPT_DIR/../utils/utils.sh"
 source "$SCRIPT_DIR/../utils/config.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 # Provide safe defaults if CONFIG is not set
 : "${CONFIG[ZRAM_PERCENT]:=200}"
@@ -59,10 +59,25 @@ if [[ -f "$SWAP_FILE" ]]; then
             run_privileged swapon "$SWAP_FILE" || fatal "Failed to swapon existing file"
         fi
     else
-        warn "Swap file exists but wrong size (current: $((current_size/1024/1024))MB, expected: ${DISK_SWAP_SIZE}). Recreating..."
-        run_privileged swapoff "$SWAP_FILE" 2>/dev/null || true
-        run_privileged rm -f "$SWAP_FILE" || warn "Failed to remove swapfile"
-        create_swap_file
+        # Allow a small tolerance on swapfile size (e.g. filesystem allocation quirks).
+        actual_mb=$((current_size/1024/1024))
+        expected_mb=$DISK_SWAP_SIZE_MB
+        percent=$(( current_size * 100 / expected_size ))
+        if [[ $percent -ge 95 && $percent -le 105 ]]; then
+            info "⚠️  Swap file size differs (current: ${actual_mb}MB, expected: ${expected_mb}MB) — ${percent}% of expected. Within ±5% tolerance, keeping existing file."
+            # Activate if not active
+            if swapon --show | grep -q "$SWAP_FILE"; then
+                info "✅ Swap file already active"
+            else
+                info "🔄 Activating existing swap file..."
+                run_privileged swapon "$SWAP_FILE" || fatal "Failed to swapon existing file"
+            fi
+        else
+            warn "Swap file exists but wrong size (current: ${actual_mb}MB, expected: ${DISK_SWAP_SIZE}). Recreating..."
+            run_privileged swapoff "$SWAP_FILE" 2>/dev/null || true
+            run_privileged rm -f "$SWAP_FILE" || warn "Failed to remove swapfile"
+            create_swap_file
+        fi
     fi
 else
     info "💽 Creating new ${DISK_SWAP_SIZE} swapfile..."

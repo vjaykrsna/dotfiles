@@ -10,7 +10,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$SCRIPT_DIR/../utils/logging.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 info "🔧 Pre-Install System Preparation"
 info "This script requires sudo access for system updates"

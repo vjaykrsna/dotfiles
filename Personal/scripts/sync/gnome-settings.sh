@@ -20,7 +20,7 @@ source "$SCRIPT_DIR/../utils/logging.sh"
 source "$SCRIPT_DIR/../utils/utils.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 # The file where settings will be stored, tracked by yadm
 SETTINGS_FILE="$HOME/.config/dconf/gnome_settings.ini"

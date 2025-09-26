@@ -10,6 +10,8 @@ cmake
 cmatrix
 curl
 dconf-editor
+docker-compose-v2
+docker.io
 efibootmgr
 eza
 fastboot

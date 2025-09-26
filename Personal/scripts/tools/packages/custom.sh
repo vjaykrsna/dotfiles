@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/../../utils/logging.sh"
 source "$SCRIPT_DIR/../../utils/utils.sh"
 
 # Trap errors to log them and exit via fatal()
-trap 'fatal "Script failed at line $LINENO: Command \`$BASH_COMMAND\` exited with status $?"' ERR
+set_robust_error_handling
 
 # Root check
 if [[ "$EUID" -ne 0 ]]; then
@@ -37,27 +37,6 @@ if ! command -v google-chrome &>/dev/null && ! command -v google-chrome-stable &
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" \
         | tee /etc/apt/sources.list.d/google-chrome.list >/dev/null
     apt-get install -y google-chrome-stable || warn "Chrome install failed"
-fi
-
-# --- Docker ---
-if ! command -v docker &>/dev/null; then
-    info "Installing Docker..."
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-        | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    CODENAME=$(lsb_release -cs)
-    if ! curl -fsI "https://download.docker.com/linux/ubuntu/dists/${CODENAME}/Release" >/dev/null; then
-        warn "Docker repo does not yet provide packages for '$CODENAME'; falling back to 'noble'."
-        CODENAME="noble"
-    fi
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" \
-        | tee /etc/apt/sources.list.d/docker.list >/dev/null
-    apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin || warn "Docker install failed"
-
-    if [[ -n "${SUDO_USER:-}" ]]; then
-        info "Adding $SUDO_USER to docker group..."
-        usermod -aG docker "$SUDO_USER"
-        warn "User $SUDO_USER added to 'docker'. Relog required."
-    fi
 fi
 
 # --- VS Code ---
