@@ -21,16 +21,6 @@
       },
       "disabled": true
     },
-    "context7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp"
-      ],
-      "env": {
-        "DEFAULT_MINIMUM_TOKENS": ""
-      }
-    },
     "firecrawl-mcp": {
       "command": "npx",
       "args": [
@@ -39,6 +29,20 @@
       ],
       "env": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "alwaysAllow": [
+        "firecrawl_search"
+      ],
+      "disabled": true
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": ""
       }
     }
   }
