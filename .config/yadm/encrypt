@@ -7,19 +7,3 @@
 **/.env
 .git-credentials
 .env
-
-# Zen Browser sensitive data
-.var/app/app.zen_browser.zen/.zen/*/logins.json
-.var/app/app.zen_browser.zen/.zen/*/key4.db
-.var/app/app.zen_browser.zen/.zen/*/formhistory.sqlite
-.var/app/app.zen_browser.zen/.zen/*/permissions.sqlite
-.var/app/app.zen_browser.zen/.zen/*/cert9.db
-.var/app/app.zen_browser.zen/.zen/*/cookies.sqlite
-.var/app/app.zen_browser.zen/.zen/*/autofill-profiles.json
-.var/app/app.zen_browser.zen/.zen/*/logins-backup.json
-.var/app/app.zen_browser.zen/.zen/*/weave/**
-.var/app/app.zen_browser.zen/config/pulse/cookie
-.var/app/app.zen_browser.zen/.zen/*/signedInUser.json
-.var/app/app.zen_browser.zen/.zen/*/places.sqlite
-.var/app/app.zen_browser.zen/.zen/*/extension-preferences.json
-.var/app/app.zen_browser.zen/.zen/*/extension-settings.json
