@@ -6,7 +6,7 @@
 # -----------------------------
 # History (shared with zsh)
 # -----------------------------
-HISTFILE="$HOME/.zsh_history"
+HISTFILE="$HOME/.bash_history"
 HISTCONTROL=ignoreboth
 HISTSIZE=10000
 HISTFILESIZE=10000
