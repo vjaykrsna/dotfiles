@@ -67,9 +67,6 @@ eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 eval "$(thefuck --alias)"
 
-# Source ~/.profile for login-time environment if it wasn't already sourced
-[[ -z ${PROFILE_SOURCED:-} && -f "$HOME/.profile" ]] && source "$HOME/.profile"
-
 # ==================================================================
 # PERSONAL
 # ==================================================================

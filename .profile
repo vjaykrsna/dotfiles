@@ -1,13 +1,5 @@
 # ~/.profile: executed by login shells
 
-# Mark that ~/.profile is being sourced so ~/.bashrc can avoid re-sourcing it
-export PROFILE_SOURCED=1
-
-# Include .bashrc for interactive shells
-if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
-    . "$HOME/.bashrc"
-fi
-
 # -----------------------------
 # PATH setup
 # -----------------------------
