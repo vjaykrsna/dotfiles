@@ -157,3 +157,5 @@ AGENTS.md
 !/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/
 !/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/
 !/.config/Code/User/globalStorage/rooveterinaryinc.roo-cline/settings/mcp_settings.json
+
+*.cache

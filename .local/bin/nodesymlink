@@ -25,7 +25,8 @@ fi
 NODE_CURRENT="$NVM_DIR/versions/node/v$current_version/bin"
 
 # Default list of node-related executables
-bins=(${NODESYMLINK_BINS[@]:-node npm npx yarn pnpm corepack bun})
+bins=(${NODESYMLINK_BINS[@]:-node npm npx pnpm pn pnpx pnx yarn yarnpkg corepack omniroute omniroute-reset-password
+})
 [[ $# -gt 0 ]] && bins=("$@")
 
 mkdir -p "$TARGET_DIR"

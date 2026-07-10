@@ -1,5 +1,8 @@
 {
+  "disableAutoUpdate": true,
   "showMemoryUsage": true,
+  "showLineNumbers": true,
+  "shouldUseNodePtyShell": true,
   "selectedAuthType": "qwen-oauth",
   "mcpServers": {
     "context7": {
@@ -24,11 +27,7 @@
       }
     }
   },
-  "context": {
-    "loadMemoryFromIncludeDirectories": true
-  },
-  "tools": {
-    "useRipgrep": true
-  },
-  "skipLoopDetection": true
+  "skipLoopDetection": true,
+  "approvalMode": "",
+  "contextFileName": "AGENTS.md"
 }

@@ -75,3 +75,7 @@ eval "$(thefuck --alias)"
 if [[ -s "$HOME/.bun/_bun" ]]; then
   source "$HOME/.bun/_bun"
 fi
+export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"

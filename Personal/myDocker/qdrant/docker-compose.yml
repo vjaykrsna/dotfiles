@@ -20,11 +20,11 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - qdrant_network
+      - docker_common_network
 
 volumes:
   qdrant_data:
 
 networks:
-  qdrant_network:
-    driver: bridge
+  docker_common_network:
+    external: true

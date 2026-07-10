@@ -3,48 +3,56 @@
 # ==================================================================
 
 # Basic navigation and utilities
-alias ls='eza'
-alias ll='eza -alh --icons'
-alias cd='z'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias -- -='cd -'
 alias bat='batcat'
+alias cd='z'
 alias fd='fdfind'
-alias search='fdfind'
+alias ll='eza -alh --icons'
+alias ls='eza'
 
 # Zsh editing
 alias editzsh="micro $HOME/.zshrc"
 alias reloadzsh="source $HOME/.zshrc"
 
 # Git aliases
-commit() { git commit -m "$*"; }
 alias lgit='lazygit'
 gl() { git log --oneline --graph --decorate --all -n "${1:-5}"; }
+commit() { git commit -m "$*"; }
 toggleyadm() {
-    if head -1 $HOME/.git | grep -q '^#'; then
-        sed -i '1s/^#//' $HOME/.git
+    if [ -f "$HOME/.git" ]; then
+        rm "$HOME/.git"
     else
-        sed -i '1s/^/#/' $HOME/.git
+        echo 'gitdir: /home/vijay/.local/share/yadm/repo.git' > "$HOME/.git"
     fi
 }
 
 # System & Monitoring
-alias mem='free -h'
 alias cpu='btop'
-alias temp='sensors'
-alias usage='du -sh .[!.]* * 2>/dev/null | awk '\''$1 ~ /K$/ && $1+0 >= 50 || $1 ~ /M|G$/'\'' | sort -hr'
-alias update='sudo apt update && sudo apt upgrade -y'
+alias mem='free -h'
 alias netcheck='ping -c 4 google.com'
 alias ports='sudo lsof -i -P -n | grep LISTEN'
+alias temp='sensors'
+alias upgrade='sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y && sudo apt autoclean'
+alias usage='du -sh .[!.]*(N) * 2>/dev/null | awk '\''$1 ~ /K$/ && $1+0 >= 50 || $1 ~ /M|G$/'\'' | sort -hr'
 
 # Custom Apps
-alias hackerui='$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox'
 alias dockerui='lazydocker'
+alias hackerui='$HOME/Applications/xDEX-UI-Linux-x86_64.AppImage --no-sandbox'
 alias zinitcompile='zinit self-update && zinit compile --all'
 
+# Build tools
+alias buildninstall='./gradlew installDebug'
+alias ktfmt='./gradlew spotlessApply'
+gradlew() { ./gradlew --console=rich "$@"; }
+
+# Temp
+alias startc='npm run dev --prefix client'
+alias starts='npm run dev --prefix server'
+
 # ==================================================================
-# RUNTIME MANAGERS (shared)
+# FUNCTIONS
 # ==================================================================
 # Note: NVM_DIR is exported from ~/.profile. Use fallback if unset.
 nvm() {
@@ -58,3 +66,5 @@ nvm() {
         return 127
     fi
 }
+
+largefiles() { rg --files --glob '*.{kt,kts,xml,java}' | xargs wc -l | sort -nr | head -n "${1:-10}" | column -t; }

@@ -1,7 +1,7 @@
 services:
   redis:
     image: redis:7-alpine
-    container_name: litellm_redis
+    container_name: redis
     restart: unless-stopped
     pull_policy: if_not_present
     ports:
@@ -17,11 +17,11 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - litellm_network
+      - docker_common_network
 
 volumes:
   redis_data:
 
 networks:
-  litellm_network:
+  docker_common_network:
     external: true

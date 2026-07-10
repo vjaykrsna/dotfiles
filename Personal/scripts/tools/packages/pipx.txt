@@ -1,3 +1,5 @@
 black
+docling
 gnome-extensions-cli
+huggingface-hub
 uv

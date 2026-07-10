@@ -1,6 +1,7 @@
 services:
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm
     restart: unless-stopped
     pull_policy: if_not_present
     ports:
@@ -21,7 +22,7 @@ services:
       LITELLM_MODE: "PRODUCTION"
       LITELLM_SALT_KEY: "${LITELLM_SALT_KEY}"
     networks:
-      - litellm_network
+      - docker_common_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health/readiness"]
       interval: 30s
@@ -30,5 +31,5 @@ services:
       start_period: 60s
 
 networks:
-  litellm_network:
+  docker_common_network:
     external: true

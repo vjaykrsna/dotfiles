@@ -1,6 +1,6 @@
-bun@latest
-corepack@latest
+@charmland/crush@latest
+@fission-ai/openspec@latest
 firecrawl-mcp@latest
 nodemon@latest
-npm@latest
+omniroute@latest
 pnpm@latest

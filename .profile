@@ -30,3 +30,10 @@ export NVM_DIR="${XDG_CONFIG_HOME:-$HOME/.nvm}"
 # Cargo environment (if exists)
 # -----------------------------
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
+
+# Disable zoxide doctor warning
+export _ZO_DOCTOR=0
+
+
+# Added by Toolbox App
+export PATH="$PATH:/home/vijay/.local/share/JetBrains/Toolbox/scripts"
