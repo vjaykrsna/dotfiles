@@ -1,0 +1,4 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Entry point for `yadm bootstrap`; the real script stays at ~/bootstrap.sh.
+set -euo pipefail
+exec "$HOME/bootstrap.sh" "$@"

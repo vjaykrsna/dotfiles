@@ -8,15 +8,15 @@ the default desktop setup; `termux` is an orphan branch with phone-only configs.
 ```bash
 pkg install -y yadm
 yadm clone -b termux https://github.com/vjaykrsna/dotfiles.git
-cd "$HOME"
-chmod +x bootstrap.sh
-./bootstrap.sh
+yadm bootstrap
 exec zsh
 ```
 
-`bootstrap.sh` installs packages, zinit, the JetBrains Mono Nerd Font Mono,
-creates the SSH key if missing, and applies Catppuccin Mocha. It does not store
-private keys or tokens.
+`yadm bootstrap` runs `~/bootstrap.sh` through
+`~/.config/yadm/bootstrap`. The script installs packages, zinit, the JetBrains
+Mono Nerd Font Mono, creates the SSH key if missing, and applies Catppuccin
+Mocha. It does not store private keys or tokens. Running `./bootstrap.sh`
+directly also works.
 
 ## What is managed
 
@@ -29,6 +29,7 @@ private keys or tokens.
 - SSH client config (key generated locally, never committed)
 - micro settings
 - `.hushlogin`
+- `~/.config/yadm/bootstrap` wrapper for `yadm bootstrap`
 
 ## Theme switching
 

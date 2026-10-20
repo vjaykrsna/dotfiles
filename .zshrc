@@ -1,12 +1,19 @@
 # ~/.zshrc — Termux zsh entry point
 # Modules live in ~/.config/zsh/{env,plugins,aliases,functions}.zsh
 
+[[ -o interactive ]] || return
+
 # --- history -------------------------------------------------------------
 HISTFILE="$HOME/.zsh_history"
 HISTSIZE=20000
 SAVEHIST=20000
 setopt HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS SHARE_HISTORY \
        EXTENDED_HISTORY INC_APPEND_HISTORY HIST_IGNORE_SPACE
+
+# --- completion colors ---------------------------------------------------
+if command -v dircolors >/dev/null 2>&1; then
+  eval "$(dircolors -b)"
+fi
 
 # --- completion styles ---------------------------------------------------
 zstyle ':completion:*' menu select
