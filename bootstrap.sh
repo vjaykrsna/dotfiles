@@ -5,11 +5,15 @@ set -euo pipefail
 
 say() { printf '\n==> %s\n' "$*"; }
 
-say "Installing Termux packages"
-pkg install -y \
-  zsh starship micro eza bat fzf zoxide jq git-delta fastfetch tealdeer \
-  yazi gh yadm uv ruff pnpm nodejs rust golang sqlite python-yt-dlp yt-dlp-ejs \
-  openssh ffmpeg curl
+if [[ -z "${BOOTSTRAP_SKIP_PACKAGES:-}" ]]; then
+  say "Installing Termux packages"
+  pkg install -y \
+    zsh starship micro eza bat fzf zoxide jq git-delta fastfetch tealdeer \
+    yazi gh yadm uv ruff pnpm nodejs-lts rust golang sqlite python-yt-dlp yt-dlp-ejs \
+    openssh ffmpeg curl
+else
+  say "Skipping package installation (BOOTSTRAP_SKIP_PACKAGES is set)"
+fi
 
 say "Preparing directories"
 mkdir -p \

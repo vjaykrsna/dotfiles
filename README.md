@@ -7,7 +7,7 @@ the default desktop setup; `termux` is an orphan branch with phone-only configs.
 
 ```bash
 pkg install -y yadm
-yadm clone -b termux https://github.com/vjaykrsna/dotfiles.git
+yadm clone --no-bootstrap -b termux https://github.com/vjaykrsna/dotfiles.git
 yadm bootstrap
 exec zsh
 ```
@@ -16,7 +16,8 @@ exec zsh
 `~/.config/yadm/bootstrap`. The script installs packages, zinit, the JetBrains
 Mono Nerd Font Mono, creates the SSH key if missing, and applies Catppuccin
 Mocha. It does not store private keys or tokens. Running `./bootstrap.sh`
-directly also works.
+directly also works. For a no-package-install preflight, use
+`BOOTSTRAP_SKIP_PACKAGES=1 ./bootstrap.sh`.
 
 ## What is managed
 
@@ -49,6 +50,15 @@ theme does not dirty the tracked config.
 
 Share a video URL to Termux. The opener uses `yt-dlp` with best video+audio,
 SponsorBlock removal, and saves under `~/storage/shared/Download/Termux`.
+
+## Not restored by this branch
+
+- The native OpenCode install under `~/agents/opencode` and its config under
+  `~/.config/opencode` are deliberately not stored here. Reinstall or restore
+  them separately before wiping Termux app data.
+- GitHub CLI authentication is not stored. Run `gh auth login` again.
+- The SSH key is generated new by bootstrap; add the new public key where needed.
+- Android shared-storage access must be granted again with `termux-setup-storage`.
 
 ## Notes
 
