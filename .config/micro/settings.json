@@ -1,0 +1,12 @@
+{
+    "colorscheme": "atom-dark",
+    "mouse": true,
+    "clipboard": "terminal",
+    "tabsize": 4,
+    "tabstospaces": true,
+    "autosave": false,
+    "savecursor": true,
+    "saveundo": true,
+    "scrollbar": true,
+    "statusline": true
+}

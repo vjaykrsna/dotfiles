@@ -1,0 +1,13 @@
+# Generated or device-local state
+.termux/colors.properties
+.termux/font.ttf
+.cache/
+.local/share/
+.zsh/cache/
+.zsh_history
+.ssh/id_*
+.ssh/known_hosts
+.config/gh/
+.config/micro/buffers/
+storage/
+*.log

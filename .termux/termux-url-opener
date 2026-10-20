@@ -1,0 +1,38 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Termux "Share to Termux" handler for yt-dlp.
+# Saves best-quality video to Download/Termux, removes SponsorBlock segments.
+set -euo pipefail
+
+url="${1:-}"
+if [[ -z "$url" ]]; then
+  echo "No URL received." >&2
+  exit 1
+fi
+
+dest="$HOME/storage/shared/Download/Termux"
+mkdir -p "$dest"
+
+args=(
+  --no-mtime
+  --embed-metadata
+  --embed-thumbnail
+  --embed-chapters
+  --embed-subs
+  --sponsorblock-remove all
+  --merge-output-format mp4/mkv
+  --no-abort-on-error
+  -f "bv*+ba/b"
+  -P "$dest"
+  -o "%(title).200s [%(id)s].%(ext)s"
+)
+
+# A shared video that happens to carry a playlist id should stay a single video.
+if [[ "$url" == *"v="* ]]; then
+  args+=(--no-playlist)
+fi
+
+echo "Downloading to: $dest"
+yt-dlp "${args[@]}" "$url"
+
+echo
+echo "Done. Files are in: $dest"

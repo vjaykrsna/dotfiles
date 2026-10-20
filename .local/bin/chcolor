@@ -1,0 +1,50 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Switch Catppuccin terminal colors and the matching Starship palette.
+set -euo pipefail
+
+colors_dir="${HOME}/.termux/colors"
+target="${HOME}/.termux/colors.properties"
+base_config="${HOME}/.config/starship.toml"
+runtime_config="${XDG_CACHE_HOME:-${HOME}/.cache}/starship/starship.toml"
+themes=(mocha macchiato frappe latte)
+
+usage() {
+  echo "Usage: chcolor {mocha|macchiato|frappe|latte}"
+  echo "       chcolor list"
+}
+
+current_theme() {
+  [[ -r "$runtime_config" ]] || return 0
+  sed -n 's/^palette = "catppuccin_\([a-z]*\)"/\1/p' "$runtime_config" | head -1
+}
+
+if [[ $# -eq 0 || "$1" == "list" ]]; then
+  current="$(current_theme)"
+  echo "Catppuccin themes: ${themes[*]}"
+  [[ -n "$current" ]] && echo "Current: ${current}"
+  exit 0
+fi
+
+theme="$1"
+src="${colors_dir}/${theme}.colors"
+if [[ ! -r "$src" ]]; then
+  usage
+  exit 1
+fi
+
+cp "$src" "$target"
+
+# Keep Starship in the same palette without editing the tracked config.
+if [[ -r "$base_config" ]]; then
+  mkdir -p "$(dirname "$runtime_config")"
+  sed "s/^palette = .*/palette = \"catppuccin_${theme}\"/" \
+    "$base_config" > "${runtime_config}.tmp"
+  mv "${runtime_config}.tmp" "$runtime_config"
+fi
+
+if command -v termux-reload-settings >/dev/null 2>&1; then
+  termux-reload-settings
+fi
+
+echo "Catppuccin ${theme} applied."
+echo "Terminal colors switched; Starship follows on the next prompt."
