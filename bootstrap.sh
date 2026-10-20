@@ -8,8 +8,8 @@ say() { printf '\n==> %s\n' "$*"; }
 say "Installing Termux packages"
 pkg install -y \
   zsh starship micro eza bat fzf zoxide jq git-delta fastfetch tealdeer \
-  yazi gh yadm uv ruff pnpm rust golang sqlite python-yt-dlp yt-dlp-ejs \
-  openssh ffmpeg curl unzip
+  yazi gh yadm uv ruff pnpm nodejs rust golang sqlite python-yt-dlp yt-dlp-ejs \
+  openssh ffmpeg curl
 
 say "Preparing directories"
 mkdir -p \
@@ -51,7 +51,7 @@ fi
 
 say "Generating an SSH key (no passphrase)"
 if [[ ! -f "$HOME/.ssh/id_ed25519" ]]; then
-  ssh-keygen -t ed25519 -C "termux@$(hostname)" \
+  ssh-keygen -t ed25519 -C "termux@$(uname -n 2>/dev/null || echo termux)" \
     -f "$HOME/.ssh/id_ed25519" -N ""
 fi
 

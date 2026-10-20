@@ -20,6 +20,7 @@ args=(
   --embed-subs
   --sponsorblock-remove all
   --merge-output-format mp4/mkv
+  --js-runtimes node
   --no-abort-on-error
   -f "bv*+ba/b"
   -P "$dest"
